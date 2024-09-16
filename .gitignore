@@ -62,3 +62,6 @@ build/
 # Graphics files
 *.psd
 gfx/
+
+# VS Code files
+.vscode/
