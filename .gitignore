@@ -50,10 +50,7 @@ modules.order
 Module.symvers
 Mkfile.old
 dkms.conf
-<<<<<<< HEAD
 
 # Prizm build files
 *.g3a
 *.bin
-=======
->>>>>>> 7e3022b5a2219b307291080bbdaa1bf8c2649f91
