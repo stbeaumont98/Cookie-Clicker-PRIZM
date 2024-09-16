@@ -342,8 +342,8 @@ int main() {
 				if(gold.effect > 0 && gold.effect <= 43) {
 					// Lucky!
 					double earned = (data.cookies >= data.cps * cps_multiplier * 6000) ?
-						(max(data.cookies * 0.15, data.cps * cps_multiplier * 900) + 13 * 1E-15) :
-						(min(data.cookies * 0.15, data.cps * cps_multiplier * 900) + 13 * 1E-15);
+						(max(data.cookies * 0.15, data.cps * cps_multiplier * 900) + 13) :
+						(min(data.cookies * 0.15, data.cps * cps_multiplier * 900) + 13);
 
 					char msg_buf[30];
 					strcpy(msg_buf, "+");
