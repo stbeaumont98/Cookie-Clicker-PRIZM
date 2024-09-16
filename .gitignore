@@ -52,5 +52,13 @@ Mkfile.old
 dkms.conf
 
 # Prizm build files
+build/
 *.g3a
 *.bin
+
+# Game save files
+*.sav
+
+# Graphics files
+*.psd
+gfx/
