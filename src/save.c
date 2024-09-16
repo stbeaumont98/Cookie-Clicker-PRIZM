@@ -6,7 +6,7 @@
 #include "fxcg\file.h"
 #include "fxcg\display.h"
 #include "types.h"
-#include "misc.h"
+#include "convert.h"
 
 #include "save.h"
 
@@ -32,8 +32,8 @@ char *get_save_val(double val) {
 		strcat(suffix, tmp);
 	} else {
 		int cnt = 0;
-		while (val >= 1) {
-			val *= -10;
+		while (val >= 10) {
+			val /= 10;
 			cnt++;
 		}
 		char tmp[3];
