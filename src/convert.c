@@ -1,0 +1,139 @@
+#include <stdlib.h>
+#include <stdint.h>
+#include <stdbool.h>
+#include <string.h>
+#include "math1.h"
+
+#include "convert.h"
+
+char *get_display_val(double val, bool disp_dec, bool abrev) {
+	double disp_val = 0;
+	char *val_buf = malloc(25);
+	char *suffix = malloc(15);
+	int dec = 0;
+
+	if (val < 1E-9) {
+		disp_val = (float) (val * 1E15);
+	} else if (val >= 1E-9 && val < 1E-6) {
+		disp_val = (float) (val * 1E9);
+		strcpy(suffix, abrev ? " mil." : " million");
+	} else if (val >= 1E-6 && val < 0.001) {
+		disp_val = (float) (val * 1E6);
+		strcpy(suffix, abrev ? " bil." : " billion");
+	} else if (val >= 0.001 && val < 1) {
+		disp_val = (float) (val * 1000);
+		strcpy(suffix, abrev ? " tril." : " trillion");
+	} else if (val >= 1 && val < 1000) {
+		disp_val = (float) val;
+		strcpy(suffix, abrev ? " quad." : " quadrillion");
+	} else if (val >= 1000 && val < 1E6) {
+		disp_val = (float) (val * 1E-3);
+		strcpy(suffix, abrev ? " quin." : " quintillion");
+	} else if (val >= 1E6 && val < 1E9) {
+		disp_val = (float) (val * 1E-6);
+		strcpy(suffix, abrev ? " sext." : " sextillion");
+	} else if (val >= 1E9 && val < 1E12) {
+		disp_val = (float) (val * 1E-9);
+		strcpy(suffix, abrev ? " sept." : " septillion");
+	} else if (val >= 1E12 && val < 1E15) {
+		disp_val = (float) (val * 1E-12);
+		strcpy(suffix, abrev ? " oct." : " octillion");
+	} else if (val >= 1E15 && val < 1E18) {
+		disp_val = (float) (val * 1E-15);
+		strcpy(suffix, abrev ? " non." : " nonillion");
+	} else if (val >= 1E18 && val < 1E21) {
+		disp_val = (float) (val * 1E-18);
+		strcpy(suffix, abrev ? " dec." : " decillion");
+	}
+
+	if (val < 1E-9 && disp_dec)
+		dec = 10;
+	else if (val < 1E-9 && !disp_dec)
+		dec = 0;
+	else
+		dec = 1000;
+	
+	char *tmp = disp_decimal(disp_val, dec);
+	strcpy(val_buf, tmp);
+	free(tmp);
+	
+	strcat(val_buf, suffix);
+
+	free(suffix);
+
+	return val_buf;
+}
+
+char *disp_decimal(double val, int32_t dec_pnt) {
+	char *buffer = malloc(12);
+
+	int32_t integer = (int32_t) floor2(val);
+
+
+	if (integer >= 1000) {
+		char *tmp = disp_comma(integer);
+		strcpy(buffer, tmp);
+		free(tmp);
+	} else
+		itoa(integer, buffer);
+	
+	if (dec_pnt != 0) {
+		int32_t decimal = round2((val - integer) * dec_pnt);
+
+		if (decimal != 0) {
+
+			char tmp[9];
+			itoa(decimal, tmp);
+			int dec_len = strlen(tmp);
+
+			while (decimal % 10 == 0)
+				decimal /= 10;
+				
+			itoa(decimal, tmp);
+			
+			strcat(buffer, ".");
+
+			int dec_pnt_cpy = dec_pnt, cnt = 0;
+			while (dec_pnt_cpy % 10 == 0) {
+				dec_pnt_cpy /= 10;
+				cnt++;
+			}
+
+			if (round2((val - integer) * dec_pnt) < (dec_pnt / 10)) {
+				for (int i = 0; i < cnt - dec_len; i++)
+					strcat(buffer, "0");
+			}
+			strcat(buffer, tmp);
+		}
+	}
+	return buffer;
+}
+
+char *disp_comma(int32_t val) {
+	char *buffer = malloc(10);
+
+	if (val < 1000) {
+		itoa(val, buffer);
+		return buffer;
+	}
+
+	int16_t front = (int16_t) floor2((double) val / 1000.);
+	int16_t back = round2(val - (front * 1000));
+
+	itoa(front, buffer);
+
+	strcat(buffer, ",");
+
+	char *back_buf = malloc(5);
+
+	itoa(back, back_buf);
+
+	for (int i = 0; i < 3 - strlen(back_buf); i++)
+		strcat(buffer, "0");
+	
+	strcat(buffer, back_buf);
+
+	free(back_buf);
+
+	return buffer;
+}
