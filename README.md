@@ -3,9 +3,10 @@ A port of [Ortiel's Cookie Clicker](https://orteil.dashnet.org/cookieclicker/) f
 
 In case it wasn't clear, the concept and modified sprites were created by [Ortiel](https://orteil.dashnet.org/). I'm just a fan of the game and wanted to create a version for my calculator!
 
-![menu icon screenshot](/screenshots/menu_icon.png) ![beginning of the game](/screenshots/game_start.png)
-![golden cookie](/screenshots/golden_cookie.png) ![golden cookie effect](/screenshots/golden_effect.png)
-![later game](/screenshots/game.png) ![game statistics](/screenshots/stats.png)
+![menu icon screenshot](/screenshots/menu_icon.png)
+![beginning of the game](/screenshots/game_start.png) ![golden cookie](/screenshots/golden_cookie.png)
+![golden cookie effect](/screenshots/golden_effect.png) ![later game](/screenshots/game.png)
+![game statistics](/screenshots/stats.png)
 
 Discussion thread: https://www.cemetech.net/forum/viewtopic.php?t=10476
 
