@@ -252,7 +252,7 @@ int main() {
 				free(price_buf);
 
 				char owned_buf[5];
-				itoa(data.buildings[i+sel_offset].owned, owned_buf);
+				itoa(data.buildings[i+sel_offset].owned, owned_buf, 10);
 				disp_string(380 - text_width(owned_buf), 62 + i * 42, owned_buf, 0x0000);
 
 				char type[18];
@@ -379,7 +379,7 @@ int main() {
 						strcpy(msg_buf, "Your ");
 
 						char * tmp = malloc(6);
-						itoa(data.buildings[r_b].owned, tmp);
+						itoa(data.buildings[r_b].owned, tmp, 10);
 						strcat(msg_buf, tmp);
 						free(tmp);
 
@@ -391,7 +391,7 @@ int main() {
 						strcat(msg_buf, "Cookie production +");
 
 						tmp = malloc(6);
-						itoa((data.buildings[r_b].owned * 10), tmp);
+						itoa((data.buildings[r_b].owned * 10), tmp, 10);
 						strcat(msg_buf, tmp);
 						free(tmp);
 

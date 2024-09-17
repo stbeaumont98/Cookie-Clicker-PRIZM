@@ -28,7 +28,7 @@ char *get_save_val(double val) {
 			strcat(suffix, "-");
 		}
 		char tmp[3];
-		itoa(cnt, tmp);
+		itoa(cnt, tmp, 10);
 		strcat(suffix, tmp);
 	} else {
 		int cnt = 0;
@@ -37,7 +37,7 @@ char *get_save_val(double val) {
 			cnt++;
 		}
 		char tmp[3];
-		itoa(cnt, tmp);
+		itoa(cnt, tmp, 10);
 		strcat(suffix, tmp);
 	}
 
@@ -101,7 +101,7 @@ void save_game(struct CookieData data) {
 	ProgressBar2((unsigned char *) heading, 4, 28);
 
 	tmp = malloc(12);
-	itoa(data.click_count, tmp);
+	itoa(data.click_count, tmp, 10);
 	strcat(save_buf, tmp);
 	strcat(save_buf, "\n");
 	free(tmp);
@@ -109,7 +109,7 @@ void save_game(struct CookieData data) {
 	ProgressBar2((unsigned char *) heading, 5, 28);
 
 	tmp = malloc(6);
-	itoa(data.gold_click_count, tmp);
+	itoa(data.gold_click_count, tmp, 10);
 	strcat(save_buf, tmp);
 	strcat(save_buf, "\n");
 	free(tmp);
@@ -119,7 +119,7 @@ void save_game(struct CookieData data) {
     tmp = malloc(4);
 	strcpy(tmp, "");
     for (i = 0; i < 20; i++) {
-        itoa(data.buildings[i].owned, tmp);
+        itoa(data.buildings[i].owned, tmp, 10);
         strcat(save_buf, tmp);
 		strcat(save_buf, "\n");
 		ProgressBar2((unsigned char *) heading, 7 + i, 28);
