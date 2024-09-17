@@ -149,7 +149,6 @@ int main() {
 	
 	int sel = 0;
 	int sel_offset = 0;
-	int price_color;
 
 	bool stats_toggle = false;
 
@@ -185,11 +184,13 @@ int main() {
 			copy_sprite_masked(money, 152, 57, 14, 14, COLOR_RED);
 			copy_sprite_masked(money, 214, 75, 14, 14, COLOR_RED);
 
+			bool is_abrev = (data.cookies >= 1E45 && data.cookies < 1E48);
 			char *tmp = get_display_val(data.cookies, false, false);
 			disp_string(170, 57, tmp, 0xFFFF);
 			free(tmp);
 
-			tmp = get_display_val(data.cookies_all_time, false, true);
+			is_abrev = (data.cookies_all_time >= 1E15 && data.cookies_all_time < 1E27) || (data.cookies_all_time >= 1E30 && data.cookies_all_time < 1E33) || data.cookies_all_time > 1E36;
+			tmp = get_display_val(data.cookies_all_time, false, is_abrev);
 			disp_string(232, 75, tmp, 0xFFFF);
 			free(tmp);
 
@@ -205,7 +206,8 @@ int main() {
 			disp_string(177, 111, tmp, 0xFFFF);
 			free(tmp);
 
-			tmp = get_display_val(data.cps, true, false);
+			is_abrev = (data.cps >= 1E15 && data.cps < 1E27) || (data.cps >= 1E30 && data.cps < 1E33) || data.cps > 1E36;
+			tmp = get_display_val(data.cps, true, is_abrev);
 			disp_string(213, 129, tmp, 0xFFFF);
 			free(tmp);
 
@@ -245,12 +247,8 @@ int main() {
 					copy_sprite_scaled_overlay(icons[i + sel_offset], 186, 48 + i * 42, 21, 21, 42, 42, 0x0000);
 				
 				copy_sprite_masked(money, 229, 70 + i * 42, 14, 14, COLOR_RED);
-				if(data.cookies >= data.buildings[i + sel_offset].price)
-					price_color = 0x67ec;
-				else
-					price_color = COLOR_RED;
 				char *price_buf = get_display_val(data.buildings[i + sel_offset].price, false, false);
-				disp_string(246, 70 + i * 42, price_buf, price_color);
+				disp_string(246, 70 + i * 42, price_buf, (data.cookies >= data.buildings[i + sel_offset].price) ? 0x67ec : COLOR_RED);
 				free(price_buf);
 
 				char owned_buf[5];
@@ -289,9 +287,9 @@ int main() {
 			if((keydownlast(KEY_PRGM_SHIFT) && !keydownhold(KEY_PRGM_SHIFT)) || key == KEY_PRGM_SHIFT) {
 				scale_w = 112;
 				scale_h = 114;
-				data.cookies += (1E-15 * click_multiplier);
-				data.cookies_all_time += (1E-15 * click_multiplier);
-				data.handmade_cookies += (1E-15 * click_multiplier);
+				data.cookies += click_multiplier;
+				data.cookies_all_time += click_multiplier;
+				data.handmade_cookies += click_multiplier;
 				data.click_count++;
 			}
 
@@ -322,8 +320,7 @@ int main() {
 			strcat(cps_buf, tmp);
 			free(tmp);
 
-			char *cookie_buf = get_display_val(data.cookies, false, false);
-
+			char *cookie_buf = get_display_val(data.cookies, false, data.cookies >= 1E48);
 			disp_string((170 - text_width(cookie_buf)) / 2, 17, cookie_buf, 0xffff);
 			free(cookie_buf);
 

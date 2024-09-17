@@ -33,7 +33,7 @@ char *get_save_val(double val) {
 	} else {
 		int cnt = 0;
 		while (val >= 10) {
-			val /= 10;
+			val *= 0.1;
 			cnt++;
 		}
 		char tmp[3];
