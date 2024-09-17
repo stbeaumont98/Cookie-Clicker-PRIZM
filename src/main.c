@@ -17,7 +17,7 @@
 #include "save.h"
 #include "convert.h"
 
-static char *building_specials[20] = {
+static const char *building_specials[20] = {
 	"High-five", "Congregation", "Luxuriant harvest", "Ore vein", "Oiled-up",
 	"Juicy profits", "Fervent adoration", "Manabloom", "Delicious lifeforms",
 	"Breakthrough", "Righteous cataclysm", "Golden ages", "Extra cycles",
@@ -25,14 +25,14 @@ static char *building_specials[20] = {
 	"Cosmic nursery", "Brainstorm", "Deduplication"
 };
 
-static char *buildings[20] = {
+static const char *buildings[20] = {
 	" cursors ", " grandmas ", " farms ", " mines ", " factories ", " banks ", " temples ",
 	" wizard towers ", " shipments ", " alchemy labs ", " portals ", " time machines ",
 	" antimatter condensers ", " prisms ", " chancemakers ", " fractal engines ",
 	" javascript consoles ", " idleverses ", " cortex bakers ", " You "
 };
 
-static char *blab[39] = {
+static const char *blab[39] = {
 	"Cookie crumbliness x3 for 60 seconds!", "Chocolatiness x7 for 77 seconds!",
 	"Dough elasticity halved for 66 seconds!",
 	"Golden cookie shininess doubled for 3 seconds!",
@@ -71,13 +71,13 @@ void reset_gold(struct GoldenData *data) {
 	data->time = random() % 60 + 44; //random() % 600 + 314;
 }
 
-void set_message(struct Message *msg, char *header, char *body, uint8_t time) {
+void set_message(struct Message *msg, const char *header, const char *body, uint8_t time) {
 	strcpy(msg->header, header);
 	strcpy(msg->body, body);
 	msg->time = time;
 }
 
-void display_msg(struct Message msg) {
+void display_msg(const struct Message msg) {
 	bool has_header = strlen(msg.header) != 0;
 	int width = max(text_width(msg.header), text_width(msg.body));
 	int height = text_height(msg.body) * 19;
@@ -103,8 +103,8 @@ void draw_background(){
 		if(i % 2 != 0)
 			fill_area(i * 32, 0, 32, 216, rgb_color(44, 108, 143));
 	}
-	copy_sprite_scaled(panel_vertical, 170, 0, 8, 108, 16, 216);
-	copy_sprite_scaled(panel_horizontal, 186, 32, 99, 8, 198, 16);
+	copy_sprite_scaled(panel_vertical, 170, 0, 8, 108, 16, 216, false, 0);
+	copy_sprite_scaled(panel_horizontal, 186, 32, 99, 8, 198, 16, false, 0);
 }
 
 void draw_store_tile(uint16_t x, uint8_t y) {
@@ -174,10 +174,10 @@ int main() {
 			disp_string(150, 30, "STATISTICS", 0xFFFF);
 			draw_line(148, 47, 236, 47, rgb_color(100, 100, 100), 0);
 
-			copy_sprite_scaled(panel_horizontal, 0, 0, 99, 8, 198, 16);
-			copy_sprite_scaled(panel_horizontal, 198, 0, 99, 8, 198, 16);
-			copy_sprite_scaled(panel_vertical, 0, 0, 8, 108, 16, 216);
-			copy_sprite_scaled(panel_vertical, 368, 0, 8, 108, 16, 216);
+			copy_sprite_scaled(panel_horizontal, 0, 0, 99, 8, 198, 16, false, 0);
+			copy_sprite_scaled(panel_horizontal, 198, 0, 99, 8, 198, 16, false, 0);
+			copy_sprite_scaled(panel_vertical, 0, 0, 8, 108, 16, 216, false, 0);
+			copy_sprite_scaled(panel_vertical, 368, 0, 8, 108, 16, 216, false, 0);
 			
 			disp_string(21, 57, "Cookies in bank:\nCookies baked (all time):\nBuildings owned:\nCookies per second:\nRaw cookies per second:\nCookie clicks:\nHand-made cookies:\nGolden cookie clicks:", rgb_color(150, 150, 150));
 			
@@ -240,12 +240,7 @@ int main() {
 
 			for(int i = 0; i < store_size; i++) {
 				draw_store_tile(186, 48 + i * 42);
-
-				if (!data.buildings[i + sel_offset].hidden)
-					copy_sprite_scaled(icons[i + sel_offset], 186, 48 + i * 42, 21, 21, 42, 42);
-				else
-					copy_sprite_scaled_overlay(icons[i + sel_offset], 186, 48 + i * 42, 21, 21, 42, 42, 0x0000);
-				
+				copy_sprite_scaled(icons[i + sel_offset], 186, 48 + i * 42, 21, 21, 42, 42, data.buildings[i + sel_offset].hidden, 0x0000);
 				copy_sprite_masked(money, 229, 70 + i * 42, 14, 14, COLOR_RED);
 				char *price_buf = get_display_val(data.buildings[i + sel_offset].price, false, false);
 				disp_string(246, 70 + i * 42, price_buf, (data.cookies >= data.buildings[i + sel_offset].price) ? 0x67ec : COLOR_RED);
@@ -309,7 +304,7 @@ int main() {
 				scale_h = 126;
 			}
 			
-			copy_sprite_scaled(perfect_cookie, (scale_w < 124) ? 29 : 23, (scale_h < 126) ? 86 : 80, 62, 63, scale_w, scale_h);
+			copy_sprite_scaled(perfect_cookie, (scale_w < 124) ? 29 : 23, (scale_h < 126) ? 86 : 80, 62, 63, scale_w, scale_h, false, 0);
 			fill_area(0, 10, 170, 60, 0x0000);
 			
 			char cps_buf[30];
@@ -420,7 +415,7 @@ int main() {
 		
 		if (gold.time <= 13) {
 			if (!stats_toggle)
-				copy_sprite_scaled(gold_cookie, 4 + gold.x * 66 + (23 - (gold.scale / 2)), gold.y + (23 - (gold.scale / 2)) , 23, 23, gold.scale, gold.scale);
+				copy_sprite_scaled(gold_cookie, 4 + gold.x * 66 + (23 - (gold.scale / 2)), gold.y + (23 - (gold.scale / 2)) , 23, 23, gold.scale, gold.scale, false, 0);
 
 			if (gold.time > 0 && gold.scale < 46)
 				gold.scale += 2;

@@ -52,11 +52,10 @@ char *get_save_val(double val) {
 	return val_buf;
 }
 
-void save_game(struct CookieData data) {
+void save_game(const struct CookieData data) {
 	char *heading = "Saving...";
 
 	ProgressBar2((unsigned char *) heading, 0, 28);
-    int i;
 
     unsigned short p_file[sizeof(PATH) * 2];
 
@@ -118,7 +117,7 @@ void save_game(struct CookieData data) {
 
     tmp = malloc(4);
 	strcpy(tmp, "");
-    for (i = 0; i < 20; i++) {
+    for (int i = 0; i < 20; i++) {
         itoa(data.buildings[i].owned, tmp, 10);
         strcat(save_buf, tmp);
 		strcat(save_buf, "\n");

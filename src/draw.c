@@ -1,4 +1,5 @@
 #include <stdint.h>
+#include <stdbool.h>
 #include <string.h>
 #include "fxcg\display.h"
 #include "charmap.h"
@@ -109,7 +110,7 @@ void copy_sprite_masked_alpha(const void *datar, unsigned x, unsigned y, unsigne
     }
 }
 
-void copy_sprite_scaled(const color_t *in, unsigned x, unsigned y, unsigned w1, unsigned h1, unsigned w2, unsigned h2) {
+void copy_sprite_scaled(const color_t *in, unsigned x, unsigned y, unsigned w1, unsigned h1, unsigned w2, unsigned h2, bool overlay, color_t overlay_color) {
 	color_t* VRAM = (color_t *) GetVRAMAddress();
    	VRAM += (LCD_WIDTH_PX * y + x);
 	unsigned x_ratio = ((w1 << 16) / w2) + 1;   
@@ -121,33 +122,13 @@ void copy_sprite_scaled(const color_t *in, unsigned x, unsigned y, unsigned w1, 
 			y2 = ((i * y_ratio) >> 16);
 			color_t p = in[(y2 * w1) + x2];
 			if(i >= 0 && i <= 216 && j >= 0 && j <= 384 && p != COLOR_RED)
-				*(VRAM)++ = p;
+				*(VRAM)++ = overlay ? 0x0000 : p;
 			else
 				VRAM++;
 		} 
 		VRAM += LCD_WIDTH_PX - w2; 
 	}
-} 
-
-void copy_sprite_scaled_overlay(const color_t *in, unsigned x, unsigned y, unsigned w1, unsigned h1, unsigned w2, unsigned h2, color_t overlay) {
-	color_t* VRAM = (color_t *) GetVRAMAddress();
-   	VRAM += (LCD_WIDTH_PX * y + x);
-	unsigned x_ratio = ((w1 << 16) / w2) + 1;   
-	unsigned y_ratio = ((h1 << 16) / h2) + 1;   
-	unsigned x2, y2, i, j;
-	for (i = 0; i < h2; ++i) {
-		for (j = 0; j < w2; ++j) {   
-			x2 = ((j * x_ratio) >> 16);
-			y2 = ((i * y_ratio) >> 16);
-			color_t p = in[(y2 * w1) + x2];
-			if(i >= 0 && i <= 216 && j >= 0 && j <= 384 && p != COLOR_RED)
-				*(VRAM)++ = overlay;
-			else
-				VRAM++;
-		} 
-		VRAM += LCD_WIDTH_PX - w2; 
-	}
-} 
+}
 
 void draw_circle(int xs, int ys, int radius, int color) {
 	int f = 1 - radius;
@@ -319,7 +300,7 @@ void disp_string(unsigned x, unsigned y, const char* message, int color) {
     }
 }
 
-int text_width(char *msg) {
+int text_width(const char *msg) {
     int total = 0, max_total = 0;
 	for (int i = 0; i < strlen(msg); i++) {
         if (msg[i] == '\n') {
@@ -343,7 +324,7 @@ int text_width(char *msg) {
 	return max(total, max_total);
 }
 
-int text_height(char *msg) {
+int text_height(const char *msg) {
     if (strlen(msg) == 0)
         return 0;
     

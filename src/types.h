@@ -4,7 +4,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 
-static char *building_types[20] = {
+static const char *building_types[20] = {
 	"Cursor", "Grandma", "Farm", "Mine", "Factory", "Bank", "Temple",
 	"Wizard tower", "Shipment", "Alchemy lab", "Portal",
 	"Time machine", "Antimatter con.", "Prism", "Chancemaker",
