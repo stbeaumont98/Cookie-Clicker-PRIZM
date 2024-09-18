@@ -23,7 +23,6 @@ static const double base_cps[20] = {
 
 struct Building {
 	double price;
-	double b_cps;
 	double multiplier;
 	int16_t owned;
 	bool hidden;
