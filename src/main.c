@@ -17,6 +17,10 @@
 #include "save.h"
 #include "convert.h"
 
+static const double MAX_FRENZY = 77.;
+static const double MAX_CLICK_FRENZY = 13.;
+static const double MAX_BOOST = 30.;
+
 static const char *building_specials[20] = {
 	"High-five", "Congregation", "Luxuriant harvest", "Ore vein", "Oiled-up",
 	"Juicy profits", "Fervent adoration", "Manabloom", "Delicious lifeforms",
@@ -245,12 +249,12 @@ int main() {
 
 			if((keydownlast(KEY_PRGM_DOWN) && !keydownhold(KEY_PRGM_DOWN)) && sel < store_size - 1) {
 				sel++;
-			} else if((keydownlast(KEY_PRGM_DOWN) && !keydownhold(KEY_PRGM_DOWN)) && sel == 3 && data.buildings_unlocked > 4 && sel_offset < data.buildings_unlocked - 4){
+			} else if((keydownlast(KEY_PRGM_DOWN) && !keydownhold(KEY_PRGM_DOWN)) && sel == 3 && data.buildings_unlocked > 4 && sel_offset < data.buildings_unlocked - 4) {
 				sel_offset++;
 			}
 			if((keydownlast(KEY_PRGM_UP) && !keydownhold(KEY_PRGM_UP)) && sel > 0) {
 				sel--;
-			} else if((keydownlast(KEY_PRGM_UP) && !keydownhold(KEY_PRGM_UP)) && sel == 0 && sel_offset > 0){
+			} else if((keydownlast(KEY_PRGM_UP) && !keydownhold(KEY_PRGM_UP)) && sel == 0 && sel_offset > 0) {
 				sel_offset--;
 			}
 			if((keydownlast(KEY_PRGM_ALPHA) && !keydownhold(KEY_PRGM_ALPHA)) && data.cookies >= data.buildings[sel + sel_offset].price) {
@@ -416,9 +420,9 @@ int main() {
 				copy_sprite_scaled(gold_cookie, 4 + gold.x * 66 + (23 - (gold.scale / 2)), gold.y + (23 - (gold.scale / 2)) , 23, 23, gold.scale, gold.scale, false, 0);
 
 			if (gold.time > 0 && gold.scale < 46)
-				gold.scale++;
+				gold.scale += 2;
 			else if (gold.time <= 0 && gold.scale >= 2)
-				gold.scale--;
+				gold.scale -= 2;
 			
 			if (gold.time <= 0 && gold.scale <= 2)
 				reset_gold(&gold);
@@ -445,12 +449,18 @@ int main() {
 
 		if (gold.frenzy_time <= 0)
 			gold.cps_multiplier = 1;
+		else
+			draw_line(0, 1, round2(170. * ((double) gold.frenzy_time / MAX_FRENZY)), 1, 0xddeb, 1);
 
 		if (gold.click_frenzy_time <= 0)
 			gold.click_multiplier = 1;
+		else
+			draw_line(0, 1, round2(170. * ((double) gold.click_frenzy_time / MAX_CLICK_FRENZY)), 1, 0xddeb, 1);
 
 		if (gold.boost_time <= 0) 
 			gold.boost_multiplier = 0;
+		else
+			draw_line(0, 1, round2(170. * ((double) gold.boost_time / MAX_BOOST)), 1, 0xddeb, 1);
 
         Bdisp_PutDisp_DD();
         Bdisp_AllClr_VRAM();
