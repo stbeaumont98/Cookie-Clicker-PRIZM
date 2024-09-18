@@ -167,8 +167,8 @@ void draw_line(int x1, int y1, int x2, int y2, int color, int thickness) {
     signed char iy;
 
     // if x1 == x2 or y1 == y2, then it does not matter what we set here
-    int delta_x = (x2 > x1?(ix = 1, x2 - x1):(ix = -1, x1 - x2)) << 1;
-    int delta_y = (y2 > y1?(iy = 1, y2 - y1):(iy = -1, y1 - y2)) << 1;
+    int delta_x = (x2 > x1 ? (ix = 1, x2 - x1) : (ix = -1, x1 - x2)) << 1;
+    int delta_y = (y2 > y1 ? (iy = 1, y2 - y1) : (iy = -1, y1 - y2)) << 1;
 
    	draw_circle(x1, y1, thickness, color);
     if (delta_x >= delta_y) {
@@ -201,10 +201,10 @@ void draw_line(int x1, int y1, int x2, int y2, int color, int thickness) {
 }
 
 void draw_rect(int x, int y, int width, int height, int color, int thickness) {
-    draw_line(x, y, x+width, y, color, thickness);
-    draw_line(x, y, x, y+height, color, thickness);
-    draw_line(x+width, y, x+width, y+height, color, thickness);
-    draw_line(x, y+height, x+width, y+height, color, thickness);
+    draw_line(x, y, x + width, y, color, thickness);
+    draw_line(x, y, x, y + height, color, thickness);
+    draw_line(x + width, y, x + width, y + height, color, thickness);
+    draw_line(x, y + height, x + width, y + height, color, thickness);
     return;
 }
 

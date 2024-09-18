@@ -97,8 +97,7 @@ char *get_display_val(double val, bool disp_dec, bool abrev) {
 char *disp_decimal(double val, int32_t dec_pnt) {
 	char *buffer = malloc(12);
 
-	int32_t integer = (int32_t) floor2(val);
-
+	int32_t integer = (int32_t) val;
 
 	if (integer >= 1000) {
 		char *tmp = disp_comma(integer);
@@ -108,7 +107,7 @@ char *disp_decimal(double val, int32_t dec_pnt) {
 		itoa(integer, buffer, 10);
 	
 	if (dec_pnt != 0) {
-		int32_t decimal = round2((val - integer) * dec_pnt);
+		int32_t decimal = (int32_t) ((val - integer) * dec_pnt);
 
 		if (decimal != 0) {
 
@@ -147,8 +146,8 @@ char *disp_comma(int32_t val) {
 		return buffer;
 	}
 
-	int16_t front = (int16_t) floor2((double) val / 1000.);
-	int16_t back = round2(val - (front * 1000));
+	int16_t front = val / 1000;
+	int16_t back = val - (front * 1000);
 
 	itoa(front, buffer, 10);
 
