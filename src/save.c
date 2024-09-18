@@ -2,11 +2,11 @@
 #include <stdio.h>
 #include <stdbool.h>
 #include <string.h>
-#include <math.h>
 #include "fxcg\file.h"
 #include "fxcg\display.h"
 #include "types.h"
 #include "convert.h"
+#include "math1.h"
 
 #include "save.h"
 
@@ -194,10 +194,10 @@ void load_game(struct CookieData *data) {
 	for (i = 0; i < 20; i++) {
 
 		data->buildings[i].owned = (int16_t) strtod(strtok(NULL, "\n"), NULL);
-		data->cps += data->buildings[i].owned * data->buildings[i].b_cps;
+		data->cps += data->buildings[i].owned * base_cps[i];
 
 		for (j = 0; j < data->buildings[i].owned; j++)
-			data->buildings[i].price += data->buildings[i].price * 0.15;
+			data->buildings[i].price += round2(data->buildings[i].price * 0.15);
 
 		
 		if (data->cookies_all_time >= base_prices[i])

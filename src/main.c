@@ -205,7 +205,7 @@ int main() {
 			tmp = get_display_val((data.cps * cps_multiplier) + (data.cps * cps_multiplier * boost_multiplier), true, false);
 			disp_string(177, 111, tmp, 0xFFFF);
 			free(tmp);
-
+			
 			is_abrev = (data.cps >= 1E15 && data.cps < 1E27) || (data.cps >= 1E30 && data.cps < 1E33) || data.cps > 1E36;
 			tmp = get_display_val(data.cps, true, is_abrev);
 			disp_string(213, 129, tmp, 0xFFFF);
@@ -273,8 +273,7 @@ int main() {
 			if(((keydownlast(KEY_PRGM_ALPHA) && !keydownhold(KEY_PRGM_ALPHA)) || key == KEY_PRGM_ALPHA) && data.cookies >= data.buildings[sel + sel_offset].price) {
 				data.cookies -= data.buildings[sel + sel_offset].price;
 				data.buildings[sel + sel_offset].owned++;
-				data.buildings[sel + sel_offset].price = data.buildings[sel + sel_offset].price + data.buildings[sel + sel_offset].price * .15;
-				data.cps += data.buildings[sel + sel_offset].b_cps;
+				data.buildings[sel + sel_offset].price += round2(data.buildings[sel + sel_offset].price * .15);
 			}
 
 			// end store code
@@ -288,7 +287,10 @@ int main() {
 				data.click_count++;
 			}
 
+			double tmp_cps = 0;
 			for (int i = 0; i < 20; i++) {
+				tmp_cps += data.buildings[i].owned * base_cps[i];
+
 				if (data.cookies_all_time >= base_prices[i])
 					data.buildings[i].hidden = false;
 				if (i >= 2) {
@@ -298,6 +300,8 @@ int main() {
 					}
 				}
 			}
+
+			data.cps = tmp_cps;
 
 			if (key == 0) {
 				scale_w = 124;
@@ -381,7 +385,7 @@ int main() {
 						strcat(msg_buf, buildings[r_b]);
 						strcat(msg_buf, "are boosting");
 						strcat(msg_buf, strlen(buildings[r_b]) >= 15 ? "\n" : " ");
-						strcat(msg_buf, "your Cps!");
+						strcat(msg_buf, "your CpS!");
 						strcat(msg_buf, strlen(buildings[r_b]) >= 15 ? " " : "\n");
 						strcat(msg_buf, "Cookie production +");
 
