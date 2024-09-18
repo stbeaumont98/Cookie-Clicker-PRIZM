@@ -18,5 +18,5 @@ void reset_gold(struct GoldenData *data) {
 	data->y = random() % 171;
 	data->scale = 2;
 	data->effect = random() % 1000 + 1;
-	data->time = 44; //random() % 600 + 314;
+	data->time = random() % 600 + 314;
 }
