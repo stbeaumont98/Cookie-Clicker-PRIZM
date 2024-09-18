@@ -67,7 +67,7 @@ void reset_gold(struct GoldenData *data) {
 	data->x = random() % 6;
 	data->y = random() % 171;
 	data->scale = 2;
-	data->effect = random() % 100 + 1;
+	data->effect = random() % 1000 + 1;
 	data->time = random() % 600 + 314;
 }
 
@@ -335,7 +335,7 @@ int main() {
 			
 			if((keydownlast(f_buttons[gold.x]) && !keydownhold(f_buttons[gold.x])) && gold.time <= 13) {
 				data.gold_click_count++;
-				if(gold.effect > 0 && gold.effect <= 43) {
+				if(gold.effect > 0 && gold.effect <= 425) {
 					// Lucky!
 					double earned = (data.cookies >= data.cps * cps_multiplier * 6000) ?
 						(max(data.cookies * 0.15, data.cps * cps_multiplier * 900) + 13) :
@@ -351,17 +351,17 @@ int main() {
 
 					data.cookies_all_time += earned;
 					data.cookies += earned;
-				} else if(gold.effect > 43 && gold.effect <= 85) {
+				} else if(gold.effect > 425 && gold.effect <= 850) {
 					// Frenzy
 					set_message(&msg, "Frenzy", "Cookie production x7 for 77 seconds!", 5);
 					cps_multiplier = 7;
 					frenzy = 77;
-				} else if(gold.effect > 85 && gold.effect <= 89) {
+				} else if(gold.effect > 850 && gold.effect <= 893) {
 					// Click Frenzy
 					set_message(&msg, "Click Frenzy", "Clicking power x777 for 13 seconds!", 5);
 					click_multiplier = 777;
 					click_frenzy = 13;
-				} else if (gold.effect > 89 && gold.effect <= 99) {
+				} else if (gold.effect > 893 && gold.effect <= 996) {
 					// Building special
 					int cnt = 0;
 					for (int i = 0; i < 20; i++) {
@@ -403,13 +403,24 @@ int main() {
 						boost_multiplier = data.buildings[r_b].owned / 10.0;
 						boost = 30;
 					} else {
-						// Frenzy
-						set_message(&msg, "Frenzy", "Cookie production x7 for 77 seconds!", 5);
-						cps_multiplier = 7;
-						frenzy = 77;
+						// Lucky!
+						double earned = (data.cookies >= data.cps * cps_multiplier * 6000) ?
+							(max(data.cookies * 0.15, data.cps * cps_multiplier * 900) + 13) :
+							(min(data.cookies * 0.15, data.cps * cps_multiplier * 900) + 13);
+
+						char msg_buf[30];
+						strcpy(msg_buf, "+");
+						char *tmp = get_display_val(earned, false, false);
+						strcat(msg_buf, tmp);
+						free(tmp);
+						strcat(msg_buf, " cookies!");
+						set_message(&msg, "Lucky!", msg_buf, 4);
+
+						data.cookies_all_time += earned;
+						data.cookies += earned;
 					}
 
-				} else if(gold.effect == 100) {
+				} else if(gold.effect > 996) {
 					int rblab = random() % 39;
 					set_message(&msg, "", blab[rblab], 6);
 				}
@@ -422,10 +433,10 @@ int main() {
 				copy_sprite_scaled(gold_cookie, 4 + gold.x * 66 + (23 - (gold.scale / 2)), gold.y + (23 - (gold.scale / 2)) , 23, 23, gold.scale, gold.scale, false, 0);
 
 			if (gold.time > 0 && gold.scale < 46)
-				gold.scale += 2;
+				gold.scale++;
 			else if (gold.time <= 0 && gold.scale >= 2)
-				gold.scale -= 2;
-
+				gold.scale--;
+			
 			if (gold.time <= 0 && gold.scale <= 2)
 				reset_gold(&gold);
 		}
