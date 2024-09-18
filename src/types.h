@@ -29,6 +29,20 @@ struct Building {
 	bool locked;
 };
 
+struct GoldenData {
+	uint16_t x;
+	uint8_t y;
+	uint8_t scale;
+	uint16_t effect;
+	uint16_t time;
+	uint8_t frenzy_time;
+	double cps_multiplier;
+	uint8_t click_frenzy_time;
+	double click_multiplier;
+	uint8_t boost_time;
+	double boost_multiplier;
+};
+
 struct CookieData {
 	double cookies_all_time;
 	double cookies;
@@ -40,14 +54,6 @@ struct CookieData {
 	uint16_t gold_click_count;
 };
 
-struct GoldenData {
-	uint16_t x;
-	uint8_t y;
-	uint8_t scale;
-	uint16_t effect;
-	uint16_t time;
-};
-
 struct Message {
 	char *header;
 	char *body;
@@ -55,5 +61,6 @@ struct Message {
 };
 
 void reset_buildings(struct CookieData *data);
+void reset_gold(struct GoldenData *data);
 
 #endif

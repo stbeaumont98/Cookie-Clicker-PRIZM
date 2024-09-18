@@ -52,10 +52,10 @@ char *get_save_val(double val) {
 	return val_buf;
 }
 
-void save_game(const struct CookieData data) {
+void save_game(const struct CookieData data, const struct GoldenData gold) {
 	char *heading = "Saving...";
 
-	ProgressBar2((unsigned char *) heading, 0, 28);
+	ProgressBar2((unsigned char *) heading, 0, 39);
 
     unsigned short p_file[sizeof(PATH) * 2];
 
@@ -77,7 +77,7 @@ void save_game(const struct CookieData data) {
 			DisplayMessageBox((unsigned char *) "FAILED TO CREATE FILE");
         }
 	}
-	ProgressBar2((unsigned char *) heading, 1, 28);
+	ProgressBar2((unsigned char *) heading, 1, 39);
 
 	char save_buf[500];
 
@@ -85,19 +85,28 @@ void save_game(const struct CookieData data) {
     strcpy(save_buf, tmp);
 	free(tmp);
 	
-	ProgressBar2((unsigned char *) heading, 2, 28);
+	ProgressBar2((unsigned char *) heading, 2, 39);
 
 	tmp = get_save_val(data.cookies);
     strcat(save_buf, tmp);
 	free(tmp);
 	
-	ProgressBar2((unsigned char *) heading, 3, 28);
+	ProgressBar2((unsigned char *) heading, 3, 39);
 
 	tmp = get_save_val(data.handmade_cookies);
     strcat(save_buf, tmp);
 	free(tmp);
 	
-	ProgressBar2((unsigned char *) heading, 4, 28);
+	ProgressBar2((unsigned char *) heading, 4, 39);
+
+    tmp = malloc(4);
+    for (int i = 0; i < 20; i++) {
+        itoa(data.buildings[i].owned, tmp, 10);
+        strcat(save_buf, tmp);
+		strcat(save_buf, "\n");
+		ProgressBar2((unsigned char *) heading, 5 + i, 39);
+    }
+    free(tmp);
 
 	tmp = malloc(12);
 	itoa(data.click_count, tmp, 10);
@@ -105,7 +114,7 @@ void save_game(const struct CookieData data) {
 	strcat(save_buf, "\n");
 	free(tmp);
 
-	ProgressBar2((unsigned char *) heading, 5, 28);
+	ProgressBar2((unsigned char *) heading, 25, 39);
 
 	tmp = malloc(6);
 	itoa(data.gold_click_count, tmp, 10);
@@ -113,26 +122,99 @@ void save_game(const struct CookieData data) {
 	strcat(save_buf, "\n");
 	free(tmp);
 
-	ProgressBar2((unsigned char *) heading, 6, 28);
+	ProgressBar2((unsigned char *) heading, 26, 39);
 
-    tmp = malloc(4);
-	strcpy(tmp, "");
-    for (int i = 0; i < 20; i++) {
-        itoa(data.buildings[i].owned, tmp, 10);
-        strcat(save_buf, tmp);
-		strcat(save_buf, "\n");
-		ProgressBar2((unsigned char *) heading, 7 + i, 28);
-    }
+	// save GoldenData
 
-    free(tmp);
+	tmp = malloc(4);
+	itoa(gold.x, tmp, 10);
+	strcat(save_buf, tmp);
+	strcat(save_buf, "\n");
+	free(tmp);
+
+	ProgressBar2((unsigned char *) heading, 27, 39);
+
+	tmp = malloc(4);
+	itoa(gold.y, tmp, 10);
+	strcat(save_buf, tmp);
+	strcat(save_buf, "\n");
+	free(tmp);
+
+	ProgressBar2((unsigned char *) heading, 39, 39);
+
+	tmp = malloc(4);
+	itoa(gold.scale, tmp, 10);
+	strcat(save_buf, tmp);
+	strcat(save_buf, "\n");
+	free(tmp);
+
+	ProgressBar2((unsigned char *) heading, 29, 39);
+
+	tmp = malloc(5);
+	itoa(gold.effect, tmp, 10);
+	strcat(save_buf, tmp);
+	strcat(save_buf, "\n");
+	free(tmp);
+
+	ProgressBar2((unsigned char *) heading, 30, 39);
+
+	tmp = malloc(5);
+	itoa(gold.time, tmp, 10);
+	strcat(save_buf, tmp);
+	strcat(save_buf, "\n");
+	free(tmp);
+
+	ProgressBar2((unsigned char *) heading, 31, 39);
+
+	tmp = malloc(4);
+	itoa(gold.frenzy_time, tmp, 10);
+	strcat(save_buf, tmp);
+	strcat(save_buf, "\n");
+	free(tmp);
+
+	ProgressBar2((unsigned char *) heading, 32, 39);
+
+	tmp = get_save_val(gold.cps_multiplier);
+	strcat(save_buf, tmp);
+	free(tmp);
+
+	ProgressBar2((unsigned char *) heading, 33, 39);
+
+	tmp = malloc(4);
+	itoa(gold.click_frenzy_time, tmp, 10);
+	strcat(save_buf, tmp);
+	strcat(save_buf, "\n");
+	free(tmp);
+
+	ProgressBar2((unsigned char *) heading, 34, 39);
+
+	tmp = get_save_val(gold.click_multiplier);
+	strcat(save_buf, tmp);
+	free(tmp);
+
+	ProgressBar2((unsigned char *) heading, 35, 39);
+
+	tmp = malloc(4);
+	itoa(gold.boost_time, tmp, 10);
+	strcat(save_buf, tmp);
+	strcat(save_buf, "\n");
+	free(tmp);
+
+	ProgressBar2((unsigned char *) heading, 36, 39);
+
+	tmp = get_save_val(gold.boost_multiplier);
+	strcat(save_buf, tmp);
+	free(tmp);
+
+	ProgressBar2((unsigned char *) heading, 37, 39);
 
     Bfile_WriteFile_OS(h_file, save_buf, strlen(save_buf));
 	
-	ProgressBar2((unsigned char *) heading, 27, 28);
+	ProgressBar2((unsigned char *) heading, 38, 39);
 
     Bfile_CloseFile_OS(h_file);
 
-	ProgressBar2((unsigned char *) heading, 28, 28);
+	ProgressBar2((unsigned char *) heading, 39, 39);
 
 	MsgBoxPop();
 
@@ -158,9 +240,10 @@ double ten_pow(int16_t n) {
 	return pow;
 }
 
-
-void load_game(struct CookieData *data) {
+void load_game(struct CookieData *data, struct GoldenData *gold) {
 	reset_buildings(data);
+	reset_gold(gold);
+
 	data->buildings_unlocked = 2;
 
     int i, j;
@@ -177,6 +260,12 @@ void load_game(struct CookieData *data) {
 		data->cps = 0;
 		data->click_count = 0;
 		data->gold_click_count = 0;
+		gold->frenzy_time = 0;
+		gold->cps_multiplier = 1;
+		gold->click_frenzy_time = 0;
+		gold->click_multiplier = 1;
+		gold->boost_time = 0;
+		gold->boost_multiplier = 0;
 		return;
 	}
 	
@@ -185,11 +274,6 @@ void load_game(struct CookieData *data) {
 	char *all_time = strtok(buf, "\n");
 	char *cookies = strtok(NULL, "\n");
 	char *handmade = strtok(NULL, "\n");
-	char *clicked = strtok(NULL, "\n");
-	char *g_clicked = strtok(NULL, "\n");
-
-	data->click_count = strtod(clicked, NULL);
-	data->gold_click_count = strtod(g_clicked, NULL);
 
 	for (i = 0; i < 20; i++) {
 
@@ -210,6 +294,24 @@ void load_game(struct CookieData *data) {
 			}
 		}
 	}
+
+	char *clicked = strtok(NULL, "\n");
+	char *g_clicked = strtok(NULL, "\n");
+
+	data->click_count = strtod(clicked, NULL);
+	data->gold_click_count = strtod(g_clicked, NULL);
+
+	gold->x = (uint16_t) strtod(strtok(NULL, "\n"), NULL);
+	gold->y = (uint8_t) strtod(strtok(NULL, "\n"), NULL);
+	gold->scale = (uint8_t) strtod(strtok(NULL, "\n"), NULL);
+	gold->effect = (uint16_t) strtod(strtok(NULL, "\n"), NULL);
+	gold->time = (uint16_t) strtod(strtok(NULL, "\n"), NULL);
+	gold->frenzy_time = (uint8_t) strtod(strtok(NULL, "\n"), NULL);
+	char *cps_multiplier = strtok(NULL, "\n");
+	gold->click_frenzy_time = (uint8_t) strtod(strtok(NULL, "\n"), NULL);
+	char *click_multiplier = strtok(NULL, "\n");
+	gold->boost_time = (uint8_t) strtod(strtok(NULL, "\n"), NULL);
+	char *boost_multiplier = strtok(NULL, "\n");
 	
 	char *dec = strtok(all_time, "E");
 	char *pow = strtok(NULL, "E");
@@ -225,6 +327,21 @@ void load_game(struct CookieData *data) {
 	pow = strtok(NULL, "E");
 
 	data->handmade_cookies = strtod(dec, NULL) * ten_pow(strtod(pow, NULL));
+
+	dec = strtok(cps_multiplier, "E");
+	pow = strtok(NULL, "E");
+
+	gold->cps_multiplier = strtod(dec, NULL) * ten_pow(strtod(pow, NULL));
+
+	dec = strtok(click_multiplier, "E");
+	pow = strtok(NULL, "E");
+
+	gold->click_multiplier = strtod(dec, NULL) * ten_pow(strtod(pow, NULL));
+
+	dec = strtok(boost_multiplier, "E");
+	pow = strtok(NULL, "E");
+
+	gold->boost_multiplier = strtod(dec, NULL) * ten_pow(strtod(pow, NULL));
 
 	free(buf);
 

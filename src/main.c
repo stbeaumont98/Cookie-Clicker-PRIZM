@@ -63,14 +63,6 @@ int get_time(){
 	return (int)(RTC_GetTicks() / 128);
 }
 
-void reset_gold(struct GoldenData *data) {
-	data->x = random() % 6;
-	data->y = random() % 171;
-	data->scale = 2;
-	data->effect = random() % 1000 + 1;
-	data->time = random() % 600 + 314;
-}
-
 void set_message(struct Message *msg, const char *header, const char *body, uint8_t time) {
 	strcpy(msg->header, header);
 	strcpy(msg->body, body);
@@ -124,26 +116,17 @@ int main() {
 	
 	int time = get_time(), old_time, one_second;
 
-	struct CookieData data;
-	load_game(&data);
-
 	struct GoldenData gold;
-	reset_gold(&gold);
+
+	struct CookieData data;
+	load_game(&data, &gold);
+
 	int f_buttons[6] = {KEY_PRGM_F1, KEY_PRGM_F2, KEY_PRGM_F3, KEY_PRGM_F4, KEY_PRGM_F5, KEY_PRGM_F6};
 
 	struct Message msg;
 
 	msg.header = malloc(30);
 	msg.body = malloc(150);
-
-	int frenzy = 0;
-	double cps_multiplier = 1;
-
-	int click_frenzy = 0;
-	double click_multiplier = 1;
-
-	int boost = 0;
-	double boost_multiplier = 0;
 	
 	int scale_w = 124, scale_h = 126;
 	
@@ -155,7 +138,7 @@ int main() {
 	while(1) {
         int key = PRGM_GetKey();
         if(key == KEY_PRGM_MENU) {
-			save_game(data);
+			save_game(data, gold);
 			GetKey(&key);
 			free(msg.header);
 			free(msg.body);
@@ -202,7 +185,7 @@ int main() {
 			disp_string(156, 93, tmp, 0xFFFF);
 			free(tmp);
 
-			tmp = get_display_val((data.cps * cps_multiplier) + (data.cps * cps_multiplier * boost_multiplier), true, false);
+			tmp = get_display_val((data.cps * gold.cps_multiplier) + (data.cps * gold.cps_multiplier * gold.boost_multiplier), true, false);
 			disp_string(177, 111, tmp, 0xFFFF);
 			free(tmp);
 			
@@ -281,9 +264,9 @@ int main() {
 			if(keydownlast(KEY_PRGM_SHIFT) && !keydownhold(KEY_PRGM_SHIFT)) {
 				scale_w = 112;
 				scale_h = 114;
-				data.cookies += click_multiplier;
-				data.cookies_all_time += click_multiplier;
-				data.handmade_cookies += click_multiplier;
+				data.cookies += gold.click_multiplier;
+				data.cookies_all_time += gold.click_multiplier;
+				data.handmade_cookies += gold.click_multiplier;
 				data.click_count++;
 			}
 
@@ -315,7 +298,7 @@ int main() {
 
 			strcpy(cps_buf, "CpS: ");
 
-			char *tmp = get_display_val((data.cps * cps_multiplier) + (data.cps * cps_multiplier * boost_multiplier), true, true);
+			char *tmp = get_display_val((data.cps * gold.cps_multiplier) + (data.cps * gold.cps_multiplier * gold.boost_multiplier), true, true);
 			strcat(cps_buf, tmp);
 			free(tmp);
 
@@ -337,9 +320,9 @@ int main() {
 				data.gold_click_count++;
 				if(gold.effect > 0 && gold.effect <= 425) {
 					// Lucky!
-					double earned = (data.cookies >= data.cps * cps_multiplier * 6000) ?
-						(max(data.cookies * 0.15, data.cps * cps_multiplier * 900) + 13) :
-						(min(data.cookies * 0.15, data.cps * cps_multiplier * 900) + 13);
+					double earned = (data.cookies >= data.cps * gold.cps_multiplier * 6000) ?
+						(max(data.cookies * 0.15, data.cps * gold.cps_multiplier * 900) + 13) :
+						(min(data.cookies * 0.15, data.cps * gold.cps_multiplier * 900) + 13);
 
 					char msg_buf[30];
 					strcpy(msg_buf, "+");
@@ -354,13 +337,13 @@ int main() {
 				} else if(gold.effect > 425 && gold.effect <= 850) {
 					// Frenzy
 					set_message(&msg, "Frenzy", "Cookie production x7 for 77 seconds!", 5);
-					cps_multiplier = 7;
-					frenzy = 77;
+					gold.cps_multiplier = 7;
+					gold.frenzy_time = 77;
 				} else if(gold.effect > 850 && gold.effect <= 893) {
 					// Click Frenzy
 					set_message(&msg, "Click Frenzy", "Clicking power x777 for 13 seconds!", 5);
-					click_multiplier = 777;
-					click_frenzy = 13;
+					gold.click_multiplier = 777;
+					gold.click_frenzy_time = 13;
 				} else if (gold.effect > 893 && gold.effect <= 996) {
 					// Building special
 					int cnt = 0;
@@ -400,13 +383,13 @@ int main() {
 
 						set_message(&msg, building_specials[r_b], msg_buf, 6);
 
-						boost_multiplier = data.buildings[r_b].owned / 10.0;
-						boost = 30;
+						gold.boost_multiplier = data.buildings[r_b].owned / 10.0;
+						gold.boost_time = 30;
 					} else {
 						// Lucky!
-						double earned = (data.cookies >= data.cps * cps_multiplier * 6000) ?
-							(max(data.cookies * 0.15, data.cps * cps_multiplier * 900) + 13) :
-							(min(data.cookies * 0.15, data.cps * cps_multiplier * 900) + 13);
+						double earned = (data.cookies >= data.cps * gold.cps_multiplier * 6000) ?
+							(max(data.cookies * 0.15, data.cps * gold.cps_multiplier * 900) + 13) :
+							(min(data.cookies * 0.15, data.cps * gold.cps_multiplier * 900) + 13);
 
 						char msg_buf[30];
 						strcpy(msg_buf, "+");
@@ -445,29 +428,29 @@ int main() {
 			stats_toggle = !stats_toggle;
 
 		if (one_second) {
-			data.cookies += (data.cps * cps_multiplier) + (data.cps * cps_multiplier * boost_multiplier);
-			data.cookies_all_time += (data.cps * cps_multiplier) + (data.cps * cps_multiplier * boost_multiplier);
+			data.cookies += (data.cps * gold.cps_multiplier) + (data.cps * gold.cps_multiplier * gold.boost_multiplier);
+			data.cookies_all_time += (data.cps * gold.cps_multiplier) + (data.cps * gold.cps_multiplier * gold.boost_multiplier);
 
-			if (frenzy > 0)
-				frenzy--;
-			if (click_frenzy > 0)
-				click_frenzy--;
-			if (boost > 0)
-				boost--;
+			if (gold.frenzy_time > 0)
+				gold.frenzy_time--;
+			if (gold.click_frenzy_time > 0)
+				gold.click_frenzy_time--;
+			if (gold.boost_time > 0)
+				gold.boost_time--;
 			if (msg.time > 0)
 				msg.time--;
 			if (gold.time > 0)
 				gold.time--;
 		}
 
-		if (frenzy <= 0)
-			cps_multiplier = 1;
+		if (gold.frenzy_time <= 0)
+			gold.cps_multiplier = 1;
 
-		if (click_frenzy <= 0)
-			click_multiplier = 1;
+		if (gold.click_frenzy_time <= 0)
+			gold.click_multiplier = 1;
 
-		if (boost <= 0) 
-			boost_multiplier = 0;
+		if (gold.boost_time <= 0) 
+			gold.boost_multiplier = 0;
 
         Bdisp_PutDisp_DD();
         Bdisp_AllClr_VRAM();
