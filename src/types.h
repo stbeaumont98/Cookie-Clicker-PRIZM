@@ -45,7 +45,7 @@ struct GoldenData {
 	uint8_t y;
 	uint8_t scale;
 	uint8_t effect;
-	uint8_t time;
+	uint16_t time;
 };
 
 struct Message {
