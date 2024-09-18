@@ -68,7 +68,7 @@ void reset_gold(struct GoldenData *data) {
 	data->y = random() % 171;
 	data->scale = 2;
 	data->effect = random() % 100 + 1;
-	data->time = random() % 60 + 44; //random() % 600 + 314;
+	data->time = random() % 600 + 314;
 }
 
 void set_message(struct Message *msg, const char *header, const char *body, uint8_t time) {
@@ -223,7 +223,7 @@ int main() {
 			disp_string(185, 183, tmp, 0xFFFF);
 			free(tmp);
 
-			if((keydownlast(KEY_PRGM_EXIT) && !keydownhold(KEY_PRGM_EXIT)) || key == KEY_PRGM_EXIT)
+			if(keydownlast(KEY_PRGM_EXIT) && !keydownhold(KEY_PRGM_EXIT))
 					stats_toggle = false;
 
 		} else {
@@ -260,17 +260,17 @@ int main() {
 
 			draw_rect(187, 49 + sel * 42, 195, 39, 0xff80, 1);
 
-			if(((keydownlast(KEY_PRGM_DOWN) && !keydownhold(KEY_PRGM_DOWN)) || key == KEY_PRGM_DOWN) && sel < store_size - 1) {
+			if((keydownlast(KEY_PRGM_DOWN) && !keydownhold(KEY_PRGM_DOWN)) && sel < store_size - 1) {
 				sel++;
-			} else if(((keydownlast(KEY_PRGM_DOWN) && !keydownhold(KEY_PRGM_DOWN)) || key == KEY_PRGM_DOWN) && sel == 3 && data.buildings_unlocked > 4 && sel_offset < data.buildings_unlocked - 4){
+			} else if((keydownlast(KEY_PRGM_DOWN) && !keydownhold(KEY_PRGM_DOWN)) && sel == 3 && data.buildings_unlocked > 4 && sel_offset < data.buildings_unlocked - 4){
 				sel_offset++;
 			}
-			if(((keydownlast(KEY_PRGM_UP) && !keydownhold(KEY_PRGM_UP)) || key == KEY_PRGM_UP) && sel > 0) {
+			if((keydownlast(KEY_PRGM_UP) && !keydownhold(KEY_PRGM_UP)) && sel > 0) {
 				sel--;
-			} else if(((keydownlast(KEY_PRGM_UP) && !keydownhold(KEY_PRGM_UP)) || key == KEY_PRGM_UP) && sel == 0 && sel_offset > 0){
+			} else if((keydownlast(KEY_PRGM_UP) && !keydownhold(KEY_PRGM_UP)) && sel == 0 && sel_offset > 0){
 				sel_offset--;
 			}
-			if(((keydownlast(KEY_PRGM_ALPHA) && !keydownhold(KEY_PRGM_ALPHA)) || key == KEY_PRGM_ALPHA) && data.cookies >= data.buildings[sel + sel_offset].price) {
+			if((keydownlast(KEY_PRGM_ALPHA) && !keydownhold(KEY_PRGM_ALPHA)) && data.cookies >= data.buildings[sel + sel_offset].price) {
 				data.cookies -= data.buildings[sel + sel_offset].price;
 				data.buildings[sel + sel_offset].owned++;
 				data.buildings[sel + sel_offset].price += round2(data.buildings[sel + sel_offset].price * .15);
@@ -278,7 +278,7 @@ int main() {
 
 			// end store code
 
-			if((keydownlast(KEY_PRGM_SHIFT) && !keydownhold(KEY_PRGM_SHIFT)) || key == KEY_PRGM_SHIFT) {
+			if(keydownlast(KEY_PRGM_SHIFT) && !keydownhold(KEY_PRGM_SHIFT)) {
 				scale_w = 112;
 				scale_h = 114;
 				data.cookies += click_multiplier;
@@ -329,11 +329,11 @@ int main() {
 
 			if (msg.time > 0) {
 				display_msg(msg);
-				if((keydownlast(KEY_PRGM_EXIT) && !keydownhold(KEY_PRGM_EXIT)) || key == KEY_PRGM_EXIT)
+				if(keydownlast(KEY_PRGM_EXIT) && !keydownhold(KEY_PRGM_EXIT))
 					msg.time = 0;
 			}
 			
-			if(((keydownlast(f_buttons[gold.x]) && !keydownhold(f_buttons[gold.x])) || key == f_buttons[gold.x]) && gold.time <= 13) {
+			if((keydownlast(f_buttons[gold.x]) && !keydownhold(f_buttons[gold.x])) && gold.time <= 13) {
 				data.gold_click_count++;
 				if(gold.effect > 0 && gold.effect <= 43) {
 					// Lucky!
@@ -430,7 +430,7 @@ int main() {
 				reset_gold(&gold);
 		}
 
-		if((keydownlast(KEY_PRGM_VARS) && !keydownhold(KEY_PRGM_VARS)) || key == KEY_PRGM_VARS)
+		if(keydownlast(KEY_PRGM_VARS) && !keydownhold(KEY_PRGM_VARS))
 			stats_toggle = !stats_toggle;
 
 		if (one_second) {
