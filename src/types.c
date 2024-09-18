@@ -1,4 +1,6 @@
+#include <stdint.h>
 #include <string.h>
+#include "math1.h"
 
 #include "types.h"
 
@@ -9,4 +11,12 @@ void reset_buildings(struct CookieData *data) {
 		data->buildings[i].locked = !(strcmp(building_types[i], "Cursor") == 0 || strcmp(building_types[i], "Grandm*a") == 0);
 		data->buildings[i].hidden = true;
 	}
+}
+
+void reset_gold(struct GoldenData *data) {
+	data->x = random() % 6;
+	data->y = random() % 171;
+	data->scale = 2;
+	data->effect = random() % 1000 + 1;
+	data->time = random() % 600 + 314;
 }
