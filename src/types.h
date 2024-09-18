@@ -44,7 +44,7 @@ struct GoldenData {
 	uint16_t x;
 	uint8_t y;
 	uint8_t scale;
-	uint8_t effect;
+	uint16_t effect;
 	uint16_t time;
 };
 
