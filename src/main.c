@@ -260,7 +260,7 @@ int main() {
 			if((keydownlast(KEY_PRGM_ALPHA) && !keydownhold(KEY_PRGM_ALPHA)) && data.cookies >= data.buildings[sel + sel_offset].price) {
 				data.cookies -= data.buildings[sel + sel_offset].price;
 				data.buildings[sel + sel_offset].owned++;
-				data.buildings[sel + sel_offset].price += round2(data.buildings[sel + sel_offset].price * .15);
+				data.buildings[sel + sel_offset].price += (data.buildings[sel + sel_offset].price * .15);
 			}
 
 			// end store code

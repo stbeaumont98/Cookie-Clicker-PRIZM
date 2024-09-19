@@ -281,7 +281,7 @@ void load_game(struct CookieData *data, struct GoldenData *gold) {
 		data->cps += data->buildings[i].owned * base_cps[i];
 
 		for (j = 0; j < data->buildings[i].owned; j++)
-			data->buildings[i].price += round2(data->buildings[i].price * 0.15);
+			data->buildings[i].price += (data->buildings[i].price * .15);
 
 		
 		if (data->cookies_all_time >= base_prices[i])
