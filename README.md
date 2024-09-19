@@ -6,8 +6,8 @@ In case it wasn't clear, the concept and modified sprites were created by [Ortie
 ![menu icon screenshot](/screenshots/menu_icon.png)
 
 ![beginning of the game](/screenshots/game_start.png) ![golden cookie](/screenshots/golden_cookie.png)
-![golden cookie effect](/screenshots/golden_effect.png) ![gold bar](/screenshots/gold_bar.png)
-![later game](/screenshots/game.png) ![game statistics](/screenshots/stats.png)
+![golden cookie effect](/screenshots/golden_effect.png) ![later game](/screenshots/game.png)
+![game statistics](/screenshots/stats.png)
 
 Discussion thread: https://www.cemetech.net/forum/viewtopic.php?t=10476
 
