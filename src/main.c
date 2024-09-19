@@ -82,7 +82,7 @@ void display_msg(const struct Message msg) {
 	int box_x = (384 - box_width) / 2;
 	int box_y =  213 - box_height;
 
-	fill_area(box_x, box_y, box_width, box_height, rgb_color(16, 16, 16));
+	fill_area(box_x, box_y, box_width, box_height, 0x0000);
 	draw_rect(box_x - 2, box_y - 2, box_width + 3, box_height + 3, rgb_color(135, 86, 38), 1);
 
 	disp_string(box_x + 5, box_y + 4, has_header ? msg.header : msg.body, rgb_color(169, 169, 169));
