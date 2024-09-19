@@ -78,9 +78,10 @@ char *get_display_val(double val, bool disp_dec, bool abrev) {
 
 	if (val < 1E6 && disp_dec)
 		dec = 10;
-	else if (val < 1E6 && !disp_dec)
+	else if (val < 1E6 && !disp_dec) {
 		dec = 0;
-	else
+		disp_val = round2(disp_val);
+	} else
 		dec = 1000;
 	
 	char *tmp = disp_decimal(disp_val, dec);
@@ -107,7 +108,7 @@ char *disp_decimal(double val, int32_t dec_pnt) {
 		itoa(integer, buffer, 10);
 	
 	if (dec_pnt != 0) {
-		int32_t decimal = (int32_t) ((val - integer) * dec_pnt);
+		int32_t decimal = (int32_t) round2((val - integer) * dec_pnt);
 
 		if (decimal != 0) {
 
