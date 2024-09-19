@@ -450,17 +450,29 @@ int main() {
 		if (gold.frenzy_time <= 0)
 			gold.cps_multiplier = 1;
 		else
-			draw_line(0, 1, round2(170. * ((double) gold.frenzy_time / MAX_FRENZY)), 1, 0xddeb, 1);
+			fill_area(0,
+				(((double) gold.frenzy_time / MAX_FRENZY) < ((double) gold.click_frenzy_time / MAX_CLICK_FRENZY) && ((double) gold.frenzy_time / MAX_FRENZY) > ((double) gold.boost_time / MAX_BOOST)) || 
+				(((double) gold.frenzy_time / MAX_FRENZY) < ((double) gold.boost_time / MAX_BOOST) && ((double) gold.frenzy_time / MAX_FRENZY) > ((double) gold.click_frenzy_time / MAX_CLICK_FRENZY)) ? 3 :
+				(((double) gold.frenzy_time / MAX_FRENZY) < ((double) gold.click_frenzy_time / MAX_CLICK_FRENZY) && ((double) gold.frenzy_time / MAX_FRENZY) < ((double) gold.boost_time / MAX_BOOST)) ? 6 : 0,
+				round2(170. * ((double) gold.frenzy_time / MAX_FRENZY)), 3, 0xddeb);
 
 		if (gold.click_frenzy_time <= 0)
 			gold.click_multiplier = 1;
 		else
-			draw_line(0, 1, round2(170. * ((double) gold.click_frenzy_time / MAX_CLICK_FRENZY)), 1, 0xddeb, 1);
+			fill_area(0,
+				(((double) gold.click_frenzy_time / MAX_CLICK_FRENZY) < ((double) gold.frenzy_time / MAX_FRENZY) && ((double) gold.click_frenzy_time / MAX_CLICK_FRENZY) > ((double) gold.boost_time / MAX_BOOST)) || 
+				(((double) gold.click_frenzy_time / MAX_CLICK_FRENZY) < ((double) gold.boost_time / MAX_BOOST) && ((double) gold.click_frenzy_time / MAX_CLICK_FRENZY) > ((double) gold.frenzy_time / MAX_FRENZY)) ? 3 :
+				(((double) gold.click_frenzy_time / MAX_CLICK_FRENZY) < ((double) gold.frenzy_time / MAX_FRENZY) && ((double) gold.click_frenzy_time / MAX_CLICK_FRENZY) < ((double) gold.boost_time / MAX_BOOST)) ? 6 : 0,
+				round2(170. * ((double) gold.click_frenzy_time / MAX_CLICK_FRENZY)), 3, 0xddeb);
 
 		if (gold.boost_time <= 0) 
 			gold.boost_multiplier = 0;
 		else
-			draw_line(0, 1, round2(170. * ((double) gold.boost_time / MAX_BOOST)), 1, 0xddeb, 1);
+			fill_area(0,
+				(((double) gold.boost_time / MAX_BOOST) < ((double) gold.frenzy_time / MAX_FRENZY) && ((double) gold.boost_time / MAX_BOOST) > ((double) gold.click_frenzy_time / MAX_CLICK_FRENZY)) || 
+				(((double) gold.boost_time / MAX_BOOST) < ((double) gold.click_frenzy_time / MAX_CLICK_FRENZY) && ((double) gold.boost_time / MAX_BOOST) > ((double) gold.frenzy_time / MAX_FRENZY)) ? 3 :
+				(((double) gold.boost_time / MAX_BOOST) < ((double) gold.frenzy_time / MAX_FRENZY) && ((double) gold.boost_time / MAX_BOOST) < ((double) gold.click_frenzy_time / MAX_CLICK_FRENZY)) ? 6 : 0,
+				round2(170. * ((double) gold.boost_time / MAX_BOOST)), 3, 0xddeb);
 
         Bdisp_PutDisp_DD();
         Bdisp_AllClr_VRAM();
