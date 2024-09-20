@@ -198,7 +198,7 @@ int main() {
 			disp_string(213, 129, tmp, 0xFFFF);
 			free(tmp);
 
-			tmp = disp_comma(data.click_count);
+			tmp = get_display_val(data.click_count, false, false);
 			disp_string(130, 147, tmp, 0xFFFF);
 			free(tmp);
 
@@ -206,7 +206,7 @@ int main() {
 			disp_string(180, 165, tmp, 0xFFFF);
 			free(tmp);
 
-			tmp = disp_comma(data.gold_click_count);
+			tmp = get_display_val(data.gold_click_count, false, false);
 			disp_string(185, 183, tmp, 0xFFFF);
 			free(tmp);
 
