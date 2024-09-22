@@ -337,18 +337,18 @@ int main() {
 					strcat(msg_buf, tmp);
 					free(tmp);
 					strcat(msg_buf, " cookies!");
-					set_message(&msg, "Lucky!", msg_buf, 4);
+					set_message(&msg, "Lucky!", msg_buf, 6);
 
 					data.cookies_all_time += earned;
 					data.cookies += earned;
 				} else if(gold.effect > 425 && gold.effect <= 850) {
 					// Frenzy
-					set_message(&msg, "Frenzy", "Cookie production x7 for 77 seconds!", 5);
+					set_message(&msg, "Frenzy", "Cookie production x7 for 77 seconds!", 6);
 					gold.cps_multiplier = 7;
 					gold.frenzy_time = 77;
 				} else if(gold.effect > 850 && gold.effect <= 893) {
 					// Click Frenzy
-					set_message(&msg, "Click Frenzy", "Clicking power x777 for 13 seconds!", 5);
+					set_message(&msg, "Click Frenzy", "Clicking power x777 for 13 seconds!", 6);
 					gold.click_multiplier = 777;
 					gold.click_frenzy_time = 13;
 				} else if (gold.effect > 893 && gold.effect <= 996) {
@@ -403,7 +403,7 @@ int main() {
 						strcat(msg_buf, tmp);
 						free(tmp);
 						strcat(msg_buf, " cookies!");
-						set_message(&msg, "Lucky!", msg_buf, 4);
+						set_message(&msg, "Lucky!", msg_buf, 6);
 
 						data.cookies_all_time += earned;
 						data.cookies += earned;
