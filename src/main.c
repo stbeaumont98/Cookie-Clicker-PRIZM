@@ -139,6 +139,8 @@ int main() {
 
 	bool stats_toggle = false;
 
+	double current_cps = data.cps;
+
 	while(1) {
         int key = PRGM_GetKey();
         if(key == KEY_PRGM_MENU) {
@@ -154,6 +156,8 @@ int main() {
 		one_second = time - old_time;
 
 		keyupdate();
+
+		current_cps = (data.cps * gold.cps_multiplier) + (data.cps * gold.cps_multiplier * gold.boost_multiplier);
 
 		if (stats_toggle) {
 			fill_scr(0x0000);
@@ -189,7 +193,7 @@ int main() {
 			disp_string(156, 93, tmp, 0xFFFF);
 			free(tmp);
 
-			tmp = get_display_val((data.cps * gold.cps_multiplier) + (data.cps * gold.cps_multiplier * gold.boost_multiplier), true, false);
+			tmp = get_display_val(current_cps, true, false);
 			disp_string(177, 111, tmp, 0xFFFF);
 			free(tmp);
 			
@@ -302,7 +306,7 @@ int main() {
 
 			strcpy(cps_buf, "CpS: ");
 
-			char *tmp = get_display_val((data.cps * gold.cps_multiplier) + (data.cps * gold.cps_multiplier * gold.boost_multiplier), true, true);
+			char *tmp = get_display_val(current_cps, true, true);
 			strcat(cps_buf, tmp);
 			free(tmp);
 
@@ -324,10 +328,9 @@ int main() {
 				data.gold_click_count++;
 				if(gold.effect > 0 && gold.effect <= 425) {
 					// Lucky!
-					double earned = (data.cookies >= data.cps * gold.cps_multiplier * 6000) ?
-						(max(data.cookies * 0.15, data.cps * gold.cps_multiplier * 900) + 13) :
-						(min(data.cookies * 0.15, data.cps * gold.cps_multiplier * 900) + 13);
-
+					double earned = (data.cookies >= current_cps * 6000) ?
+						(max(data.cookies * 0.15, current_cps * 900) + 13) :
+						(min(data.cookies * 0.15, current_cps * 900) + 13);
 					char msg_buf[30];
 					strcpy(msg_buf, "+");
 					char *tmp = get_display_val(earned, false, false);
@@ -391,10 +394,9 @@ int main() {
 						gold.boost_time = 30;
 					} else {
 						// Lucky!
-						double earned = (data.cookies >= data.cps * gold.cps_multiplier * 6000) ?
-							(max(data.cookies * 0.15, data.cps * gold.cps_multiplier * 900) + 13) :
-							(min(data.cookies * 0.15, data.cps * gold.cps_multiplier * 900) + 13);
-
+						double earned = (data.cookies >= current_cps * 6000) ?
+							(max(data.cookies * 0.15, current_cps * 900) + 13) :
+							(min(data.cookies * 0.15, current_cps * 900) + 13);
 						char msg_buf[30];
 						strcpy(msg_buf, "+");
 						char *tmp = get_display_val(earned, false, false);
@@ -432,8 +434,8 @@ int main() {
 			stats_toggle = !stats_toggle;
 
 		if (one_second) {
-			data.cookies += (data.cps * gold.cps_multiplier) + (data.cps * gold.cps_multiplier * gold.boost_multiplier);
-			data.cookies_all_time += (data.cps * gold.cps_multiplier) + (data.cps * gold.cps_multiplier * gold.boost_multiplier);
+			data.cookies += current_cps;
+			data.cookies_all_time += current_cps;
 
 			if (gold.frenzy_time > 0)
 				gold.frenzy_time--;
