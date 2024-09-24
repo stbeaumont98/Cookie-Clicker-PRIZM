@@ -63,7 +63,7 @@ static const char *blab[39] = {
 
 int *screen;
 
-int get_time(){
+int get_time() {
 	return (int)(RTC_GetTicks() / 128);
 }
 
@@ -93,10 +93,10 @@ void display_msg(const struct Message msg) {
 	}
 }
 
-void draw_background(){
+void draw_background() {
     fill_scr(rgb_color(35, 94, 128));
-	for(int i = 0; i < 12; i++){
-		if(i % 2 != 0)
+	for (int i = 0; i < 12; i++) {
+		if (i % 2 != 0)
 			fill_area(i * 32, 0, 32, 216, rgb_color(44, 108, 143));
 	}
 	copy_sprite_scaled(panel_vertical, 170, 0, 8, 108, 16, 216, false, 0);
@@ -141,9 +141,9 @@ int main() {
 
 	double current_cps = data.cps;
 
-	while(1) {
+	while (1) {
         int key = PRGM_GetKey();
-        if(key == KEY_PRGM_MENU) {
+        if (key == KEY_PRGM_MENU) {
 			save_game(data, gold);
 			GetKey(&key);
 			free(msg.header);
@@ -175,13 +175,19 @@ int main() {
 			copy_sprite_masked(money, 152, 57, 14, 14, COLOR_RED);
 			copy_sprite_masked(money, 214, 75, 14, 14, COLOR_RED);
 
-			bool is_abrev = (data.cookies >= 1E45 && data.cookies < 1E48);
 			char *tmp = get_display_val(data.cookies, false, false);
+			if (text_width(tmp) > 197) {
+				free(tmp);
+				tmp = get_display_val(data.cookies, false, true);
+			}
 			disp_string(170, 57, tmp, 0xFFFF);
 			free(tmp);
 
-			is_abrev = (data.cookies_all_time >= 1E15 && data.cookies_all_time < 1E27) || (data.cookies_all_time >= 1E30 && data.cookies_all_time < 1E33) || data.cookies_all_time > 1E36;
-			tmp = get_display_val(data.cookies_all_time, false, is_abrev);
+			tmp = get_display_val(data.cookies_all_time, false, false);
+			if (text_width(tmp) > 135) {
+				free(tmp);
+				tmp = get_display_val(data.cookies_all_time, false, true);
+			}
 			disp_string(232, 75, tmp, 0xFFFF);
 			free(tmp);
 
@@ -194,11 +200,18 @@ int main() {
 			free(tmp);
 
 			tmp = get_display_val(current_cps, true, false);
+			if (text_width(tmp) > 190) {
+				free(tmp);
+				tmp = get_display_val(current_cps, true, true);
+			}
 			disp_string(177, 111, tmp, 0xFFFF);
 			free(tmp);
 			
-			is_abrev = (data.cps >= 1E15 && data.cps < 1E27) || (data.cps >= 1E30 && data.cps < 1E33) || data.cps > 1E36;
-			tmp = get_display_val(data.cps, true, is_abrev);
+			tmp = get_display_val(data.cps, true, false);
+			if (text_width(tmp) > 154) {
+				free(tmp);
+				tmp = get_display_val(data.cps, true, true);
+			}
 			disp_string(213, 129, tmp, 0xFFFF);
 			free(tmp);
 
@@ -207,6 +220,10 @@ int main() {
 			free(tmp);
 
 			tmp = get_display_val(data.handmade_cookies, false, false);
+			if (text_width(tmp) > 187) {
+				free(tmp);
+				tmp = get_display_val(data.handmade_cookies, false, true);
+			}
 			disp_string(180, 165, tmp, 0xFFFF);
 			free(tmp);
 
@@ -214,7 +231,7 @@ int main() {
 			disp_string(185, 183, tmp, 0xFFFF);
 			free(tmp);
 
-			if(keydownlast(KEY_PRGM_EXIT) && !keydownhold(KEY_PRGM_EXIT))
+			if (keydownlast(KEY_PRGM_EXIT) && !keydownhold(KEY_PRGM_EXIT))
 					stats_toggle = false;
 
 		} else {
@@ -229,11 +246,17 @@ int main() {
 
 			int store_size = (data.buildings_unlocked < 4) ? data.buildings_unlocked : 4;
 
-			for(int i = 0; i < store_size; i++) {
+			for (int i = 0; i < store_size; i++) {
 				draw_store_tile(186, 48 + i * 42);
 				copy_sprite_scaled(icons[i + sel_offset], 186, 48 + i * 42, 21, 21, 42, 42, data.buildings[i + sel_offset].hidden, 0x0000);
 				copy_sprite_masked(money, 229, 70 + i * 42, 14, 14, COLOR_RED);
 				char *price_buf = get_display_val(data.buildings[i + sel_offset].price, false, false);
+				if ((text_width(price_buf) > 110 && data.buildings[i + sel_offset].owned >= 100) ||
+					(text_width(price_buf) > 115 && data.buildings[i + sel_offset].owned >= 10) ||
+					(text_width(price_buf) > 124)) {
+					free(price_buf);
+					price_buf = get_display_val(data.buildings[i + sel_offset].price, false, true);
+				}
 				disp_string(246, 70 + i * 42, price_buf, (data.cookies >= data.buildings[i + sel_offset].price) ? 0x67ec : COLOR_RED);
 				free(price_buf);
 
@@ -251,17 +274,17 @@ int main() {
 
 			draw_rect(187, 49 + sel * 42, 195, 39, 0xff80, 1);
 
-			if((keydownlast(KEY_PRGM_DOWN) && !keydownhold(KEY_PRGM_DOWN)) && sel < store_size - 1) {
+			if ((keydownlast(KEY_PRGM_DOWN) && !keydownhold(KEY_PRGM_DOWN)) && sel < store_size - 1) {
 				sel++;
-			} else if((keydownlast(KEY_PRGM_DOWN) && !keydownhold(KEY_PRGM_DOWN)) && sel == 3 && data.buildings_unlocked > 4 && sel_offset < data.buildings_unlocked - 4) {
+			} else if ((keydownlast(KEY_PRGM_DOWN) && !keydownhold(KEY_PRGM_DOWN)) && sel == 3 && data.buildings_unlocked > 4 && sel_offset < data.buildings_unlocked - 4) {
 				sel_offset++;
 			}
-			if((keydownlast(KEY_PRGM_UP) && !keydownhold(KEY_PRGM_UP)) && sel > 0) {
+			if ((keydownlast(KEY_PRGM_UP) && !keydownhold(KEY_PRGM_UP)) && sel > 0) {
 				sel--;
-			} else if((keydownlast(KEY_PRGM_UP) && !keydownhold(KEY_PRGM_UP)) && sel == 0 && sel_offset > 0) {
+			} else if ((keydownlast(KEY_PRGM_UP) && !keydownhold(KEY_PRGM_UP)) && sel == 0 && sel_offset > 0) {
 				sel_offset--;
 			}
-			if((keydownlast(KEY_PRGM_ALPHA) && !keydownhold(KEY_PRGM_ALPHA)) && data.cookies >= data.buildings[sel + sel_offset].price) {
+			if ((keydownlast(KEY_PRGM_ALPHA) && !keydownhold(KEY_PRGM_ALPHA)) && data.cookies >= data.buildings[sel + sel_offset].price) {
 				data.cookies -= data.buildings[sel + sel_offset].price;
 				data.buildings[sel + sel_offset].owned++;
 				data.buildings[sel + sel_offset].price += (data.buildings[sel + sel_offset].price * .15);
@@ -269,7 +292,7 @@ int main() {
 
 			// end store code
 
-			if(keydownlast(KEY_PRGM_SHIFT) && !keydownhold(KEY_PRGM_SHIFT)) {
+			if (keydownlast(KEY_PRGM_SHIFT) && !keydownhold(KEY_PRGM_SHIFT)) {
 				scale_w = 112;
 				scale_h = 114;
 				data.cookies += gold.click_multiplier;
@@ -306,11 +329,19 @@ int main() {
 
 			strcpy(cps_buf, "CpS: ");
 
-			char *tmp = get_display_val(current_cps, true, true);
+			char *tmp = get_display_val(current_cps, true, false);
+			if (text_width(tmp) > 132) {
+				free(tmp);
+				tmp = get_display_val(current_cps, true, true);
+			}
 			strcat(cps_buf, tmp);
 			free(tmp);
 
-			char *cookie_buf = get_display_val(data.cookies, false, data.cookies >= 1E48);
+			char *cookie_buf = get_display_val(data.cookies, false, false);
+			if (text_width(cookie_buf) > 168) {
+				free(cookie_buf);
+				cookie_buf = get_display_val(data.cookies, false, true);
+			}
 			disp_string((170 - text_width(cookie_buf)) / 2, 17, cookie_buf, 0xffff);
 			free(cookie_buf);
 
@@ -320,13 +351,13 @@ int main() {
 
 			if (msg.time > 0) {
 				display_msg(msg);
-				if(keydownlast(KEY_PRGM_EXIT) && !keydownhold(KEY_PRGM_EXIT))
+				if (keydownlast(KEY_PRGM_EXIT) && !keydownhold(KEY_PRGM_EXIT))
 					msg.time = 0;
 			}
 			
-			if((keydownlast(f_buttons[gold.x]) && !keydownhold(f_buttons[gold.x])) && gold.time <= 13) {
+			if ((keydownlast(f_buttons[gold.x]) && !keydownhold(f_buttons[gold.x])) && gold.time <= 13) {
 				data.gold_click_count++;
-				if(gold.effect > 0 && gold.effect <= 425) {
+				if (gold.effect > 0 && gold.effect <= 425) {
 					// Lucky!
 					double earned = (data.cookies >= current_cps * 6000) ?
 						(max(data.cookies * 0.15, current_cps * 900) + 13) :
@@ -341,12 +372,12 @@ int main() {
 
 					data.cookies_all_time += earned;
 					data.cookies += earned;
-				} else if(gold.effect > 425 && gold.effect <= 850) {
+				} else if (gold.effect > 425 && gold.effect <= 850) {
 					// Frenzy
 					set_message(&msg, "Frenzy", "Cookie production x7 for 77 seconds!", 6);
 					gold.cps_multiplier = 7;
 					gold.frenzy_time = 77;
-				} else if(gold.effect > 850 && gold.effect <= 893) {
+				} else if (gold.effect > 850 && gold.effect <= 893) {
 					// Click Frenzy
 					set_message(&msg, "Click Frenzy", "Clicking power x777 for 13 seconds!", 6);
 					gold.click_multiplier = 777;
@@ -409,7 +440,7 @@ int main() {
 						data.cookies += earned;
 					}
 
-				} else if(gold.effect > 996) {
+				} else if (gold.effect > 996) {
 					int rblab = random() % 39;
 					set_message(&msg, "", blab[rblab], 6);
 				}
@@ -430,7 +461,7 @@ int main() {
 				reset_gold(&gold);
 		}
 
-		if(keydownlast(KEY_PRGM_VARS) && !keydownhold(KEY_PRGM_VARS))
+		if (keydownlast(KEY_PRGM_VARS) && !keydownhold(KEY_PRGM_VARS))
 			stats_toggle = !stats_toggle;
 
 		if (one_second) {
