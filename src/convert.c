@@ -6,74 +6,31 @@
 
 #include "convert.h"
 
+const char *suffixes[20] = { " million", " billion", " trillion",
+    " quadrillion", " quintillion", " sextillion", " septillion", " octillion",
+    " nonillion", " decillion", " undecillion", " duodecillion", " tredecillion",
+    " quattuordecillion", " quindecillion", " sexdecillion", " septendecillion",
+    " octodecillion", " novemdecillion", " vigintillion" };
+
+const char *suffixes_abrev[20] = { " mil.", " bil.", " tril.", " quad.",
+    " quin.", " sext.", " sept.", " oct.", " non.", " dec.", " udc.", " ddc.",
+    " tdc.", " qadc.", " qidc.", " sxdc.", " spdc.", " ocdc.", " nodc.", " vg." };
+
 char *get_display_val(double val, bool disp_dec, bool abrev) {
-	double disp_val = 0;
+	double disp_val = val;
 	char *val_buf = malloc(30);
 	char *suffix = malloc(15);
 	int dec = 0;
 
-	if (val < 1E6) {
-		disp_val = val;
-	} else if (val >= 1E6 && val < 1E9) {
-		disp_val = val * 1E-6;
-		strcpy(suffix, abrev ? " mil." : " million");
-	} else if (val >= 1E9 && val < 1E12) {
-		disp_val = val * 1E-9;
-		strcpy(suffix, abrev ? " bil." : " billion");
-	} else if (val >= 1E12 && val < 1E15) {
-		disp_val = val * 1E-12;
-		strcpy(suffix, abrev ? " tril." : " trillion");
-	} else if (val >= 1E15 && val < 1E18) {
-		disp_val = val * 1E-15;
-		strcpy(suffix, abrev ? " quad." : " quadrillion");
-	} else if (val >= 1E18 && val < 1E21) {
-		disp_val = val * 1E-18;
-		strcpy(suffix, abrev ? " quin." : " quintillion");
-	} else if (val >= 1E21 && val < 1E24) {
-		disp_val = val * 1E-21;
-		strcpy(suffix, abrev ? " sext." : " sextillion");
-	} else if (val >= 1E24 && val < 1E27) {
-		disp_val = val * 1E-24;
-		strcpy(suffix, abrev ? " sept." : " septillion");
-	} else if (val >= 1E27 && val < 1E30) {
-		disp_val = val * 1E-27;
-		strcpy(suffix, abrev ? " oct." : " octillion");
-	} else if (val >= 1E30 && val < 1E33) {
-		disp_val = val * 1E-30;
-		strcpy(suffix, abrev ? " non." : " nonillion");
-	} else if (val >= 1E33 && val < 1E36) {
-		disp_val = val * 1E-33;
-		strcpy(suffix, abrev ? " dec." : " decillion");
-	} else if (val >= 1E36 && val < 1E39) {
-		disp_val = val * 1E-36;
-		strcpy(suffix, abrev ? " udc." : " undecillion");
-	} else if (val >= 1E39 && val < 1E42) {
-		disp_val = val * 1E-39;
-		strcpy(suffix, abrev ? " ddc." : " duodecillion");
-	} else if (val >= 1E42 && val < 1E45) {
-		disp_val = val * 1E-42;
-		strcpy(suffix, abrev ? " tdc." : " tredecillion");
-	} else if (val >= 1E45 && val < 1E48) {
-		disp_val = val * 1E-45;
-		strcpy(suffix, abrev ? " qadc." : " quattuordecillion");
-	} else if (val >= 1E48 && val < 1E51) {
-		disp_val = val * 1E-48;
-		strcpy(suffix, abrev ? " qidc." : " quindecillion");
-	} else if (val >= 1E51 && val < 1E54) {
-		disp_val = val * 1E-51;
-		strcpy(suffix, abrev ? " sxdc." : " sexdecillion");
-	} else if (val >= 1E54 && val < 1E57) {
-		disp_val = val * 1E-54;
-		strcpy(suffix, abrev ? " spdc." : " septendecillion");
-	} else if (val >= 1E57 && val < 1E60) {
-		disp_val = val * 1E-57;
-		strcpy(suffix, abrev ? " ocdc." : " octodecillion");
-	} else if (val >= 1E60 && val < 1E63) {
-		disp_val = val * 1E-60;
-		strcpy(suffix, abrev ? " nodc." : " novemdecillion");
-	} else if (val >= 1E63 && val < 1E66) {
-		disp_val = val * 1E-63;
-		strcpy(suffix, abrev ? " vg." : " vigintillion");
+	if (val >= 1E6) {
+		disp_val *= 1E-6;
+		for (int i = 0; i < 20; i++) {
+			if (disp_val < 1000) {
+				strcpy(suffix, abrev ? suffixes_abrev[i] : suffixes[i]);
+				break;
+			}
+			disp_val /= 1000;
+		}
 	}
 
 	if (val < 1E6 && disp_dec)
