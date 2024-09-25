@@ -29,7 +29,7 @@ char *get_display_val(double val, bool disp_dec, bool abrev) {
 				strcpy(suffix, abrev ? suffixes_abrev[i] : suffixes[i]);
 				break;
 			}
-			disp_val /= 1000;
+			disp_val *= 1E-3;
 		}
 	}
 
