@@ -7,8 +7,8 @@
 static const char *building_types[20] = {
 	"Cursor", "Grandma", "Farm", "Mine", "Factory", "Bank", "Temple",
 	"Wizard tower", "Shipment", "Alchemy lab", "Portal",
-	"Time machine", "Antimatter con.", "Prism", "Chancemaker",
-	"Fractal engine", "JS console", "Idleverse", "Cortex baker", "You"
+	"Time machine", "Antimatter cond.", "Prism", "Chancemaker",
+	"Fractal engine", "Javascript cons.", "Idleverse", "Cortex baker", "You"
 };
 
 static const double base_prices[20] = {
