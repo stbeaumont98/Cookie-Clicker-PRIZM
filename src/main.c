@@ -447,6 +447,33 @@ int main() {
 				}
 				reset_gold(&gold);
 			}
+			
+			if (gold.frenzy_time <= 0)
+				gold.cps_multiplier = 1;
+			else
+				fill_area(0,
+					(((double) gold.frenzy_time / MAX_FRENZY) < ((double) gold.click_frenzy_time / MAX_CLICK_FRENZY) && ((double) gold.frenzy_time / MAX_FRENZY) > ((double) gold.boost_time / MAX_BOOST)) || 
+					(((double) gold.frenzy_time / MAX_FRENZY) < ((double) gold.boost_time / MAX_BOOST) && ((double) gold.frenzy_time / MAX_FRENZY) > ((double) gold.click_frenzy_time / MAX_CLICK_FRENZY)) ? 3 :
+					(((double) gold.frenzy_time / MAX_FRENZY) < ((double) gold.click_frenzy_time / MAX_CLICK_FRENZY) && ((double) gold.frenzy_time / MAX_FRENZY) < ((double) gold.boost_time / MAX_BOOST)) ? 6 : 0,
+					round2(164. * ((double) gold.frenzy_time / MAX_FRENZY)), 3, 0xddeb);
+
+			if (gold.click_frenzy_time <= 0)
+				gold.click_multiplier = 1;
+			else
+				fill_area(0,
+					(((double) gold.click_frenzy_time / MAX_CLICK_FRENZY) < ((double) gold.frenzy_time / MAX_FRENZY) && ((double) gold.click_frenzy_time / MAX_CLICK_FRENZY) > ((double) gold.boost_time / MAX_BOOST)) || 
+					(((double) gold.click_frenzy_time / MAX_CLICK_FRENZY) < ((double) gold.boost_time / MAX_BOOST) && ((double) gold.click_frenzy_time / MAX_CLICK_FRENZY) > ((double) gold.frenzy_time / MAX_FRENZY)) ? 3 :
+					(((double) gold.click_frenzy_time / MAX_CLICK_FRENZY) < ((double) gold.frenzy_time / MAX_FRENZY) && ((double) gold.click_frenzy_time / MAX_CLICK_FRENZY) < ((double) gold.boost_time / MAX_BOOST)) ? 6 : 0,
+					round2(164. * ((double) gold.click_frenzy_time / MAX_CLICK_FRENZY)), 3, 0xddeb);
+
+			if (gold.boost_time <= 0) 
+				gold.boost_multiplier = 0;
+			else
+				fill_area(0,
+					(((double) gold.boost_time / MAX_BOOST) < ((double) gold.frenzy_time / MAX_FRENZY) && ((double) gold.boost_time / MAX_BOOST) > ((double) gold.click_frenzy_time / MAX_CLICK_FRENZY)) || 
+					(((double) gold.boost_time / MAX_BOOST) < ((double) gold.click_frenzy_time / MAX_CLICK_FRENZY) && ((double) gold.boost_time / MAX_BOOST) > ((double) gold.frenzy_time / MAX_FRENZY)) ? 3 :
+					(((double) gold.boost_time / MAX_BOOST) < ((double) gold.frenzy_time / MAX_FRENZY) && ((double) gold.boost_time / MAX_BOOST) < ((double) gold.click_frenzy_time / MAX_CLICK_FRENZY)) ? 6 : 0,
+					round2(164. * ((double) gold.boost_time / MAX_BOOST)), 3, 0xddeb);
 		}
 		
 		if (gold.time <= 13) {
@@ -480,33 +507,6 @@ int main() {
 			if (gold.time > 0)
 				gold.time--;
 		}
-
-		if (gold.frenzy_time <= 0)
-			gold.cps_multiplier = 1;
-		else
-			fill_area(0,
-				(((double) gold.frenzy_time / MAX_FRENZY) < ((double) gold.click_frenzy_time / MAX_CLICK_FRENZY) && ((double) gold.frenzy_time / MAX_FRENZY) > ((double) gold.boost_time / MAX_BOOST)) || 
-				(((double) gold.frenzy_time / MAX_FRENZY) < ((double) gold.boost_time / MAX_BOOST) && ((double) gold.frenzy_time / MAX_FRENZY) > ((double) gold.click_frenzy_time / MAX_CLICK_FRENZY)) ? 3 :
-				(((double) gold.frenzy_time / MAX_FRENZY) < ((double) gold.click_frenzy_time / MAX_CLICK_FRENZY) && ((double) gold.frenzy_time / MAX_FRENZY) < ((double) gold.boost_time / MAX_BOOST)) ? 6 : 0,
-				round2(164. * ((double) gold.frenzy_time / MAX_FRENZY)), 3, 0xddeb);
-
-		if (gold.click_frenzy_time <= 0)
-			gold.click_multiplier = 1;
-		else
-			fill_area(0,
-				(((double) gold.click_frenzy_time / MAX_CLICK_FRENZY) < ((double) gold.frenzy_time / MAX_FRENZY) && ((double) gold.click_frenzy_time / MAX_CLICK_FRENZY) > ((double) gold.boost_time / MAX_BOOST)) || 
-				(((double) gold.click_frenzy_time / MAX_CLICK_FRENZY) < ((double) gold.boost_time / MAX_BOOST) && ((double) gold.click_frenzy_time / MAX_CLICK_FRENZY) > ((double) gold.frenzy_time / MAX_FRENZY)) ? 3 :
-				(((double) gold.click_frenzy_time / MAX_CLICK_FRENZY) < ((double) gold.frenzy_time / MAX_FRENZY) && ((double) gold.click_frenzy_time / MAX_CLICK_FRENZY) < ((double) gold.boost_time / MAX_BOOST)) ? 6 : 0,
-				round2(164. * ((double) gold.click_frenzy_time / MAX_CLICK_FRENZY)), 3, 0xddeb);
-
-		if (gold.boost_time <= 0) 
-			gold.boost_multiplier = 0;
-		else
-			fill_area(0,
-				(((double) gold.boost_time / MAX_BOOST) < ((double) gold.frenzy_time / MAX_FRENZY) && ((double) gold.boost_time / MAX_BOOST) > ((double) gold.click_frenzy_time / MAX_CLICK_FRENZY)) || 
-				(((double) gold.boost_time / MAX_BOOST) < ((double) gold.click_frenzy_time / MAX_CLICK_FRENZY) && ((double) gold.boost_time / MAX_BOOST) > ((double) gold.frenzy_time / MAX_FRENZY)) ? 3 :
-				(((double) gold.boost_time / MAX_BOOST) < ((double) gold.frenzy_time / MAX_FRENZY) && ((double) gold.boost_time / MAX_BOOST) < ((double) gold.click_frenzy_time / MAX_CLICK_FRENZY)) ? 6 : 0,
-				round2(164. * ((double) gold.boost_time / MAX_BOOST)), 3, 0xddeb);
 
         Bdisp_PutDisp_DD();
         Bdisp_AllClr_VRAM();
