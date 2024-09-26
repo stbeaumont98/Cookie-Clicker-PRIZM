@@ -99,18 +99,19 @@ void draw_background() {
 		if (i % 2 != 0)
 			fill_area(i * 32, 0, 32, 216, rgb_color(44, 108, 143));
 	}
-	copy_sprite_scaled(panel_vertical, 170, 0, 8, 108, 16, 216, false, 0);
+	copy_sprite_scaled(panel_vertical, 164, 0, 8, 108, 16, 216, false, 0);
+	copy_sprite_scaled(panel_horizontal, 180, 32, 99, 8, 198, 16, false, 0);
 	copy_sprite_scaled(panel_horizontal, 186, 32, 99, 8, 198, 16, false, 0);
 }
 
 void draw_store_tile(uint16_t x, uint8_t y) {
-	fill_area(x, y, 198, 42, 0xad73);
-	fill_area(x + 2, y, 196, 2, 0x7bac);
-	fill_area(x + 4, y + 2, 194, 2, 0x7bac);
+	fill_area(x, y, 204, 42, 0xad73);
+	fill_area(x + 2, y, 202, 2, 0x7bac);
+	fill_area(x + 4, y + 2, 200, 2, 0x7bac);
 	fill_area(x, y, 2, 40, 0xbdd5);
 	fill_area(x + 2, y + 2, 2, 36, 0xbdd5);
-	fill_area(x + 2, y + 38, 196, 2, 0x39c5);
-	fill_area(x, y + 40, 198, 2, 0x39c5);
+	fill_area(x + 2, y + 38, 202, 2, 0x39c5);
+	fill_area(x, y + 40, 204, 2, 0x39c5);
 }
 
 int main() {
@@ -240,24 +241,24 @@ int main() {
 
 			// start store code
 
-			fill_area(186, 0, 198, 32, 0x0000);
+			fill_area(180, 0, 204, 32, 0x0000);
 
-			disp_string(265, 10, "Store", 0xffff);
+			disp_string(262, 10, "Store", 0xffff);
 
 			int store_size = (data.buildings_unlocked < 4) ? data.buildings_unlocked : 4;
 
 			for (int i = 0; i < store_size; i++) {
-				draw_store_tile(186, 48 + i * 42);
-				copy_sprite_scaled(icons[i + sel_offset], 186, 48 + i * 42, 21, 21, 42, 42, data.buildings[i + sel_offset].hidden, 0x0000);
-				copy_sprite_masked(money, 229, 70 + i * 42, 14, 14, COLOR_RED);
+				draw_store_tile(180, 48 + i * 42);
+				copy_sprite_scaled(icons[i + sel_offset], 180, 48 + i * 42, 21, 21, 42, 42, data.buildings[i + sel_offset].hidden, 0x0000);
+				copy_sprite_masked(money, 223, 70 + i * 42, 14, 14, COLOR_RED);
 				char *price_buf = get_display_val(data.buildings[i + sel_offset].price, false, false);
-				if ((text_width(price_buf) > 110 && data.buildings[i + sel_offset].owned >= 100) ||
-					(text_width(price_buf) > 115 && data.buildings[i + sel_offset].owned >= 10) ||
-					(text_width(price_buf) > 124)) {
+				if ((text_width(price_buf) > 116 && data.buildings[i + sel_offset].owned >= 100) ||
+					(text_width(price_buf) > 121 && data.buildings[i + sel_offset].owned >= 10) ||
+					(text_width(price_buf) > 130)) {
 					free(price_buf);
 					price_buf = get_display_val(data.buildings[i + sel_offset].price, false, true);
 				}
-				disp_string(246, 70 + i * 42, price_buf, (data.cookies >= data.buildings[i + sel_offset].price) ? 0x67ec : COLOR_RED);
+				disp_string(240, 70 + i * 42, price_buf, (data.cookies >= data.buildings[i + sel_offset].price) ? 0x67ec : COLOR_RED);
 				free(price_buf);
 
 				char owned_buf[5];
@@ -269,10 +270,10 @@ int main() {
 					strcpy(type, building_types[i + sel_offset]);
 				else
 					strcpy(type, "???");
-				disp_string(229, 54 + i * 42, type, 0xffff);
+				disp_string(223, 54 + i * 42, type, 0xffff);
 			}
 
-			draw_rect(187, 49 + sel * 42, 195, 39, 0xff80, 1);
+			draw_rect(181, 49 + sel * 42, 201, 39, 0xff80, 1);
 
 			if ((keydownlast(KEY_PRGM_DOWN) && !keydownhold(KEY_PRGM_DOWN)) && sel < store_size - 1) {
 				sel++;
@@ -322,15 +323,15 @@ int main() {
 				scale_h = 126;
 			}
 			
-			copy_sprite_scaled(perfect_cookie, (scale_w < 124) ? 29 : 23, (scale_h < 126) ? 86 : 80, 62, 63, scale_w, scale_h, false, 0);
-			fill_area(0, 10, 170, 60, 0x0000);
+			copy_sprite_scaled(perfect_cookie, (scale_w < 124) ? 26 : 20, (scale_h < 126) ? 86 : 80, 62, 63, scale_w, scale_h, false, 0);
+			fill_area(0, 10, 164, 60, 0x0000);
 			
 			char cps_buf[30];
 
 			strcpy(cps_buf, "CpS: ");
 
 			char *tmp = get_display_val(current_cps, true, false);
-			if (text_width(tmp) > 132) {
+			if (text_width(tmp) > 126) {
 				free(tmp);
 				tmp = get_display_val(current_cps, true, true);
 			}
@@ -338,16 +339,16 @@ int main() {
 			free(tmp);
 
 			char *cookie_buf = get_display_val(data.cookies, false, false);
-			if (text_width(cookie_buf) > 168) {
+			if (text_width(cookie_buf) > 162) {
 				free(cookie_buf);
 				cookie_buf = get_display_val(data.cookies, false, true);
 			}
-			disp_string((170 - text_width(cookie_buf)) / 2, 17, cookie_buf, 0xffff);
+			disp_string(((164 - text_width(cookie_buf)) / 2) + 1, 17, cookie_buf, 0xffff);
 			free(cookie_buf);
 
-			disp_string(59, 34, "cookies", 0xffff);
+			disp_string(53, 34, "cookies", 0xffff);
 
-			disp_string((170 - text_width(cps_buf)) / 2, 51, cps_buf, 0xffff);
+			disp_string(((164 - text_width(cps_buf)) / 2) + 1, 51, cps_buf, 0xffff);
 
 			if (msg.time > 0) {
 				display_msg(msg);
@@ -487,7 +488,7 @@ int main() {
 				(((double) gold.frenzy_time / MAX_FRENZY) < ((double) gold.click_frenzy_time / MAX_CLICK_FRENZY) && ((double) gold.frenzy_time / MAX_FRENZY) > ((double) gold.boost_time / MAX_BOOST)) || 
 				(((double) gold.frenzy_time / MAX_FRENZY) < ((double) gold.boost_time / MAX_BOOST) && ((double) gold.frenzy_time / MAX_FRENZY) > ((double) gold.click_frenzy_time / MAX_CLICK_FRENZY)) ? 3 :
 				(((double) gold.frenzy_time / MAX_FRENZY) < ((double) gold.click_frenzy_time / MAX_CLICK_FRENZY) && ((double) gold.frenzy_time / MAX_FRENZY) < ((double) gold.boost_time / MAX_BOOST)) ? 6 : 0,
-				round2(170. * ((double) gold.frenzy_time / MAX_FRENZY)), 3, 0xddeb);
+				round2(164. * ((double) gold.frenzy_time / MAX_FRENZY)), 3, 0xddeb);
 
 		if (gold.click_frenzy_time <= 0)
 			gold.click_multiplier = 1;
@@ -496,7 +497,7 @@ int main() {
 				(((double) gold.click_frenzy_time / MAX_CLICK_FRENZY) < ((double) gold.frenzy_time / MAX_FRENZY) && ((double) gold.click_frenzy_time / MAX_CLICK_FRENZY) > ((double) gold.boost_time / MAX_BOOST)) || 
 				(((double) gold.click_frenzy_time / MAX_CLICK_FRENZY) < ((double) gold.boost_time / MAX_BOOST) && ((double) gold.click_frenzy_time / MAX_CLICK_FRENZY) > ((double) gold.frenzy_time / MAX_FRENZY)) ? 3 :
 				(((double) gold.click_frenzy_time / MAX_CLICK_FRENZY) < ((double) gold.frenzy_time / MAX_FRENZY) && ((double) gold.click_frenzy_time / MAX_CLICK_FRENZY) < ((double) gold.boost_time / MAX_BOOST)) ? 6 : 0,
-				round2(170. * ((double) gold.click_frenzy_time / MAX_CLICK_FRENZY)), 3, 0xddeb);
+				round2(164. * ((double) gold.click_frenzy_time / MAX_CLICK_FRENZY)), 3, 0xddeb);
 
 		if (gold.boost_time <= 0) 
 			gold.boost_multiplier = 0;
@@ -505,7 +506,7 @@ int main() {
 				(((double) gold.boost_time / MAX_BOOST) < ((double) gold.frenzy_time / MAX_FRENZY) && ((double) gold.boost_time / MAX_BOOST) > ((double) gold.click_frenzy_time / MAX_CLICK_FRENZY)) || 
 				(((double) gold.boost_time / MAX_BOOST) < ((double) gold.click_frenzy_time / MAX_CLICK_FRENZY) && ((double) gold.boost_time / MAX_BOOST) > ((double) gold.frenzy_time / MAX_FRENZY)) ? 3 :
 				(((double) gold.boost_time / MAX_BOOST) < ((double) gold.frenzy_time / MAX_FRENZY) && ((double) gold.boost_time / MAX_BOOST) < ((double) gold.click_frenzy_time / MAX_CLICK_FRENZY)) ? 6 : 0,
-				round2(170. * ((double) gold.boost_time / MAX_BOOST)), 3, 0xddeb);
+				round2(164. * ((double) gold.boost_time / MAX_BOOST)), 3, 0xddeb);
 
         Bdisp_PutDisp_DD();
         Bdisp_AllClr_VRAM();
