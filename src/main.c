@@ -245,6 +245,8 @@ int main() {
 
 			disp_string(262, 10, "Store", 0xffff);
 
+			copy_sprite_scaled(arrow[0], 374, 11, 3, 5, 6, 10, false, 0);
+
 			int store_size = (data.buildings_unlocked < 4) ? data.buildings_unlocked : 4;
 
 			for (int i = 0; i < store_size; i++) {
