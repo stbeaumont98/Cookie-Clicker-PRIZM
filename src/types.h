@@ -3,6 +3,7 @@
 
 #include <stdint.h>
 #include <stdbool.h>
+#include <fxcg/display.h>
 
 static const char *building_types[20] = {
 	"Cursor", "Grandma", "Farm", "Mine", "Factory", "Bank", "Temple",
@@ -27,6 +28,17 @@ struct Building {
 	int16_t owned;
 	bool hidden;
 	bool locked;
+	double cps;
+};
+
+struct Upgrade {
+	bool unlocked;
+	bool bought;
+	char *name;
+	char *description;
+	double multiplier;
+	unsigned char *icon;
+	color_t *palette;
 };
 
 struct GoldenData {
