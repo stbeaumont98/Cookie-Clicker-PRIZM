@@ -305,9 +305,12 @@ int main() {
 				fill_area(180, 48, 204, 168, 0x0000);
 
 				for (int i = 0; i < 4; i++) {
-					char name[18];
+					char name[0x80];
 					strcpy(name, upgrades[i + sel_offset].name);
-					small_disp_string(180, 54 + i * 42, name, upgrades[i + sel_offset].unlocked ? 0xffff : 0x5555);
+					char desc[0xff];
+					strcpy(desc, upgrades[i + sel_offset].description);
+					small_disp_string(185, 54 + i * 42, name, upgrades[i + sel_offset].unlocked ? 0xffff : 0x4208);
+					small_disp_string(185, 64 + i * 42, desc, upgrades[i + sel_offset].unlocked ? 0x8410 : 0x4208);
 				}
 
 				draw_rect(181, 49 + sel * 42, 201, 39, 0xff80, 1);
@@ -388,7 +391,7 @@ int main() {
 
 			disp_string(53, 34, "cookies", 0xffff);
 
-			disp_string(((164 - text_width(cps_buf)) / 2) + 1, 51, cps_buf, 0xffff);
+			small_disp_string(((164 - small_text_width(cps_buf)) / 2) + 1, 51, cps_buf, 0xffff);
 
 			if (msg.time > 0) {
 				display_msg(msg);
