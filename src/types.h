@@ -32,13 +32,12 @@ struct Building {
 };
 
 struct Upgrade {
+	double price;
 	bool unlocked;
 	bool bought;
 	char *name;
 	char *description;
 	double multiplier;
-	unsigned char *icon;
-	color_t *palette;
 };
 
 struct GoldenData {
