@@ -311,6 +311,10 @@ int main() {
 					strcpy(desc, upgrades[i + sel_offset].description);
 					small_disp_string(185, 54 + i * 42, name, upgrades[i + sel_offset].unlocked ? 0xffff : 0x4208);
 					small_disp_string(185, 64 + i * 42, desc, upgrades[i + sel_offset].unlocked ? 0x8410 : 0x4208);
+					char *price_buf = get_display_val(upgrades[i + sel_offset].price, false, false);
+					copy_sprite_scaled(money, 370 - small_text_width(price_buf), 53 + i * 42, 14, 14, 8, 8, false, 0);
+					small_disp_string(380 - small_text_width(price_buf), 54 + i * 42, price_buf, (data.cookies >= upgrades[i + sel_offset].price) ? 0x67ec : COLOR_RED);
+					free(price_buf);
 				}
 
 				draw_rect(181, 49 + sel * 42, 201, 39, 0xff80, 1);
@@ -371,7 +375,7 @@ int main() {
 			
 			char cps_buf[30];
 
-			strcpy(cps_buf, "CpS: ");
+			strcpy(cps_buf, "per second: ");
 
 			char *tmp = get_display_val(current_cps, true, false);
 			if (text_width(tmp) > 126) {
