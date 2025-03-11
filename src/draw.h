@@ -19,5 +19,8 @@ void copy_sprite_nbit(const unsigned char* data, unsigned x, unsigned y, unsigne
 void disp_string(unsigned x, unsigned y, const char* message, int color);
 int text_width(const char *msg);
 int text_height(const char *msg);
+void small_disp_string(unsigned x, unsigned y, const char* message, int color);
+int small_text_width(const char *msg);
+int small_text_height(const char *msg);
 
 #endif

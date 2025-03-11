@@ -262,6 +262,8 @@ void copy_sprite_nbit(const unsigned char* data, unsigned x, unsigned y, unsigne
     }
 } 
 
+// normal font
+
 void disp_string(unsigned x, unsigned y, const char* message, int color) {
     int l = strlen(message);
     int i;
@@ -354,6 +356,98 @@ int text_width(const char *msg) {
 }
 
 int text_height(const char *msg) {
+    if (strlen(msg) == 0)
+        return 0;
+    
+    int total = 1;
+    for (int i = 0; i < strlen(msg); i++) {
+        if (msg[i] == '\n')
+            total ++;
+    }
+    return total;
+}
+
+// small font
+
+void small_disp_string(unsigned x, unsigned y, const char* message, int color) {
+    int l = strlen(message);
+    int i;
+    unsigned line = 0;
+    int x_offset = 0;
+    int y_offset = 0;
+    for (i = 0; i < l; i++) {
+        int w = small_char_width[(int) message[i]];
+        int h = small_char_height[(int) message[i]];
+        if (message[i] == '\n') {
+            x_offset = 0;
+            ++line;
+        }
+        else if (message[i] == '\t') {}
+            //x_offset += 20;
+        else {
+            switch (message[i]) {
+                case '(':
+                case ')':
+                case 'j':
+                case 'J':
+                case 'Q':
+                    y_offset = 0;
+                    break;
+                case '+':
+                    y_offset = 1;
+                    break;
+                case '-':
+                case ';':
+                case 'g':
+                case 'p':
+                case 'q':
+                case 'y':
+                    y_offset = 2;
+                    break;
+                case ',':
+                    y_offset = 4;
+                    break;
+                default:
+                    y_offset = 6 - h;
+                    break;
+            } 
+            copy_sprite_1bit(small_charmap[(int) message[i]], x + x_offset, y + y_offset + (line * 18), w, h, charmap_palette, color);
+            x_offset += (message[i] == ' ') ? 5 : (w + 1 + (message[i] == '(' || message[i] == ')' ? 1 : 0));
+        }
+        if (x + x_offset >= 384) {
+            x_offset = 0;
+            ++line;
+        }
+        if (y + y_offset + (line * h) >= 216)
+            break;
+    }
+}
+
+int small_text_width(const char *msg) {
+    int total = 0, max_total = 0;
+	for (int i = 0; i < strlen(msg); i++) {
+        if (msg[i] == '\n') {
+            max_total = max(total, max_total);
+            total = 0;
+        } else {
+            int w = small_char_width[(int) msg[i]];
+            switch (msg[i]) {
+                case ' ':
+                    total += 5;
+                    break;
+                case 'Q':
+                    total += (w - 1);
+                    break;
+                default:
+                    total += (w + 1);
+                    break;
+            }
+        }
+	}
+	return max(total, max_total);
+}
+
+int small_text_height(const char *msg) {
     if (strlen(msg) == 0)
         return 0;
     
