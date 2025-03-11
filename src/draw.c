@@ -394,15 +394,15 @@ void small_disp_string(unsigned x, unsigned y, const char* message, int color) {
                     y_offset = 0;
                     break;
                 case '+':
-                    y_offset = 1;
-                    break;
-                case '-':
                 case ';':
                 case 'g':
                 case 'p':
                 case 'q':
                 case 'y':
                     y_offset = 2;
+                    break;
+                case '-':
+                    y_offset = 3;
                     break;
                 case ',':
                     y_offset = 4;
@@ -411,8 +411,8 @@ void small_disp_string(unsigned x, unsigned y, const char* message, int color) {
                     y_offset = 6 - h;
                     break;
             } 
-            copy_sprite_1bit(small_charmap[(int) message[i]], x + x_offset, y + y_offset + (line * 18), w, h, charmap_palette, color);
-            x_offset += (message[i] == ' ') ? 5 : (w + 1 + (message[i] == '(' || message[i] == ')' ? 1 : 0));
+            copy_sprite_1bit(small_charmap[(int) message[i]], x + x_offset, y + y_offset + (line * 9), w, h, charmap_palette, color);
+            x_offset += (message[i] == ' ') ? 3 : (w + 1 + (message[i] == '(' || message[i] == ')' ? 1 : 0));
         }
         if (x + x_offset >= 384) {
             x_offset = 0;
@@ -433,10 +433,7 @@ int small_text_width(const char *msg) {
             int w = small_char_width[(int) msg[i]];
             switch (msg[i]) {
                 case ' ':
-                    total += 5;
-                    break;
-                case 'Q':
-                    total += (w - 1);
+                    total += 3;
                     break;
                 default:
                     total += (w + 1);
