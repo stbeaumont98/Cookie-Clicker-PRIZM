@@ -375,7 +375,7 @@ int main() {
 			
 			char cps_buf[30];
 
-			strcpy(cps_buf, "per second: ");
+			strcpy(cps_buf, "CpS: ");
 
 			char *tmp = get_display_val(current_cps, true, false);
 			if (text_width(tmp) > 126) {
@@ -395,7 +395,7 @@ int main() {
 
 			disp_string(53, 34, "cookies", 0xffff);
 
-			small_disp_string(((164 - small_text_width(cps_buf)) / 2) + 1, 51, cps_buf, 0xffff);
+			disp_string(((164 - text_width(cps_buf)) / 2) + 1, 51, cps_buf, 0xffff);
 
 			if (msg.time > 0) {
 				display_msg(msg);
