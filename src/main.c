@@ -307,7 +307,7 @@ int main() {
 				for (int i = 0; i < 4; i++) {
 					char name[18];
 					strcpy(name, upgrades[i + sel_offset].name);
-					disp_string(180, 54 + i * 42, name, upgrades[i + sel_offset].unlocked ? 0xffff : 0x5555);
+					small_disp_string(180, 54 + i * 42, name, upgrades[i + sel_offset].unlocked ? 0xffff : 0x5555);
 				}
 
 				draw_rect(181, 49 + sel * 42, 201, 39, 0xff80, 1);
