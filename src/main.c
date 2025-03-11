@@ -16,6 +16,10 @@
 #include "keys.h"
 #include "save.h"
 #include "convert.h"
+#include "upgrades.h"
+
+#define STORE_MODE_BUILDINGS 0
+#define STORE_MODE_UPGRADES 1
 
 static const double MAX_FRENZY = 77.;
 static const double MAX_CLICK_FRENZY = 13.;
@@ -138,6 +142,8 @@ int main() {
 	int sel = 0;
 	int sel_offset = 0;
 
+	int store_mode = 0;
+
 	bool stats_toggle = false;
 
 	double current_cps = data.cps;
@@ -245,55 +251,87 @@ int main() {
 
 			disp_string(262, 10, "Store", 0xffff);
 
-			copy_sprite_scaled(arrow[0], 374, 11, 3, 5, 6, 10, false, 0);
+			copy_sprite_scaled(arrow[store_mode], store_mode ? 183 : 374, 11, 3, 5, 6, 10, false, 0);
 
-			int store_size = (data.buildings_unlocked < 4) ? data.buildings_unlocked : 4;
+			if (store_mode == STORE_MODE_BUILDINGS) {
 
-			for (int i = 0; i < store_size; i++) {
-				draw_store_tile(180, 48 + i * 42);
-				copy_sprite_scaled(icons[i + sel_offset], 180, 48 + i * 42, 21, 21, 42, 42, data.buildings[i + sel_offset].hidden, 0x0000);
-				copy_sprite_masked(money, 223, 70 + i * 42, 14, 14, COLOR_RED);
-				char *price_buf = get_display_val(data.buildings[i + sel_offset].price, false, false);
-				if ((text_width(price_buf) > 116 && data.buildings[i + sel_offset].owned >= 100) ||
-					(text_width(price_buf) > 121 && data.buildings[i + sel_offset].owned >= 10) ||
-					(text_width(price_buf) > 130)) {
+				int store_size = (data.buildings_unlocked < 4) ? data.buildings_unlocked : 4;
+
+				for (int i = 0; i < store_size; i++) {
+					draw_store_tile(180, 48 + i * 42);
+					copy_sprite_scaled(icons[i + sel_offset], 180, 48 + i * 42, 21, 21, 42, 42, data.buildings[i + sel_offset].hidden, 0x0000);
+					copy_sprite_masked(money, 223, 70 + i * 42, 14, 14, COLOR_RED);
+					char *price_buf = get_display_val(data.buildings[i + sel_offset].price, false, false);
+					if ((text_width(price_buf) > 116 && data.buildings[i + sel_offset].owned >= 100) ||
+						(text_width(price_buf) > 121 && data.buildings[i + sel_offset].owned >= 10) ||
+						(text_width(price_buf) > 130)) {
+						free(price_buf);
+						price_buf = get_display_val(data.buildings[i + sel_offset].price, false, true);
+					}
+					disp_string(240, 70 + i * 42, price_buf, (data.cookies >= data.buildings[i + sel_offset].price) ? 0x67ec : COLOR_RED);
 					free(price_buf);
-					price_buf = get_display_val(data.buildings[i + sel_offset].price, false, true);
+
+					char owned_buf[5];
+					itoa(data.buildings[i+sel_offset].owned, owned_buf, 10);
+					disp_string(380 - text_width(owned_buf), 62 + i * 42, owned_buf, 0x0000);
+
+					char type[18];
+					if (!data.buildings[i + sel_offset].hidden)
+						strcpy(type, building_types[i + sel_offset]);
+					else
+						strcpy(type, "???");
+					disp_string(223, 54 + i * 42, type, 0xffff);
 				}
-				disp_string(240, 70 + i * 42, price_buf, (data.cookies >= data.buildings[i + sel_offset].price) ? 0x67ec : COLOR_RED);
-				free(price_buf);
 
-				char owned_buf[5];
-				itoa(data.buildings[i+sel_offset].owned, owned_buf, 10);
-				disp_string(380 - text_width(owned_buf), 62 + i * 42, owned_buf, 0x0000);
+				draw_rect(181, 49 + sel * 42, 201, 39, 0xff80, 1);
 
-				char type[18];
-				if (!data.buildings[i + sel_offset].hidden)
-					strcpy(type, building_types[i + sel_offset]);
-				else
-					strcpy(type, "???");
-				disp_string(223, 54 + i * 42, type, 0xffff);
-			}
+				if ((keydownlast(KEY_PRGM_DOWN) && !keydownhold(KEY_PRGM_DOWN)) && sel < store_size - 1) {
+					sel++;
+				} else if ((keydownlast(KEY_PRGM_DOWN) && !keydownhold(KEY_PRGM_DOWN)) && sel == 3 && data.buildings_unlocked > 4 && sel_offset < data.buildings_unlocked - 4) {
+					sel_offset++;
+				}
+				if ((keydownlast(KEY_PRGM_UP) && !keydownhold(KEY_PRGM_UP)) && sel > 0) {
+					sel--;
+				} else if ((keydownlast(KEY_PRGM_UP) && !keydownhold(KEY_PRGM_UP)) && sel == 0 && sel_offset > 0) {
+					sel_offset--;
+				}
+				if ((keydownlast(KEY_PRGM_ALPHA) && !keydownhold(KEY_PRGM_ALPHA)) && data.cookies >= data.buildings[sel + sel_offset].price) {
+					data.cookies -= data.buildings[sel + sel_offset].price;
+					data.buildings[sel + sel_offset].owned++;
+					data.buildings[sel + sel_offset].price += (data.buildings[sel + sel_offset].price * .15);
+				}
 
-			draw_rect(181, 49 + sel * 42, 201, 39, 0xff80, 1);
+			} else {
+				fill_area(180, 48, 204, 168, 0x0000);
 
-			if ((keydownlast(KEY_PRGM_DOWN) && !keydownhold(KEY_PRGM_DOWN)) && sel < store_size - 1) {
-				sel++;
-			} else if ((keydownlast(KEY_PRGM_DOWN) && !keydownhold(KEY_PRGM_DOWN)) && sel == 3 && data.buildings_unlocked > 4 && sel_offset < data.buildings_unlocked - 4) {
-				sel_offset++;
-			}
-			if ((keydownlast(KEY_PRGM_UP) && !keydownhold(KEY_PRGM_UP)) && sel > 0) {
-				sel--;
-			} else if ((keydownlast(KEY_PRGM_UP) && !keydownhold(KEY_PRGM_UP)) && sel == 0 && sel_offset > 0) {
-				sel_offset--;
-			}
-			if ((keydownlast(KEY_PRGM_ALPHA) && !keydownhold(KEY_PRGM_ALPHA)) && data.cookies >= data.buildings[sel + sel_offset].price) {
-				data.cookies -= data.buildings[sel + sel_offset].price;
-				data.buildings[sel + sel_offset].owned++;
-				data.buildings[sel + sel_offset].price += (data.buildings[sel + sel_offset].price * .15);
+				for (int i = 0; i < 4; i++) {
+					char name[18];
+					strcpy(name, upgrades[i + sel_offset].name);
+					disp_string(180, 54 + i * 42, name, upgrades[i + sel_offset].unlocked ? 0xffff : 0x5555);
+				}
+
+				draw_rect(181, 49 + sel * 42, 201, 39, 0xff80, 1);
+
+				if (((keydownlast(KEY_PRGM_DOWN) && !keydownhold(KEY_PRGM_DOWN)) || key == KEY_PRGM_DOWN) && sel < 3) {
+					sel++;
+				} else if (((keydownlast(KEY_PRGM_DOWN) && !keydownhold(KEY_PRGM_DOWN)) || key == KEY_PRGM_DOWN) && sel == 3) {
+					sel_offset++;
+				}
+				if (((keydownlast(KEY_PRGM_UP) && !keydownhold(KEY_PRGM_UP)) || key == KEY_PRGM_UP) && sel > 0) {
+					sel--;
+				} else if (((keydownlast(KEY_PRGM_UP) && !keydownhold(KEY_PRGM_UP)) || key == KEY_PRGM_UP) && sel == 0 && sel_offset > 0) {
+					sel_offset--;
+				}
+
 			}
 
 			// end store code
+
+			if (((keydownlast(KEY_PRGM_RIGHT) && !keydownhold(KEY_PRGM_RIGHT)) || key == KEY_PRGM_RIGHT) && store_mode == STORE_MODE_BUILDINGS)
+				store_mode = STORE_MODE_UPGRADES;
+
+			if (((keydownlast(KEY_PRGM_LEFT) && !keydownhold(KEY_PRGM_LEFT)) || key == KEY_PRGM_LEFT) && store_mode == STORE_MODE_UPGRADES)
+				store_mode = STORE_MODE_BUILDINGS;
 
 			if (keydownlast(KEY_PRGM_SHIFT) && !keydownhold(KEY_PRGM_SHIFT)) {
 				scale_w = 112;
