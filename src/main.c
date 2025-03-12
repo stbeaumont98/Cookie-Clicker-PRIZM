@@ -94,7 +94,7 @@ void display_msg(const struct Message msg) {
 	
 	if (has_header) {
 		draw_line(box_x + 5, box_y + 22, box_x + width + 3, box_y + 22, rgb_color(100, 100, 100), 0);
-		disp_string(box_x + 5, box_y + 26, msg.body, rgb_color(169, 169, 169));
+		small_disp_string(box_x + 5, box_y + 26, msg.body, rgb_color(169, 169, 169));
 	}
 }
 
@@ -242,6 +242,9 @@ int main() {
 						mode = MODE_DEFAULT;
 				break;
 			case MODE_UPGRADES:
+
+				// upgrades store
+
 				fill_scr(0x0000);
 				
 				copy_sprite_scaled(panel_horizontal, 0, 32, 99, 8, 198, 16, false, 0);
@@ -250,14 +253,15 @@ int main() {
 				copy_sprite_scaled(panel_vertical, 368, 0, 8, 108, 16, 216, false, 0);
 				
 				disp_string(172, 10, "Store", 0xffff);
+				small_disp_string(18, 37, "UPGRADES", 0xf6d7);
 
 				for (int i = 0; i < 4; i++) {
 					char name[0x80];
 					strcpy(name, upgrades[i + sel_offset].name);
 					char desc[0xff];
 					strcpy(desc, upgrades[i + sel_offset].description);
-					disp_string(21, 54 + i * 42, name, upgrades[i + sel_offset].unlocked ? 0xffff : 0x4208);
-					small_disp_string(21, 70 + i * 42, desc, upgrades[i + sel_offset].unlocked ? 0x8410 : 0x4208);
+					disp_string(21, 54 + i * 42, upgrades[i + sel_offset].unlocked ? name : "???", upgrades[i + sel_offset].unlocked ? 0xffff : 0x4208);
+					small_disp_string(21, 70 + i * 42, upgrades[i + sel_offset].unlocked ? desc : "???", upgrades[i + sel_offset].unlocked ? 0x8410 : 0x4208);
 					if (upgrades[i + sel_offset].unlocked) {
 					char *price_buf = get_display_val(upgrades[i + sel_offset].price, false, false);
 						copy_sprite_masked(money, 348 - text_width(price_buf), 53 + i * 42, 14, 14, COLOR_RED);
@@ -292,6 +296,7 @@ int main() {
 				fill_area(180, 0, 204, 32, 0x0000);
 
 				disp_string(262, 10, "Store", 0xffff);
+				small_disp_string(182, 37, "BUILDINGS", 0xf6d7);
 
 				int store_size = (data.buildings_unlocked < 4) ? data.buildings_unlocked : 4;
 
@@ -341,8 +346,10 @@ int main() {
 
 				// end store code
 
-				if (((keydownlast(KEY_PRGM_RIGHT) && !keydownhold(KEY_PRGM_RIGHT)) || key == KEY_PRGM_RIGHT) && mode == MODE_DEFAULT)
+				if (((keydownlast(KEY_PRGM_RIGHT) && !keydownhold(KEY_PRGM_RIGHT)) || key == KEY_PRGM_RIGHT) && mode == MODE_DEFAULT) {
+					unlock_upgrades(data, upgrades);
 					mode = MODE_UPGRADES;
+				}
 
 				if (keydownlast(KEY_PRGM_SHIFT) && !keydownhold(KEY_PRGM_SHIFT)) {
 					scale_w = 112;
@@ -543,8 +550,11 @@ int main() {
 				reset_gold(&gold);
 		}
 
-		if (keydownlast(KEY_PRGM_VARS) && !keydownhold(KEY_PRGM_VARS))
+		if ((keydownlast(KEY_PRGM_VARS) && !keydownhold(KEY_PRGM_VARS)) || key == KEY_PRGM_VARS)
 			mode = mode == MODE_STATS ? MODE_DEFAULT : MODE_STATS;
+
+		if (key == KEY_PRGM_7)
+			set_message(&msg, "Test", "This is a test message", 6);
 
 		if (one_second) {
 			data.cookies += current_cps;
