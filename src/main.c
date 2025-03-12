@@ -18,9 +18,9 @@
 #include "convert.h"
 #include "upgrades.h"
 
-#define MODE_DEFAULT 0
-#define MODE_UPGRADES 1
-#define MODE_STATS 2
+#define SCREEN_DEFAULT 0
+#define SCREEN_UPGRADES 1
+#define SCREEN_STATS 2
 
 static const double MAX_FRENZY = 77.;
 static const double MAX_CLICK_FRENZY = 13.;
@@ -137,7 +137,7 @@ int main() {
 	struct GoldenData gold;
 
 	struct CookieData data;
-	load_game(&data, &gold);
+	load_game(&data, &gold, upgrades);
 
 	int f_buttons[6] = {KEY_PRGM_F1, KEY_PRGM_F2, KEY_PRGM_F3, KEY_PRGM_F4, KEY_PRGM_F5, KEY_PRGM_F6};
 
@@ -164,7 +164,7 @@ int main() {
 	while (1) {
         int key = PRGM_GetKey();
         if (key == KEY_PRGM_MENU) {
-			save_game(data, gold);
+			save_game(data, gold, upgrades);
 			GetKey(&key);
 			free(msg.header);
 			free(msg.body);
@@ -183,7 +183,7 @@ int main() {
 		current_cps = (raw_cps * gold.cps_multiplier) + (raw_cps * gold.cps_multiplier * gold.boost_multiplier);
 
 		switch (mode) {
-			case MODE_STATS:
+			case SCREEN_STATS:
 				fill_scr(0x0000);
 				draw_line(148, 22, 236, 22, rgb_color(100, 100, 100), 0);
 				disp_string(150, 29, "STATISTICS", 0xFFFF);
@@ -260,9 +260,9 @@ int main() {
 				free(tmp);
 
 				if ((keydownlast(KEY_PRGM_EXIT) && !keydownhold(KEY_PRGM_EXIT)) || key == KEY_PRGM_EXIT)
-						mode = MODE_DEFAULT;
+						mode = SCREEN_DEFAULT;
 				break;
-			case MODE_UPGRADES:
+			case SCREEN_UPGRADES:
 
 				// upgrades store
 
@@ -297,8 +297,8 @@ int main() {
 
 				draw_rect(17, 49 + u_sel * 42, 349, 39, 0xff80, 1);
 				
-				if (((keydownlast(KEY_PRGM_LEFT) && !keydownhold(KEY_PRGM_LEFT)) || key == KEY_PRGM_LEFT) && mode == MODE_UPGRADES)
-					mode = MODE_DEFAULT;
+				if (((keydownlast(KEY_PRGM_LEFT) && !keydownhold(KEY_PRGM_LEFT)) || key == KEY_PRGM_LEFT) && mode == SCREEN_UPGRADES)
+					mode = SCREEN_DEFAULT;
 
 				if (((keydownlast(KEY_PRGM_DOWN) && !keydownhold(KEY_PRGM_DOWN)) || key == KEY_PRGM_DOWN) && u_sel < 3) {
 					u_sel++;
@@ -376,9 +376,9 @@ int main() {
 
 				// end store code
 
-				if (((keydownlast(KEY_PRGM_RIGHT) && !keydownhold(KEY_PRGM_RIGHT)) || key == KEY_PRGM_RIGHT) && mode == MODE_DEFAULT) {
+				if (((keydownlast(KEY_PRGM_RIGHT) && !keydownhold(KEY_PRGM_RIGHT)) || key == KEY_PRGM_RIGHT) && mode == SCREEN_DEFAULT) {
 					unlock_upgrades(data, upgrades);
-					mode = MODE_UPGRADES;
+					mode = SCREEN_UPGRADES;
 				}
 
 				if ((keydownlast(KEY_PRGM_SHIFT) && !keydownhold(KEY_PRGM_SHIFT)) || key == KEY_PRGM_SHIFT) {
@@ -568,7 +568,7 @@ int main() {
 		copy_sprite_scaled(arrow[mode], mode ? 20 : 374, 11, 3, 5, 6, 10, false, 0);
 		
 		if (gold.time <= 13) {
-			if (mode != MODE_STATS)
+			if (mode != SCREEN_STATS)
 				copy_sprite_scaled(gold_cookie, 4 + gold.x * 66 + (23 - (gold.scale / 2)), gold.y + (23 - (gold.scale / 2)) , 23, 23, gold.scale, gold.scale, false, 0);
 
 			if (gold.time > 0 && gold.scale < 46)
@@ -581,7 +581,7 @@ int main() {
 		}
 
 		if ((keydownlast(KEY_PRGM_VARS) && !keydownhold(KEY_PRGM_VARS)) || key == KEY_PRGM_VARS)
-			mode = mode == MODE_STATS ? MODE_DEFAULT : MODE_STATS;
+			mode = mode == SCREEN_STATS ? SCREEN_DEFAULT : SCREEN_STATS;
 
 		if (key == KEY_PRGM_7)
 			set_message(&msg, "Test", "This is a test message", 6);
