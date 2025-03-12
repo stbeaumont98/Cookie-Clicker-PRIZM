@@ -131,6 +131,8 @@ int main() {
 	struct CookieData data;
 	load_game(&data, &gold);
 
+	data.cpc = 1;
+
 	int f_buttons[6] = {KEY_PRGM_F1, KEY_PRGM_F2, KEY_PRGM_F3, KEY_PRGM_F4, KEY_PRGM_F5, KEY_PRGM_F6};
 
 	struct Message msg;
@@ -168,26 +170,26 @@ int main() {
 		switch (mode) {
 			case MODE_STATS:
 				fill_scr(0x0000);
-				draw_line(148, 23, 236, 23, rgb_color(100, 100, 100), 0);
-				disp_string(150, 30, "STATISTICS", 0xFFFF);
-				draw_line(148, 47, 236, 47, rgb_color(100, 100, 100), 0);
+				draw_line(148, 22, 236, 22, rgb_color(100, 100, 100), 0);
+				disp_string(150, 29, "STATISTICS", 0xFFFF);
+				draw_line(148, 46, 236, 46, rgb_color(100, 100, 100), 0);
 
 				copy_sprite_scaled(panel_horizontal, 0, 0, 99, 8, 198, 16, false, 0);
 				copy_sprite_scaled(panel_horizontal, 198, 0, 99, 8, 198, 16, false, 0);
 				copy_sprite_scaled(panel_vertical, 0, 0, 8, 108, 16, 216, false, 0);
 				copy_sprite_scaled(panel_vertical, 368, 0, 8, 108, 16, 216, false, 0);
 				
-				disp_string(21, 57, "Cookies in bank:\nCookies baked (all time):\nBuildings owned:\nCookies per second:\nRaw cookies per second:\nCookie clicks:\nHand-made cookies:\nGolden cookie clicks:", rgb_color(150, 150, 150));
+				disp_string(21, 54, "Cookies in bank:\nCookies baked (all time):\nBuildings owned:\nCookies per second:\nRaw cookies per second:\nCookies per click:\nCookie clicks:\nHand-made cookies:\nGolden cookie clicks:", rgb_color(150, 150, 150));
 				
-				copy_sprite_masked(money, 152, 57, 14, 14, COLOR_RED);
-				copy_sprite_masked(money, 214, 75, 14, 14, COLOR_RED);
+				copy_sprite_masked(money, 152, 54, 14, 14, COLOR_RED);
+				copy_sprite_masked(money, 214, 72, 14, 14, COLOR_RED);
 
 				char *tmp = get_display_val(data.cookies, false, false);
 				if (text_width(tmp) > 197) {
 					free(tmp);
 					tmp = get_display_val(data.cookies, false, true);
 				}
-				disp_string(170, 57, tmp, 0xFFFF);
+				disp_string(170, 54, tmp, 0xFFFF);
 				free(tmp);
 
 				tmp = get_display_val(data.cookies_all_time, false, false);
@@ -195,7 +197,7 @@ int main() {
 					free(tmp);
 					tmp = get_display_val(data.cookies_all_time, false, true);
 				}
-				disp_string(232, 75, tmp, 0xFFFF);
+				disp_string(232, 72, tmp, 0xFFFF);
 				free(tmp);
 
 				int num_buildings = 0;
@@ -203,7 +205,7 @@ int main() {
 					num_buildings += data.buildings[i].owned;
 
 				tmp = disp_comma(num_buildings);
-				disp_string(156, 93, tmp, 0xFFFF);
+				disp_string(156, 90, tmp, 0xFFFF);
 				free(tmp);
 
 				tmp = get_display_val(current_cps, true, false);
@@ -211,7 +213,7 @@ int main() {
 					free(tmp);
 					tmp = get_display_val(current_cps, true, true);
 				}
-				disp_string(177, 111, tmp, 0xFFFF);
+				disp_string(177, 108, tmp, 0xFFFF);
 				free(tmp);
 				
 				tmp = get_display_val(data.cps, true, false);
@@ -219,11 +221,15 @@ int main() {
 					free(tmp);
 					tmp = get_display_val(data.cps, true, true);
 				}
-				disp_string(213, 129, tmp, 0xFFFF);
+				disp_string(213, 126, tmp, 0xFFFF);
+				free(tmp);
+
+				tmp = get_display_val(data.cpc * gold.click_multiplier, true, true);
+				disp_string(160, 144, tmp, 0xFFFF);
 				free(tmp);
 
 				tmp = get_display_val(data.click_count, false, false);
-				disp_string(130, 147, tmp, 0xFFFF);
+				disp_string(130, 162, tmp, 0xFFFF);
 				free(tmp);
 
 				tmp = get_display_val(data.handmade_cookies, false, false);
@@ -231,11 +237,11 @@ int main() {
 					free(tmp);
 					tmp = get_display_val(data.handmade_cookies, false, true);
 				}
-				disp_string(180, 165, tmp, 0xFFFF);
+				disp_string(180, 180, tmp, 0xFFFF);
 				free(tmp);
 
 				tmp = get_display_val(data.gold_click_count, false, false);
-				disp_string(185, 183, tmp, 0xFFFF);
+				disp_string(185, 198, tmp, 0xFFFF);
 				free(tmp);
 
 				if (keydownlast(KEY_PRGM_EXIT) && !keydownhold(KEY_PRGM_EXIT))
@@ -351,12 +357,12 @@ int main() {
 					mode = MODE_UPGRADES;
 				}
 
-				if (keydownlast(KEY_PRGM_SHIFT) && !keydownhold(KEY_PRGM_SHIFT)) {
+				if ((keydownlast(KEY_PRGM_SHIFT) && !keydownhold(KEY_PRGM_SHIFT)) || key == KEY_PRGM_SHIFT) {
 					scale_w = 112;
 					scale_h = 114;
-					data.cookies += gold.click_multiplier;
-					data.cookies_all_time += gold.click_multiplier;
-					data.handmade_cookies += gold.click_multiplier;
+					data.cookies += data.cpc * gold.click_multiplier;
+					data.cookies_all_time += data.cpc * gold.click_multiplier;
+					data.handmade_cookies += data.cpc * gold.click_multiplier;
 					data.click_count++;
 				}
 

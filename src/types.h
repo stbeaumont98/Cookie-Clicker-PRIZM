@@ -37,7 +37,7 @@ struct Upgrade {
 	bool bought;
 	char *name;
 	char *description;
-	double multiplier;
+	double modifier;
 };
 
 struct GoldenData {
@@ -58,7 +58,8 @@ struct CookieData {
 	double cookies_all_time;
 	double cookies;
 	double handmade_cookies;
-	double cps;
+	double cps;		// cookies per second
+	double cpc;		// cookies per click
 	struct Building buildings[20];
 	int16_t buildings_unlocked;
 	uint32_t click_count;
