@@ -8,37 +8,48 @@ void unlock_upgrades(struct CookieData data, struct Upgrade *upgrades) {
         upgrades[1].unlocked = true;
     }
     
-    if (data.buildings[0].owned >= 10)
+    // cursor upgrades
+    if (data.buildings[BUILDING_CURSOR].owned >= 10)
         upgrades[2].unlocked = true;
-    
-    if (data.buildings[0].owned >= 25)
+    if (data.buildings[BUILDING_CURSOR].owned >= 25)
         upgrades[3].unlocked = true;
-
-    if (data.buildings[0].owned >= 50)
+    if (data.buildings[BUILDING_CURSOR].owned >= 50)
         upgrades[4].unlocked = true;
-    
-    if (data.buildings[0].owned >= 100)
+    if (data.buildings[BUILDING_CURSOR].owned >= 100)
         upgrades[5].unlocked = true;
-    
-    if (data.buildings[0].owned >= 150)
+    if (data.buildings[BUILDING_CURSOR].owned >= 150)
         upgrades[6].unlocked = true;
-
-    if (data.buildings[1].owned >= 1)
+    if (data.buildings[BUILDING_CURSOR].owned >= 200)
+        upgrades[43].unlocked = true;
+    if (data.buildings[BUILDING_CURSOR].owned >= 250)
+        upgrades[82].unlocked = true;
+    if (data.buildings[BUILDING_CURSOR].owned >= 300)
+        upgrades[109].unlocked = true;
+    if (data.buildings[BUILDING_CURSOR].owned >= 350)
+        upgrades[188].unlocked = true;
+    if (data.buildings[BUILDING_CURSOR].owned >= 400)
+        upgrades[189].unlocked = true;
+    if (data.buildings[BUILDING_CURSOR].owned >= 450)
+        upgrades[660].unlocked = true;
+    if (data.buildings[BUILDING_CURSOR].owned >= 500)
+        upgrades[764].unlocked = true;
+    if (data.buildings[BUILDING_CURSOR].owned >= 550)
+        upgrades[873].unlocked = true;
+        
+    // grandma upgrades
+    if (data.buildings[BUILDING_GRANDMA].owned >= 1)
         upgrades[7].unlocked = true;
-
-    if (data.buildings[1].owned >= 5)
+    if (data.buildings[BUILDING_GRANDMA].owned >= 5)
         upgrades[8].unlocked = true;
-    
-    if (data.buildings[1].owned >= 25)
+    if (data.buildings[BUILDING_GRANDMA].owned >= 25)
         upgrades[9].unlocked = true;
 
-    if (data.buildings[2].owned >= 1)
+    // farm upgrades
+    if (data.buildings[BUILDING_FARM].owned >= 1)
         upgrades[10].unlocked = true;
-
-    if (data.buildings[2].owned >= 5)
+    if (data.buildings[BUILDING_FARM].owned >= 5)
         upgrades[11].unlocked = true;
-
-    if (data.buildings[2].owned >= 25)
+    if (data.buildings[BUILDING_FARM].owned >= 25)
         upgrades[12].unlocked = true;
 }
 
