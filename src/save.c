@@ -257,7 +257,6 @@ void load_game(struct CookieData *data, struct GoldenData *gold) {
 		data->cookies_all_time = 0;
 		data->cookies = 0;
 		data->handmade_cookies = 0;
-		data->cps = 0;
 		data->click_count = 0;
 		data->gold_click_count = 0;
 		gold->frenzy_time = 0;
@@ -266,6 +265,10 @@ void load_game(struct CookieData *data, struct GoldenData *gold) {
 		gold->click_multiplier = 1;
 		gold->boost_time = 0;
 		gold->boost_multiplier = 0;
+		for (i = 0; i < 20; i ++) {
+			data->buildings[i].multiplier = 1;
+			data->buildings[i].modifier = 0;
+		}
 		return;
 	}
 	
@@ -278,7 +281,6 @@ void load_game(struct CookieData *data, struct GoldenData *gold) {
 	for (i = 0; i < 20; i++) {
 
 		data->buildings[i].owned = (int16_t) strtod(strtok(NULL, "\n"), NULL);
-		data->cps += data->buildings[i].owned * base_cps[i];
 
 		for (j = 0; j < data->buildings[i].owned; j++)
 			data->buildings[i].price += (data->buildings[i].price * .15);
@@ -293,6 +295,9 @@ void load_game(struct CookieData *data, struct GoldenData *gold) {
 				data->buildings_unlocked++;
 			}
 		}
+
+		data->buildings[i].multiplier = 1;
+		data->buildings[i].modifier = 0;
 	}
 
 	char *clicked = strtok(NULL, "\n");

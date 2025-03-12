@@ -94,7 +94,7 @@ void display_msg(const struct Message msg) {
 	
 	if (has_header) {
 		draw_line(box_x + 5, box_y + 22, box_x + width + 3, box_y + 22, rgb_color(100, 100, 100), 0);
-		small_disp_string(box_x + 5, box_y + 26, msg.body, rgb_color(169, 169, 169));
+		disp_string(box_x + 5, box_y + 26, msg.body, rgb_color(169, 169, 169));
 	}
 }
 
@@ -119,6 +119,14 @@ void draw_store_tile(uint16_t x, uint8_t y) {
 	fill_area(x, y + 40, 204, 2, 0x39c5);
 }
 
+double get_cps(struct CookieData data) {
+	double raw_cps = 0;
+	for (int i = 0; i < 20; i++) {
+		raw_cps += (base_cps[i] * data.buildings[i].owned) * data.buildings[i].multiplier + data.buildings[i].modifier;
+	}
+	return raw_cps;
+}
+
 int main() {
     Bdisp_EnableColor(1);
 	srandom(RTC_GetTicks());
@@ -131,8 +139,6 @@ int main() {
 	struct CookieData data;
 	load_game(&data, &gold);
 
-	data.cpc = 1;
-
 	int f_buttons[6] = {KEY_PRGM_F1, KEY_PRGM_F2, KEY_PRGM_F3, KEY_PRGM_F4, KEY_PRGM_F5, KEY_PRGM_F6};
 
 	struct Message msg;
@@ -142,12 +148,18 @@ int main() {
 	
 	int scale_w = 124, scale_h = 126;
 	
-	int sel = 0;
-	int sel_offset = 0;
+	int b_sel = 0;
+	int b_sel_offset = 0;
+
+	int u_sel = 0;
+	int u_sel_offset = 0;
 
 	int mode = 0;
 
-	double current_cps = data.cps;
+	double raw_cps = get_cps(data);
+	double current_cps = (raw_cps * gold.cps_multiplier) + (raw_cps * gold.cps_multiplier * gold.boost_multiplier);
+
+	double cpc = data.buildings[BUILDING_CURSOR].multiplier + data.buildings[BUILDING_CURSOR].modifier;
 
 	while (1) {
         int key = PRGM_GetKey();
@@ -165,7 +177,10 @@ int main() {
 
 		keyupdate();
 
-		current_cps = (data.cps * gold.cps_multiplier) + (data.cps * gold.cps_multiplier * gold.boost_multiplier);
+		raw_cps = get_cps(data);
+		cpc = data.buildings[BUILDING_CURSOR].multiplier + data.buildings[BUILDING_CURSOR].modifier;
+
+		current_cps = (raw_cps * gold.cps_multiplier) + (raw_cps * gold.cps_multiplier * gold.boost_multiplier);
 
 		switch (mode) {
 			case MODE_STATS:
@@ -216,15 +231,15 @@ int main() {
 				disp_string(177, 108, tmp, 0xFFFF);
 				free(tmp);
 				
-				tmp = get_display_val(data.cps, true, false);
+				tmp = get_display_val(raw_cps, true, false);
 				if (text_width(tmp) > 154) {
 					free(tmp);
-					tmp = get_display_val(data.cps, true, true);
+					tmp = get_display_val(raw_cps, true, true);
 				}
 				disp_string(213, 126, tmp, 0xFFFF);
 				free(tmp);
 
-				tmp = get_display_val(data.cpc * gold.click_multiplier, true, true);
+				tmp = get_display_val(cpc * gold.click_multiplier, true, true);
 				disp_string(160, 144, tmp, 0xFFFF);
 				free(tmp);
 
@@ -244,7 +259,7 @@ int main() {
 				disp_string(185, 198, tmp, 0xFFFF);
 				free(tmp);
 
-				if (keydownlast(KEY_PRGM_EXIT) && !keydownhold(KEY_PRGM_EXIT))
+				if ((keydownlast(KEY_PRGM_EXIT) && !keydownhold(KEY_PRGM_EXIT)) || key == KEY_PRGM_EXIT)
 						mode = MODE_DEFAULT;
 				break;
 			case MODE_UPGRADES:
@@ -263,36 +278,43 @@ int main() {
 
 				for (int i = 0; i < 4; i++) {
 					char name[0x80];
-					strcpy(name, upgrades[i + sel_offset].name);
+					strcpy(name, upgrades[i + u_sel_offset].name);
 					char desc[0xff];
-					strcpy(desc, upgrades[i + sel_offset].description);
-					disp_string(21, 54 + i * 42, upgrades[i + sel_offset].unlocked ? name : "???", upgrades[i + sel_offset].unlocked ? 0xffff : 0x4208);
-					small_disp_string(21, 70 + i * 42, upgrades[i + sel_offset].unlocked ? desc : "???", upgrades[i + sel_offset].unlocked ? 0x8410 : 0x4208);
-					if (upgrades[i + sel_offset].unlocked) {
-					char *price_buf = get_display_val(upgrades[i + sel_offset].price, false, false);
+					strcpy(desc, upgrades[i + u_sel_offset].description);
+					disp_string(21, 54 + i * 42, upgrades[i + u_sel_offset].unlocked ? name : "???", upgrades[i + u_sel_offset].unlocked ? 0xffff : 0x4208);
+					small_disp_string(21, 70 + i * 42, upgrades[i + u_sel_offset].unlocked ? desc : "???", upgrades[i + u_sel_offset].unlocked ? 0x8410 : 0x4208);
+					if (upgrades[i + u_sel_offset].unlocked) {
+					char *price_buf = get_display_val(upgrades[i + u_sel_offset].price, false, false);
 						copy_sprite_masked(money, 348 - text_width(price_buf), 53 + i * 42, 14, 14, COLOR_RED);
-						disp_string(364 - text_width(price_buf), 54 + i * 42, price_buf, (data.cookies >= upgrades[i + sel_offset].price) ? 0x67ec : COLOR_RED);
+						disp_string(364 - text_width(price_buf), 54 + i * 42, price_buf, (data.cookies >= upgrades[i + u_sel_offset].price) ? 0x67ec : COLOR_RED);
 						free(price_buf);
 					} else {
 						copy_sprite_masked(lock, 353, 53 + i * 42, 10, 11, COLOR_RED);
 					}
 				}
 
-				draw_rect(17, 49 + sel * 42, 349, 39, 0xff80, 1);
+				draw_rect(17, 49 + u_sel * 42, 349, 39, 0xff80, 1);
 				
 				if (((keydownlast(KEY_PRGM_LEFT) && !keydownhold(KEY_PRGM_LEFT)) || key == KEY_PRGM_LEFT) && mode == MODE_UPGRADES)
 					mode = MODE_DEFAULT;
 
-				if (((keydownlast(KEY_PRGM_DOWN) && !keydownhold(KEY_PRGM_DOWN)) || key == KEY_PRGM_DOWN) && sel < 3) {
-					sel++;
-				} else if (((keydownlast(KEY_PRGM_DOWN) && !keydownhold(KEY_PRGM_DOWN)) || key == KEY_PRGM_DOWN) && sel == 3) {
-					sel_offset++;
+				if (((keydownlast(KEY_PRGM_DOWN) && !keydownhold(KEY_PRGM_DOWN)) || key == KEY_PRGM_DOWN) && u_sel < 3) {
+					u_sel++;
+				} else if (((keydownlast(KEY_PRGM_DOWN) && !keydownhold(KEY_PRGM_DOWN)) || key == KEY_PRGM_DOWN) && u_sel == 3) {
+					u_sel_offset++;
 				}
-				if (((keydownlast(KEY_PRGM_UP) && !keydownhold(KEY_PRGM_UP)) || key == KEY_PRGM_UP) && sel > 0) {
-					sel--;
-				} else if (((keydownlast(KEY_PRGM_UP) && !keydownhold(KEY_PRGM_UP)) || key == KEY_PRGM_UP) && sel == 0 && sel_offset > 0) {
-					sel_offset--;
+				if (((keydownlast(KEY_PRGM_UP) && !keydownhold(KEY_PRGM_UP)) || key == KEY_PRGM_UP) && u_sel > 0) {
+					u_sel--;
+				} else if (((keydownlast(KEY_PRGM_UP) && !keydownhold(KEY_PRGM_UP)) || key == KEY_PRGM_UP) && u_sel == 0 && u_sel_offset > 0) {
+					u_sel_offset--;
 				}
+
+				if (((keydownlast(KEY_PRGM_ALPHA) && !keydownhold(KEY_PRGM_ALPHA)) || key == KEY_PRGM_ALPHA) && data.cookies >= upgrades[u_sel + u_sel_offset].price && !upgrades[u_sel + u_sel_offset].owned) {
+					data.cookies -= upgrades[u_sel + u_sel_offset].price;
+					upgrades[u_sel + u_sel_offset].owned = true;
+					enable_upgrade(&data, u_sel + u_sel_offset);
+				}
+
 				break;
 			default:
 				draw_background();
@@ -308,46 +330,46 @@ int main() {
 
 				for (int i = 0; i < store_size; i++) {
 					draw_store_tile(180, 48 + i * 42);
-					copy_sprite_scaled(icons[i + sel_offset], 180, 48 + i * 42, 21, 21, 42, 42, data.buildings[i + sel_offset].hidden, 0x0000);
+					copy_sprite_scaled(icons[i + b_sel_offset], 180, 48 + i * 42, 21, 21, 42, 42, data.buildings[i + b_sel_offset].hidden, 0x0000);
 					copy_sprite_masked(money, 223, 70 + i * 42, 14, 14, COLOR_RED);
-					char *price_buf = get_display_val(data.buildings[i + sel_offset].price, false, false);
-					if ((text_width(price_buf) > 116 && data.buildings[i + sel_offset].owned >= 100) ||
-						(text_width(price_buf) > 121 && data.buildings[i + sel_offset].owned >= 10) ||
+					char *price_buf = get_display_val(data.buildings[i + b_sel_offset].price, false, false);
+					if ((text_width(price_buf) > 116 && data.buildings[i + b_sel_offset].owned >= 100) ||
+						(text_width(price_buf) > 121 && data.buildings[i + b_sel_offset].owned >= 10) ||
 						(text_width(price_buf) > 130)) {
 						free(price_buf);
-						price_buf = get_display_val(data.buildings[i + sel_offset].price, false, true);
+						price_buf = get_display_val(data.buildings[i + b_sel_offset].price, false, true);
 					}
-					disp_string(240, 70 + i * 42, price_buf, (data.cookies >= data.buildings[i + sel_offset].price) ? 0x67ec : COLOR_RED);
+					disp_string(240, 70 + i * 42, price_buf, (data.cookies >= data.buildings[i + b_sel_offset].price) ? 0x67ec : COLOR_RED);
 					free(price_buf);
 
 					char owned_buf[5];
-					itoa(data.buildings[i+sel_offset].owned, owned_buf, 10);
+					itoa(data.buildings[i+b_sel_offset].owned, owned_buf, 10);
 					disp_string(380 - text_width(owned_buf), 62 + i * 42, owned_buf, 0x0000);
 
 					char type[18];
-					if (!data.buildings[i + sel_offset].hidden)
-						strcpy(type, building_types[i + sel_offset]);
+					if (!data.buildings[i + b_sel_offset].hidden)
+						strcpy(type, building_types[i + b_sel_offset]);
 					else
 						strcpy(type, "???");
 					disp_string(223, 54 + i * 42, type, 0xffff);
 				}
 
-				draw_rect(181, 49 + sel * 42, 201, 39, 0xff80, 1);
+				draw_rect(181, 49 + b_sel * 42, 201, 39, 0xff80, 1);
 
-				if ((keydownlast(KEY_PRGM_DOWN) && !keydownhold(KEY_PRGM_DOWN)) && sel < store_size - 1) {
-					sel++;
-				} else if ((keydownlast(KEY_PRGM_DOWN) && !keydownhold(KEY_PRGM_DOWN)) && sel == 3 && data.buildings_unlocked > 4 && sel_offset < data.buildings_unlocked - 4) {
-					sel_offset++;
+				if (((keydownlast(KEY_PRGM_DOWN) && !keydownhold(KEY_PRGM_DOWN)) || key == KEY_PRGM_DOWN) && b_sel < store_size - 1) {
+					b_sel++;
+				} else if (((keydownlast(KEY_PRGM_DOWN) && !keydownhold(KEY_PRGM_DOWN)) || key == KEY_PRGM_DOWN) && b_sel == 3 && data.buildings_unlocked > 4 && b_sel_offset < data.buildings_unlocked - 4) {
+					b_sel_offset++;
 				}
-				if ((keydownlast(KEY_PRGM_UP) && !keydownhold(KEY_PRGM_UP)) && sel > 0) {
-					sel--;
-				} else if ((keydownlast(KEY_PRGM_UP) && !keydownhold(KEY_PRGM_UP)) && sel == 0 && sel_offset > 0) {
-					sel_offset--;
+				if (((keydownlast(KEY_PRGM_UP) && !keydownhold(KEY_PRGM_UP)) || key == KEY_PRGM_UP) && b_sel > 0) {
+					b_sel--;
+				} else if (((keydownlast(KEY_PRGM_UP) && !keydownhold(KEY_PRGM_UP)) || key == KEY_PRGM_UP) && b_sel == 0 && b_sel_offset > 0) {
+					b_sel_offset--;
 				}
-				if ((keydownlast(KEY_PRGM_ALPHA) && !keydownhold(KEY_PRGM_ALPHA)) && data.cookies >= data.buildings[sel + sel_offset].price) {
-					data.cookies -= data.buildings[sel + sel_offset].price;
-					data.buildings[sel + sel_offset].owned++;
-					data.buildings[sel + sel_offset].price += (data.buildings[sel + sel_offset].price * .15);
+				if (((keydownlast(KEY_PRGM_ALPHA) && !keydownhold(KEY_PRGM_ALPHA)) || key == KEY_PRGM_ALPHA) && data.cookies >= data.buildings[b_sel + b_sel_offset].price) {
+					data.cookies -= data.buildings[b_sel + b_sel_offset].price;
+					data.buildings[b_sel + b_sel_offset].owned++;
+					data.buildings[b_sel + b_sel_offset].price += (data.buildings[b_sel + b_sel_offset].price * .15);
 				}
 
 				// end store code
@@ -360,9 +382,9 @@ int main() {
 				if ((keydownlast(KEY_PRGM_SHIFT) && !keydownhold(KEY_PRGM_SHIFT)) || key == KEY_PRGM_SHIFT) {
 					scale_w = 112;
 					scale_h = 114;
-					data.cookies += data.cpc * gold.click_multiplier;
-					data.cookies_all_time += data.cpc * gold.click_multiplier;
-					data.handmade_cookies += data.cpc * gold.click_multiplier;
+					data.cookies += cpc * gold.click_multiplier;
+					data.cookies_all_time += cpc * gold.click_multiplier;
+					data.handmade_cookies += cpc * gold.click_multiplier;
 					data.click_count++;
 				}
 
@@ -380,7 +402,7 @@ int main() {
 					}
 				}
 
-				data.cps = tmp_cps;
+				raw_cps = tmp_cps;
 
 				if (key == 0) {
 					scale_w = 124;
@@ -416,11 +438,11 @@ int main() {
 
 				if (msg.time > 0) {
 					display_msg(msg);
-					if (keydownlast(KEY_PRGM_EXIT) && !keydownhold(KEY_PRGM_EXIT))
+					if ((keydownlast(KEY_PRGM_EXIT) && !keydownhold(KEY_PRGM_EXIT)) || key == KEY_PRGM_EXIT)
 						msg.time = 0;
 				}
 				
-				if ((keydownlast(f_buttons[gold.x]) && !keydownhold(f_buttons[gold.x])) && gold.time <= 13) {
+				if (((keydownlast(f_buttons[gold.x]) && !keydownhold(f_buttons[gold.x])) || key == f_buttons[gold.x]) && gold.time <= 13) {
 					data.gold_click_count++;
 					if (gold.effect > 0 && gold.effect <= 425) {
 						// Lucky!
@@ -471,7 +493,7 @@ int main() {
 							strcat(msg_buf, buildings[r_b]);
 							strcat(msg_buf, "are boosting");
 							strcat(msg_buf, strlen(buildings[r_b]) >= 15 ? "\n" : " ");
-							strcat(msg_buf, "your CpS!");
+							strcat(msg_buf, "your raw_cps!");
 							strcat(msg_buf, strlen(buildings[r_b]) >= 15 ? " " : "\n");
 							strcat(msg_buf, "Cookie production +");
 

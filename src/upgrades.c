@@ -41,3 +41,16 @@ void unlock_upgrades(struct CookieData data, struct Upgrade *upgrades) {
     if (data.buildings[2].owned >= 25)
         upgrades[12].unlocked = true;
 }
+
+void enable_upgrade(struct CookieData *data, int id) {
+    switch(upgrades[id].mode) {
+        case MODE_MULTIPLY:
+            data->buildings[upgrades[id].building].multiplier *= upgrades[id].modifier;
+            break;
+        case MODE_MODIFY:
+            data->buildings[upgrades[id].building].modifier *= upgrades[id].modifier;
+            break;
+        default:
+            break;
+    }
+}

@@ -5,6 +5,27 @@
 #include <stdbool.h>
 #include <fxcg/display.h>
 
+#define BUILDING_CURSOR 0
+#define BUILDING_GRANDMA 1
+#define BUILDING_FARM 2
+#define BUILDING_MINE 3
+#define BUILDING_FACTORY 4
+#define BUILDING_BANK 5
+#define BUILDING_TEMPLE 6
+#define BUILDING_WIZARD_TOWER 7
+#define BUILDING_SHIPMENT 8
+#define BUILDING_ALCHEMY_LAB 9
+#define BUILDING_PORTAL 10
+#define BUILDING_TIME_MACHINE 11
+#define BUILDING_ANTIMATTER_CONDENSER 12
+#define BUILDING_PRISM 13
+#define BUILDING_CHANCEMAKER 14
+#define BUILDING_FRACTAL_ENGINE 15
+#define BUILDING_JAVASCRIPT_CONSOLE 16
+#define BUILDING_IDLEVERSE 17
+#define BUILDING_CORTEX_BAKER 18
+#define BUILDING_YOU 19
+
 static const char *building_types[20] = {
 	"Cursor", "Grandma", "Farm", "Mine", "Factory", "Bank", "Temple",
 	"Wizard tower", "Shipment", "Alchemy lab", "Portal",
@@ -25,6 +46,7 @@ static const double base_cps[20] = {
 struct Building {
 	double price;
 	double multiplier;
+	double modifier;
 	int16_t owned;
 	bool hidden;
 	bool locked;
@@ -34,10 +56,12 @@ struct Building {
 struct Upgrade {
 	double price;
 	bool unlocked;
-	bool bought;
+	bool owned;
 	char *name;
 	char *description;
 	double modifier;
+	uint8_t mode;
+	uint8_t building;
 };
 
 struct GoldenData {
@@ -58,8 +82,6 @@ struct CookieData {
 	double cookies_all_time;
 	double cookies;
 	double handmade_cookies;
-	double cps;		// cookies per second
-	double cpc;		// cookies per click
 	struct Building buildings[20];
 	int16_t buildings_unlocked;
 	uint32_t click_count;
