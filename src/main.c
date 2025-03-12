@@ -281,16 +281,18 @@ int main() {
 					strcpy(name, upgrades[i + u_sel_offset].name);
 					char desc[0xff];
 					strcpy(desc, upgrades[i + u_sel_offset].description);
-					disp_string(21, 54 + i * 42, upgrades[i + u_sel_offset].unlocked ? name : "???", upgrades[i + u_sel_offset].unlocked ? 0xffff : 0x4208);
-					small_disp_string(21, 70 + i * 42, upgrades[i + u_sel_offset].unlocked ? desc : "???", upgrades[i + u_sel_offset].unlocked ? 0x8410 : 0x4208);
+					disp_string(21, 54 + i * 42, upgrades[i + u_sel_offset].unlocked ? name : "???", upgrades[i + u_sel_offset].unlocked ? (upgrades[i + u_sel_offset].owned ? 0x4208 : 0xffff) : 0x4208);
+					small_disp_string(21, 70 + i * 42, upgrades[i + u_sel_offset].unlocked ? desc : "???", upgrades[i + u_sel_offset].unlocked ? (upgrades[i + u_sel_offset].owned ? 0x4208 : 0x8410) : 0x4208);
 					if (upgrades[i + u_sel_offset].unlocked) {
-					char *price_buf = get_display_val(upgrades[i + u_sel_offset].price, false, false);
-						copy_sprite_masked(money, 348 - text_width(price_buf), 53 + i * 42, 14, 14, COLOR_RED);
-						disp_string(364 - text_width(price_buf), 54 + i * 42, price_buf, (data.cookies >= upgrades[i + u_sel_offset].price) ? 0x67ec : COLOR_RED);
-						free(price_buf);
-					} else {
+						if (!upgrades[i + u_sel_offset].owned) {
+							char *price_buf = get_display_val(upgrades[i + u_sel_offset].price, false, false);
+							copy_sprite_masked(money, 348 - text_width(price_buf), 53 + i * 42, 14, 14, COLOR_RED);
+							disp_string(364 - text_width(price_buf), 54 + i * 42, price_buf, (data.cookies >= upgrades[i + u_sel_offset].price) ? 0x67ec : COLOR_RED);
+							free(price_buf);
+						} else
+							copy_sprite_masked(check, 353, 53 + i * 42, 11, 10, COLOR_RED);
+					} else
 						copy_sprite_masked(lock, 353, 53 + i * 42, 10, 11, COLOR_RED);
-					}
 				}
 
 				draw_rect(17, 49 + u_sel * 42, 349, 39, 0xff80, 1);
