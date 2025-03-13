@@ -62,6 +62,8 @@ struct Upgrade {
 	double modifier;
 	uint8_t mode;
 	uint8_t building;
+	unsigned char *sprite;
+	color_t *palette;
 };
 
 struct GoldenData {
