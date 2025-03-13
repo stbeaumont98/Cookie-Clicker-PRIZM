@@ -281,8 +281,11 @@ int main() {
 					strcpy(name, upgrades[i + u_sel_offset].name);
 					char desc[0xff];
 					strcpy(desc, upgrades[i + u_sel_offset].description);
-					disp_string(21, 54 + i * 42, upgrades[i + u_sel_offset].unlocked ? name : "???", upgrades[i + u_sel_offset].unlocked ? (upgrades[i + u_sel_offset].owned ? 0x4208 : 0xffff) : 0x4208);
-					small_disp_string(21, 70 + i * 42, upgrades[i + u_sel_offset].unlocked ? desc : "???", upgrades[i + u_sel_offset].unlocked ? (upgrades[i + u_sel_offset].owned ? 0x4208 : 0x8410) : 0x4208);
+					copy_sprite_masked(upgrade_frame, 23, 55 + i * 42, 30, 30, COLOR_RED);
+					if (upgrades[i + u_sel_offset].sprite != NULL)
+						copy_sprite_4bit(upgrades[i + u_sel_offset].sprite, 26, 58 + i * 42, 24, 24, upgrades[i + u_sel_offset].palette);
+					disp_string(58, 54 + i * 42, upgrades[i + u_sel_offset].unlocked ? name : "???", upgrades[i + u_sel_offset].unlocked ? (upgrades[i + u_sel_offset].owned ? 0x4208 : 0xffff) : 0x4208);
+					small_disp_string(58, 70 + i * 42, upgrades[i + u_sel_offset].unlocked ? desc : "???", upgrades[i + u_sel_offset].unlocked ? (upgrades[i + u_sel_offset].owned ? 0x4208 : 0x8410) : 0x4208);
 					if (upgrades[i + u_sel_offset].unlocked) {
 						if (!upgrades[i + u_sel_offset].owned) {
 							char *price_buf = get_display_val(upgrades[i + u_sel_offset].price, false, false);
