@@ -278,8 +278,10 @@ void load_game(struct CookieData *data, struct GoldenData *gold) {
 			data->buildings[i].percent_cps = 0;
 		}
 		data->total_buildings = 0;
-		memset(data->upgrades, false, 300);
-		memset(data->upgrades_unlocked, true, 300);
+		for (i = 0; i < 300; i++) {
+			data->upgrades[i] = false;
+			data->upgrades_unlocked[i] = false;
+		}
 		gold->frenzy_time = 0;
 		gold->cps_multiplier = 1;
 		gold->click_frenzy_time = 0;
@@ -369,10 +371,19 @@ void load_game(struct CookieData *data, struct GoldenData *gold) {
 
 	gold->boost_multiplier = strtod(dec, NULL) * ten_pow(strtod(pow, NULL));
 
-	for (i = 0; i < 300; i++) {
-		data->upgrades[i] = owned[i] == '1';
-		if (owned[i] == '1')
-			enable_upgrade(data, i);
+	if (strlen(owned) != 300) {
+		for (i = 0; i < 300; i++) {
+			data->upgrades[i] = false;
+			data->upgrades_unlocked[i] = false;
+		}
+	} else {
+		for (i = 0; i < 300; i++) {
+			bool val = (owned[i] == '1');
+			data->upgrades[i] = val;
+			data->upgrades_unlocked[i] = val;
+			if (val)
+				enable_upgrade(data, i);
+		}
 	}
 
 	free(buf);
