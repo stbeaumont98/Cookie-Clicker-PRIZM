@@ -53,7 +53,7 @@ char *get_save_val(double val) {
 	return val_buf;
 }
 
-void save_game(const struct CookieData data, const struct GoldenData gold, const struct Upgrade upgrades[]) {
+void save_game(const struct CookieData data, const struct GoldenData gold) {
 	char *heading = "Saving...";
 	int i;
 
@@ -66,7 +66,7 @@ void save_game(const struct CookieData data, const struct GoldenData gold, const
     int h_file = Bfile_OpenFile_OS(p_file, 3, 0);
 
     if (h_file < 0) {
-        size_t size = 900;
+        size_t size = 0x200;
         if (Bfile_CreateEntry_OS(p_file, 1, &size) >= 0) {
             h_file = Bfile_OpenFile_OS(p_file, 3, 0);
             if (h_file < 0) {
@@ -81,7 +81,7 @@ void save_game(const struct CookieData data, const struct GoldenData gold, const
 	}
 	ProgressBar2((unsigned char *) heading, 1, 21);
 
-	char save_buf[900];
+	char save_buf[0x200];
 
 	char *tmp = get_save_val(data.cookies_all_time);
     strcpy(save_buf, tmp);
@@ -212,8 +212,8 @@ void save_game(const struct CookieData data, const struct GoldenData gold, const
 	ProgressBar2((unsigned char *) heading, 18, 21);
 
 	tmp = malloc(2);
-	for (i = 0; i < 716; i++) {
-		itoa(upgrades[i].owned, tmp, 10);
+	for (i = 0; i < 300; i++) {
+		itoa(data.upgrades[i], tmp, 10);
 		strcat(save_buf, tmp);
 	}
 	strcat(save_buf, "\n");
@@ -253,7 +253,7 @@ double ten_pow(int16_t n) {
 	return pow;
 }
 
-void load_game(struct CookieData *data, struct GoldenData *gold, struct Upgrade *upgrades) {
+void load_game(struct CookieData *data, struct GoldenData *gold) {
 	reset_buildings(data);
 	reset_gold(gold);
 
@@ -261,7 +261,7 @@ void load_game(struct CookieData *data, struct GoldenData *gold, struct Upgrade 
 
     int i, j;
     unsigned short p_file[sizeof(PATH) * 2];
-	char *buf = malloc(0xFF);
+	char *buf = malloc(0x400);
     Bfile_StrToName_ncpy(p_file, (unsigned char *) PATH, sizeof(PATH));
 
     int h_file = Bfile_OpenFile_OS(p_file, 3, 0);
@@ -272,28 +272,34 @@ void load_game(struct CookieData *data, struct GoldenData *gold, struct Upgrade 
 		data->handmade_cookies = 0;
 		data->click_count = 0;
 		data->gold_click_count = 0;
+		for (i = 0; i < 20; i ++) {
+			data->buildings[i].multiplier = 1;
+			data->buildings[i].modifier = 0;
+			data->buildings[i].percent_cps = 0;
+		}
+		data->total_buildings = 0;
+		memset(data->upgrades, false, 300);
+		memset(data->upgrades_unlocked, true, 300);
 		gold->frenzy_time = 0;
 		gold->cps_multiplier = 1;
 		gold->click_frenzy_time = 0;
 		gold->click_multiplier = 1;
 		gold->boost_time = 0;
 		gold->boost_multiplier = 0;
-		for (i = 0; i < 20; i ++) {
-			data->buildings[i].multiplier = 1;
-			data->buildings[i].modifier = 0;
-		}
 		return;
 	}
 	
-	Bfile_ReadFile_OS(h_file, buf, 0xFF, 0);
+	Bfile_ReadFile_OS(h_file, buf, 0x400, 0);
 
 	char *all_time = strtok(buf, "\n");
 	char *cookies = strtok(NULL, "\n");
 	char *handmade = strtok(NULL, "\n");
 
 	for (i = 0; i < 20; i++) {
+		uint16_t count = (int16_t) strtod(strtok(NULL, "\n"), NULL);
 
-		data->buildings[i].owned = (int16_t) strtod(strtok(NULL, "\n"), NULL);
+		data->buildings[i].owned = count;
+		data->total_buildings += count;
 
 		for (j = 0; j < data->buildings[i].owned; j++)
 			data->buildings[i].price += (data->buildings[i].price * .15);
@@ -311,6 +317,7 @@ void load_game(struct CookieData *data, struct GoldenData *gold, struct Upgrade 
 
 		data->buildings[i].multiplier = 1;
 		data->buildings[i].modifier = 0;
+		data->buildings[i].percent_cps = 0;
 	}
 
 	char *clicked = strtok(NULL, "\n");
@@ -362,8 +369,8 @@ void load_game(struct CookieData *data, struct GoldenData *gold, struct Upgrade 
 
 	gold->boost_multiplier = strtod(dec, NULL) * ten_pow(strtod(pow, NULL));
 
-	for (i = 0; i < 716; i++) {
-		upgrades[i].owned = owned[i] == '1';
+	for (i = 0; i < 300; i++) {
+		data->upgrades[i] = owned[i] == '1';
 		if (owned[i] == '1')
 			enable_upgrade(data, i);
 	}
