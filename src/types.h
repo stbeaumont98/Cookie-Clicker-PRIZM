@@ -47,6 +47,7 @@ struct Building {
 	double price;
 	double multiplier;
 	double modifier;
+	double percent_cps;
 	int16_t owned;
 	bool hidden;
 	bool locked;
@@ -55,15 +56,7 @@ struct Building {
 
 struct Upgrade {
 	double price;
-	bool unlocked;
-	bool owned;
 	char *name;
-	char *description;
-	double modifier;
-	uint8_t mode;
-	uint8_t building;
-	unsigned char *sprite;
-	color_t *palette;
 };
 
 struct GoldenData {
@@ -88,6 +81,9 @@ struct CookieData {
 	int16_t buildings_unlocked;
 	uint32_t click_count;
 	uint16_t gold_click_count;
+	uint16_t total_buildings;
+	bool upgrades[300];
+	bool upgrades_unlocked[300];
 };
 
 struct Message {
