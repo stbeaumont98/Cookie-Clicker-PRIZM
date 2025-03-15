@@ -121,10 +121,15 @@ void draw_store_tile(uint16_t x, uint8_t y) {
 
 double get_cps(struct CookieData data) {
 	double raw_cps = 0;
-	for (int i = 0; i < 20; i++) {
-		raw_cps += (base_cps[i] * data.buildings[i].owned) * data.buildings[i].multiplier + data.buildings[i].modifier;
-	}
+	int non_cursors = data.total_buildings - data.buildings[BUILDING_CURSOR].owned;
+	for (int i = 0; i < 20; i++)
+		raw_cps += ((base_cps[i] * data.buildings[i].owned) * data.buildings[i].multiplier) + (data.buildings[i].modifier * data.buildings[i].owned * (i == BUILDING_CURSOR ? non_cursors : 1));
 	return raw_cps;
+}
+
+double get_cpc(struct CookieData data, double cps) {
+	int non_cursors = data.total_buildings - data.buildings[BUILDING_CURSOR].owned;
+	return data.buildings[BUILDING_CURSOR].multiplier + (data.buildings[BUILDING_CURSOR].modifier * non_cursors) + (data.buildings[BUILDING_CURSOR].percent_cps * cps);
 }
 
 int main() {
@@ -137,7 +142,8 @@ int main() {
 	struct GoldenData gold;
 
 	struct CookieData data;
-	load_game(&data, &gold, upgrades);
+
+	load_game(&data, &gold);
 
 	int f_buttons[6] = {KEY_PRGM_F1, KEY_PRGM_F2, KEY_PRGM_F3, KEY_PRGM_F4, KEY_PRGM_F5, KEY_PRGM_F6};
 
@@ -159,12 +165,15 @@ int main() {
 	double raw_cps = get_cps(data);
 	double current_cps = (raw_cps * gold.cps_multiplier) + (raw_cps * gold.cps_multiplier * gold.boost_multiplier);
 
-	double cpc = data.buildings[BUILDING_CURSOR].multiplier + data.buildings[BUILDING_CURSOR].modifier;
+	double cpc = get_cpc(data, current_cps);
+
+	char *cookie_buf;
+	char *price_buf;
 
 	while (1) {
         int key = PRGM_GetKey();
         if (key == KEY_PRGM_MENU) {
-			save_game(data, gold, upgrades);
+			save_game(data, gold);
 			GetKey(&key);
 			free(msg.header);
 			free(msg.body);
@@ -178,9 +187,9 @@ int main() {
 		keyupdate();
 
 		raw_cps = get_cps(data);
-		cpc = data.buildings[BUILDING_CURSOR].multiplier + data.buildings[BUILDING_CURSOR].modifier;
-
 		current_cps = (raw_cps * gold.cps_multiplier) + (raw_cps * gold.cps_multiplier * gold.boost_multiplier);
+
+		cpc =  get_cpc(data, current_cps);
 
 		switch (mode) {
 			case SCREEN_STATS:
@@ -194,7 +203,15 @@ int main() {
 				copy_sprite_scaled(panel_vertical, 0, 0, 8, 108, 16, 216, false, 0);
 				copy_sprite_scaled(panel_vertical, 368, 0, 8, 108, 16, 216, false, 0);
 				
-				disp_string(21, 54, "Cookies in bank:\nCookies baked (all time):\nBuildings owned:\nCookies per second:\nRaw cookies per second:\nCookies per click:\nCookie clicks:\nHand-made cookies:\nGolden cookie clicks:", rgb_color(150, 150, 150));
+				disp_string(21, 54, "Cookies in bank:", rgb_color(150, 150, 150));
+				disp_string(21, 72, "Cookies baked (all time):", rgb_color(150, 150, 150));
+				disp_string(21, 90, "Buildings owned:", rgb_color(150, 150, 150));
+				disp_string(21, 108, "Cookies per second:", rgb_color(150, 150, 150));
+				disp_string(21, 126, "Raw cookies per second:", rgb_color(150, 150, 150));
+				disp_string(21, 144, "Cookies per click:", rgb_color(150, 150, 150));
+				disp_string(21, 162, "Cookie clicks:", rgb_color(150, 150, 150));
+				disp_string(21, 180, "Hand-made cookies:", rgb_color(150, 150, 150));
+				disp_string(21, 198, "Golden cookie clicks:", rgb_color(150, 150, 150));
 				
 				copy_sprite_masked(money, 152, 54, 14, 14, COLOR_RED);
 				copy_sprite_masked(money, 214, 72, 14, 14, COLOR_RED);
@@ -274,21 +291,61 @@ int main() {
 				copy_sprite_scaled(panel_vertical, 368, 0, 8, 108, 16, 216, false, 0);
 				
 				disp_string(172, 10, "Store", 0xffff);
-				small_disp_string(18, 37, "UPGRADES", 0xf6d7);
+				small_disp_string(18, 37, "UPGRADES", 0xffff, true);
+				small_disp_string(366 - small_text_width(building_types[(u_sel + u_sel_offset) / 15], true), 37, building_types[(u_sel + u_sel_offset) / 15], 0xffff, true);
+				small_disp_string(28, 5, "[OPTN]", 0xffff, true);
+		
+				copy_sprite_1bit(arrow[1], 20, 5, 6, 6, arrow_palette, 0xffff);
+
+				cookie_buf = get_display_val(data.cookies, false, false);
+				if (text_width(cookie_buf) > 162) {
+					free(cookie_buf);
+					cookie_buf = get_display_val(data.cookies, false, true);
+				}
+				small_disp_string(365 - small_text_width(cookie_buf, false), 4, cookie_buf, 0xffff, false);
+				free(cookie_buf);
+				
+				small_disp_string(365 - small_text_width("cookies", false), 12, "cookies", 0xffff, false);
 
 				for (int i = 0; i < 4; i++) {
-					char name[0x80];
-					strcpy(name, upgrades[i + u_sel_offset].name);
+					if (i + u_sel_offset > 300)
+						continue;
+					uint8_t building_i = (i + u_sel_offset) / 15;
 					char desc[0xff];
-					strcpy(desc, upgrades[i + u_sel_offset].description);
-					copy_sprite_masked(upgrade_frame, 23, 55 + i * 42, 30, 30, COLOR_RED);
-					if (upgrades[i + u_sel_offset].sprite != NULL)
-						copy_sprite_4bit(upgrades[i + u_sel_offset].sprite, 26, 58 + i * 42, 24, 24, upgrades[i + u_sel_offset].palette);
-					disp_string(58, 54 + i * 42, upgrades[i + u_sel_offset].unlocked ? name : "???", upgrades[i + u_sel_offset].unlocked ? (upgrades[i + u_sel_offset].owned ? 0x4208 : 0xffff) : 0x4208);
-					small_disp_string(58, 70 + i * 42, upgrades[i + u_sel_offset].unlocked ? desc : "???", upgrades[i + u_sel_offset].unlocked ? (upgrades[i + u_sel_offset].owned ? 0x4208 : 0x8410) : 0x4208);
-					if (upgrades[i + u_sel_offset].unlocked) {
-						if (!upgrades[i + u_sel_offset].owned) {
-							char *price_buf = get_display_val(upgrades[i + u_sel_offset].price, false, false);
+					if (building_i == BUILDING_CURSOR) {
+						switch (i + u_sel_offset) {
+							case 0:
+							case 1:
+							case 2:
+								strcpy(desc, "The mouse and cursors are twice as efficient.");
+								break;
+							case 3:
+								strcpy(desc, "The mouse and cursors gain +0.1 cookies for each non-cursor object\nowned.");
+								break;
+							case 4:
+								strcpy(desc, "Multiplies the gain from Thousand fingers by 5.");
+								break;
+							case 5:
+								strcpy(desc, "Multiplies the gain from Thousand fingers by 10.");
+								break;
+							default:
+								strcpy(desc, "Multiplies the gain from Thousand fingers by 20.");
+								break;
+						}
+					} else {
+						strcpy(desc, building_types[building_i]);
+						if (building_i < 19)
+							strcat(desc, "s");
+						strcat(desc, " are twice as efficient.");
+					}
+					// copy_sprite_masked(upgrade_frame, 23, 54 + i * 42, 30, 30, COLOR_RED);
+					// if (upgrades[i + u_sel_offset].sprite != NULL)
+					// 	copy_sprite_4bit(upgrades[i + u_sel_offset].sprite, 26, 57 + i * 42, 24, 24, upgrades[i + u_sel_offset].palette);
+					disp_string(23, (data.upgrades_unlocked[i + u_sel_offset] ? (text_height(upgrades[i + u_sel_offset].name) > 1 ? 53 : 55) : 56) + i * 42, data.upgrades_unlocked[i + u_sel_offset] ? upgrades[i + u_sel_offset].name : "???", data.upgrades_unlocked[i + u_sel_offset] ? (data.upgrades[i + u_sel_offset] ? 0x4208 : 0xffff) : 0x4208);
+					small_disp_string(23, (data.upgrades_unlocked[i + u_sel_offset] ? (text_height(upgrades[i + u_sel_offset].name) > 1 ? 79 : 70) : 71) + i * 42, data.upgrades_unlocked[i + u_sel_offset] ? desc : "???", data.upgrades_unlocked[i + u_sel_offset] ? (data.upgrades[i + u_sel_offset] ? 0x4208 : 0x8410) : 0x4208, false);
+					if (data.upgrades_unlocked[i + u_sel_offset]) {
+						if (!data.upgrades[i + u_sel_offset]) {
+							price_buf = get_display_val(upgrades[i + u_sel_offset].price, false, upgrades[i + u_sel_offset].price >= 1e36);
 							copy_sprite_masked(money, 348 - text_width(price_buf), 53 + i * 42, 14, 14, COLOR_RED);
 							disp_string(364 - text_width(price_buf), 54 + i * 42, price_buf, (data.cookies >= upgrades[i + u_sel_offset].price) ? 0x67ec : COLOR_RED);
 							free(price_buf);
@@ -300,12 +357,12 @@ int main() {
 
 				draw_rect(17, 49 + u_sel * 42, 349, 39, 0xff80, 1);
 				
-				if (((keydownlast(KEY_PRGM_LEFT) && !keydownhold(KEY_PRGM_LEFT)) || key == KEY_PRGM_LEFT) && mode == SCREEN_UPGRADES)
+				if (((keydownlast(KEY_PRGM_OPTN) && !keydownhold(KEY_PRGM_OPTN)) || key == KEY_PRGM_OPTN) && mode == SCREEN_UPGRADES)
 					mode = SCREEN_DEFAULT;
 
 				if (((keydownlast(KEY_PRGM_DOWN) && !keydownhold(KEY_PRGM_DOWN)) || key == KEY_PRGM_DOWN) && u_sel < 3) {
 					u_sel++;
-				} else if (((keydownlast(KEY_PRGM_DOWN) && !keydownhold(KEY_PRGM_DOWN)) || key == KEY_PRGM_DOWN) && u_sel == 3) {
+				} else if (((keydownlast(KEY_PRGM_DOWN) && !keydownhold(KEY_PRGM_DOWN)) || key == KEY_PRGM_DOWN) && u_sel == 3 && u_sel_offset < 300 - 4) {
 					u_sel_offset++;
 				}
 				if (((keydownlast(KEY_PRGM_UP) && !keydownhold(KEY_PRGM_UP)) || key == KEY_PRGM_UP) && u_sel > 0) {
@@ -314,9 +371,23 @@ int main() {
 					u_sel_offset--;
 				}
 
-				if (((keydownlast(KEY_PRGM_ALPHA) && !keydownhold(KEY_PRGM_ALPHA)) || key == KEY_PRGM_ALPHA) && data.cookies >= upgrades[u_sel + u_sel_offset].price && !upgrades[u_sel + u_sel_offset].owned) {
+				if (((keydownlast(KEY_PRGM_RIGHT) && !keydownhold(KEY_PRGM_RIGHT)) || key == KEY_PRGM_RIGHT) && u_sel_offset <= 300 - 15)
+					u_sel_offset += 15;
+				else if (((keydownlast(KEY_PRGM_RIGHT) && !keydownhold(KEY_PRGM_RIGHT)) || key == KEY_PRGM_RIGHT) && u_sel_offset > 300 - 15) {
+					u_sel = 3;
+					u_sel_offset = 300 - 4;
+				}
+
+				if (((keydownlast(KEY_PRGM_LEFT) && !keydownhold(KEY_PRGM_LEFT)) || key == KEY_PRGM_LEFT) && u_sel_offset >= 15)
+					u_sel_offset -= 15;
+				else if (((keydownlast(KEY_PRGM_LEFT) && !keydownhold(KEY_PRGM_LEFT)) || key == KEY_PRGM_LEFT) && u_sel_offset < 15) {
+					u_sel = 0;
+					u_sel_offset = 0;
+				}
+
+				if (((keydownlast(KEY_PRGM_ALPHA) && !keydownhold(KEY_PRGM_ALPHA)) || key == KEY_PRGM_ALPHA) && data.cookies >= upgrades[u_sel + u_sel_offset].price && !data.upgrades[u_sel + u_sel_offset]) {
 					data.cookies -= upgrades[u_sel + u_sel_offset].price;
-					upgrades[u_sel + u_sel_offset].owned = true;
+					data.upgrades[u_sel + u_sel_offset] = true;
 					enable_upgrade(&data, u_sel + u_sel_offset);
 				}
 
@@ -329,7 +400,10 @@ int main() {
 				fill_area(180, 0, 204, 32, 0x0000);
 
 				disp_string(262, 10, "Store", 0xffff);
-				small_disp_string(182, 37, "BUILDINGS", 0xf6d7);
+				small_disp_string(182, 37, "BUILDINGS", 0xffff, true);
+				small_disp_string(339, 5, "[OPTN]", 0xffff, true);
+		
+				copy_sprite_1bit(arrow[0], 374, 5, 6, 6, arrow_palette, 0xffff);
 
 				int store_size = (data.buildings_unlocked < 4) ? data.buildings_unlocked : 4;
 
@@ -337,7 +411,7 @@ int main() {
 					draw_store_tile(180, 48 + i * 42);
 					copy_sprite_scaled(icons[i + b_sel_offset], 180, 48 + i * 42, 21, 21, 42, 42, data.buildings[i + b_sel_offset].hidden, 0x0000);
 					copy_sprite_masked(money, 223, 70 + i * 42, 14, 14, COLOR_RED);
-					char *price_buf = get_display_val(data.buildings[i + b_sel_offset].price, false, false);
+					price_buf = get_display_val(data.buildings[i + b_sel_offset].price, false, false);
 					if ((text_width(price_buf) > 116 && data.buildings[i + b_sel_offset].owned >= 100) ||
 						(text_width(price_buf) > 121 && data.buildings[i + b_sel_offset].owned >= 10) ||
 						(text_width(price_buf) > 130)) {
@@ -361,6 +435,11 @@ int main() {
 
 				draw_rect(181, 49 + b_sel * 42, 201, 39, 0xff80, 1);
 
+				if (((keydownlast(KEY_PRGM_OPTN) && !keydownhold(KEY_PRGM_OPTN)) || key == KEY_PRGM_OPTN) && mode == SCREEN_DEFAULT) {
+					unlock_upgrades(&data);
+					mode = SCREEN_UPGRADES;
+				}
+
 				if (((keydownlast(KEY_PRGM_DOWN) && !keydownhold(KEY_PRGM_DOWN)) || key == KEY_PRGM_DOWN) && b_sel < store_size - 1) {
 					b_sel++;
 				} else if (((keydownlast(KEY_PRGM_DOWN) && !keydownhold(KEY_PRGM_DOWN)) || key == KEY_PRGM_DOWN) && b_sel == 3 && data.buildings_unlocked > 4 && b_sel_offset < data.buildings_unlocked - 4) {
@@ -375,14 +454,10 @@ int main() {
 					data.cookies -= data.buildings[b_sel + b_sel_offset].price;
 					data.buildings[b_sel + b_sel_offset].owned++;
 					data.buildings[b_sel + b_sel_offset].price += (data.buildings[b_sel + b_sel_offset].price * .15);
+					data.total_buildings++;
 				}
 
 				// end store code
-
-				if (((keydownlast(KEY_PRGM_RIGHT) && !keydownhold(KEY_PRGM_RIGHT)) || key == KEY_PRGM_RIGHT) && mode == SCREEN_DEFAULT) {
-					unlock_upgrades(data, upgrades);
-					mode = SCREEN_UPGRADES;
-				}
 
 				if ((keydownlast(KEY_PRGM_SHIFT) && !keydownhold(KEY_PRGM_SHIFT)) || key == KEY_PRGM_SHIFT) {
 					scale_w = 112;
@@ -429,7 +504,7 @@ int main() {
 				strcat(cps_buf, tmp);
 				free(tmp);
 
-				char *cookie_buf = get_display_val(data.cookies, false, false);
+				cookie_buf = get_display_val(data.cookies, false, false);
 				if (text_width(cookie_buf) > 162) {
 					free(cookie_buf);
 					cookie_buf = get_display_val(data.cookies, false, true);
@@ -440,104 +515,6 @@ int main() {
 				disp_string(53, 34, "cookies", 0xffff);
 
 				disp_string(((164 - text_width(cps_buf)) / 2) + 1, 51, cps_buf, 0xffff);
-
-				if (msg.time > 0) {
-					display_msg(msg);
-					if ((keydownlast(KEY_PRGM_EXIT) && !keydownhold(KEY_PRGM_EXIT)) || key == KEY_PRGM_EXIT)
-						msg.time = 0;
-				}
-				
-				if (((keydownlast(f_buttons[gold.x]) && !keydownhold(f_buttons[gold.x])) || key == f_buttons[gold.x]) && gold.time <= 13) {
-					data.gold_click_count++;
-					if (gold.effect > 0 && gold.effect <= 425) {
-						// Lucky!
-						double earned = (data.cookies >= current_cps * 6000) ?
-							(max(data.cookies * 0.15, current_cps * 900) + 13) :
-							(min(data.cookies * 0.15, current_cps * 900) + 13);
-						char msg_buf[30];
-						strcpy(msg_buf, "+");
-						char *tmp = get_display_val(earned, false, false);
-						strcat(msg_buf, tmp);
-						free(tmp);
-						strcat(msg_buf, " cookies!");
-						set_message(&msg, "Lucky!", msg_buf, 6);
-
-						data.cookies_all_time += earned;
-						data.cookies += earned;
-					} else if (gold.effect > 425 && gold.effect <= 850) {
-						// Frenzy
-						set_message(&msg, "Frenzy", "Cookie production x7 for 77 seconds!", 6);
-						gold.cps_multiplier = 7;
-						gold.frenzy_time = 77;
-					} else if (gold.effect > 850 && gold.effect <= 893) {
-						// Click Frenzy
-						set_message(&msg, "Click Frenzy", "Clicking power x777 for 13 seconds!", 6);
-						gold.click_multiplier = 777;
-						gold.click_frenzy_time = 13;
-					} else if (gold.effect > 893 && gold.effect <= 996) {
-						// Building special
-						int cnt = 0;
-						for (int i = 0; i < 20; i++) {
-							if (data.buildings[i].owned >= 10)
-								cnt++;
-						}
-						if (cnt > 0) {
-							int r_b = random() % 20; 
-							while (data.buildings[r_b].owned < 10)
-								r_b = random() % 20;
-
-							char msg_buf[150];
-
-							strcpy(msg_buf, "Your ");
-
-							char * tmp = malloc(6);
-							itoa(data.buildings[r_b].owned, tmp, 10);
-							strcat(msg_buf, tmp);
-							free(tmp);
-
-							strcat(msg_buf, buildings[r_b]);
-							strcat(msg_buf, "are boosting");
-							strcat(msg_buf, strlen(buildings[r_b]) >= 15 ? "\n" : " ");
-							strcat(msg_buf, "your raw_cps!");
-							strcat(msg_buf, strlen(buildings[r_b]) >= 15 ? " " : "\n");
-							strcat(msg_buf, "Cookie production +");
-
-							tmp = malloc(6);
-							itoa((data.buildings[r_b].owned * 10), tmp, 10);
-							strcat(msg_buf, tmp);
-							free(tmp);
-
-							strcat(msg_buf, "% for");
-							strcat(msg_buf, strlen(buildings[r_b]) >= 15 ? "\n" : " ");
-							strcat(msg_buf, "30 seconds!");
-
-							set_message(&msg, building_specials[r_b], msg_buf, 6);
-
-							gold.boost_multiplier = data.buildings[r_b].owned / 10.0;
-							gold.boost_time = 30;
-						} else {
-							// Lucky!
-							double earned = (data.cookies >= current_cps * 6000) ?
-								(max(data.cookies * 0.15, current_cps * 900) + 13) :
-								(min(data.cookies * 0.15, current_cps * 900) + 13);
-							char msg_buf[30];
-							strcpy(msg_buf, "+");
-							char *tmp = get_display_val(earned, false, false);
-							strcat(msg_buf, tmp);
-							free(tmp);
-							strcat(msg_buf, " cookies!");
-							set_message(&msg, "Lucky!", msg_buf, 6);
-
-							data.cookies_all_time += earned;
-							data.cookies += earned;
-						}
-
-					} else if (gold.effect > 996) {
-						int rblab = random() % 39;
-						set_message(&msg, "", blab[rblab], 6);
-					}
-					reset_gold(&gold);
-				}
 				
 				if (gold.frenzy_time <= 0)
 					gold.cps_multiplier = 1;
@@ -567,8 +544,104 @@ int main() {
 						round2(164. * ((double) gold.boost_time / MAX_BOOST)), 3, 0xddeb);
 				break;
 		}
+
+		if (msg.time > 0) {
+			display_msg(msg);
+			if ((keydownlast(KEY_PRGM_EXIT) && !keydownhold(KEY_PRGM_EXIT)) || key == KEY_PRGM_EXIT)
+				msg.time = 0;
+		}
 		
-		copy_sprite_scaled(arrow[mode], mode ? 20 : 374, 11, 3, 5, 6, 10, false, 0);
+		if (((keydownlast(f_buttons[gold.x]) && !keydownhold(f_buttons[gold.x])) || key == f_buttons[gold.x]) && gold.time <= 13) {
+			data.gold_click_count++;
+			if (gold.effect > 0 && gold.effect <= 425) {
+				// Lucky!
+				double earned = (data.cookies >= current_cps * 6000) ?
+					(max(data.cookies * 0.15, current_cps * 900) + 13) :
+					(min(data.cookies * 0.15, current_cps * 900) + 13);
+				char msg_buf[30];
+				strcpy(msg_buf, "+");
+				char *tmp = get_display_val(earned, false, false);
+				strcat(msg_buf, tmp);
+				free(tmp);
+				strcat(msg_buf, " cookies!");
+				set_message(&msg, "Lucky!", msg_buf, 6);
+
+				data.cookies_all_time += earned;
+				data.cookies += earned;
+			} else if (gold.effect > 425 && gold.effect <= 850) {
+				// Frenzy
+				set_message(&msg, "Frenzy", "Cookie production x7 for 77 seconds!", 6);
+				gold.cps_multiplier = 7;
+				gold.frenzy_time = 77;
+			} else if (gold.effect > 850 && gold.effect <= 893) {
+				// Click Frenzy
+				set_message(&msg, "Click Frenzy", "Clicking power x777 for 13 seconds!", 6);
+				gold.click_multiplier = 777;
+				gold.click_frenzy_time = 13;
+			} else if (gold.effect > 893 && gold.effect <= 996) {
+				// Building special
+				int cnt = 0;
+				for (int i = 0; i < 20; i++) {
+					if (data.buildings[i].owned >= 10)
+						cnt++;
+				}
+				if (cnt > 0) {
+					int r_b = random() % 20; 
+					while (data.buildings[r_b].owned < 10)
+						r_b = random() % 20;
+
+					char msg_buf[150];
+
+					strcpy(msg_buf, "Your ");
+
+					char * tmp = malloc(6);
+					itoa(data.buildings[r_b].owned, tmp, 10);
+					strcat(msg_buf, tmp);
+					free(tmp);
+
+					strcat(msg_buf, buildings[r_b]);
+					strcat(msg_buf, "are boosting");
+					strcat(msg_buf, strlen(buildings[r_b]) >= 15 ? "\n" : " ");
+					strcat(msg_buf, "your raw_cps!");
+					strcat(msg_buf, strlen(buildings[r_b]) >= 15 ? " " : "\n");
+					strcat(msg_buf, "Cookie production +");
+
+					tmp = malloc(6);
+					itoa((data.buildings[r_b].owned * 10), tmp, 10);
+					strcat(msg_buf, tmp);
+					free(tmp);
+
+					strcat(msg_buf, "% for");
+					strcat(msg_buf, strlen(buildings[r_b]) >= 15 ? "\n" : " ");
+					strcat(msg_buf, "30 seconds!");
+
+					set_message(&msg, building_specials[r_b], msg_buf, 6);
+
+					gold.boost_multiplier = data.buildings[r_b].owned / 10.0;
+					gold.boost_time = 30;
+				} else {
+					// Lucky!
+					double earned = (data.cookies >= current_cps * 6000) ?
+						(max(data.cookies * 0.15, current_cps * 900) + 13) :
+						(min(data.cookies * 0.15, current_cps * 900) + 13);
+					char msg_buf[30];
+					strcpy(msg_buf, "+");
+					char *tmp = get_display_val(earned, false, false);
+					strcat(msg_buf, tmp);
+					free(tmp);
+					strcat(msg_buf, " cookies!");
+					set_message(&msg, "Lucky!", msg_buf, 6);
+
+					data.cookies_all_time += earned;
+					data.cookies += earned;
+				}
+
+			} else if (gold.effect > 996) {
+				int rblab = random() % 39;
+				set_message(&msg, "", blab[rblab], 6);
+			}
+			reset_gold(&gold);
+		}
 		
 		if (gold.time <= 13) {
 			if (mode != SCREEN_STATS)
