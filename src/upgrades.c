@@ -120,18 +120,4 @@ void enable_upgrade(struct CookieData *data, int id) {
     //     // multiply building cps by 2
     //     data->buildings[building_id].multiplier *= 2;
 
-    //         data->buildings[upgrades[id].building].multiplier *= upgrades[id].modifier;
-    //         break;
-    //     case MODE_ADD:
-    //         data->buildings[upgrades[id].building].modifier += upgrades[id].modifier;
-    //         break;
-    //     case MODE_MODIFY:
-    //         data->buildings[upgrades[id].building].modifier *= upgrades[id].modifier;
-    //         break;
-    //     case MODE_CPS_PERCENT:
-    //         data->buildings[upgrades[id].building].percent_cps += upgrades[id].modifier;
-    //         break;
-    //     default:
-    //         break;
-    // }
 }
