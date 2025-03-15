@@ -6,25 +6,28 @@
 
 #include "convert.h"
 
-const char *suffixes[20] = { " million", " billion", " trillion",
+const char *suffixes[25] = { " million", " billion", " trillion",
     " quadrillion", " quintillion", " sextillion", " septillion", " octillion",
     " nonillion", " decillion", " undecillion", " duodecillion", " tredecillion",
     " quattuordecillion", " quindecillion", " sexdecillion", " septendecillion",
-    " octodecillion", " novemdecillion", " vigintillion" };
+    " octodecillion", " novemdecillion", " vigintillion", " unvigintillion",
+	" duovigintillion", " trevigintillion", " quattuorvigintillion",
+	" quinvigintillion"};
 
-const char *suffixes_abrev[20] = { " mil.", " bil.", " tril.", " quad.",
+const char *suffixes_abrev[25] = { " mil.", " bil.", " tril.", " quad.",
     " quin.", " sext.", " sept.", " oct.", " non.", " dec.", " udc.", " ddc.",
-    " tdc.", " qadc.", " qidc.", " sxdc.", " spdc.", " ocdc.", " nodc.", " vg." };
+    " tdc.", " qadc.", " qidc.", " sxdc.", " spdc.", " ocdc.", " nodc.", " vg.",
+	" uvg.", " dvg.", " tvg.", " qavg.", " qivg." };
 
 char *get_display_val(double val, bool disp_dec, bool abrev) {
 	double disp_val = val;
 	char *val_buf = malloc(30);
-	char *suffix = malloc(15);
+	char *suffix = malloc(20);
 	int dec = 0;
 
 	if (val >= 1E6) {
 		disp_val *= 1E-6;
-		for (int i = 0; i < 20; i++) {
+		for (int i = 0; i < 25; i++) {
 			if (disp_val < 1000) {
 				strcpy(suffix, abrev ? suffixes_abrev[i] : suffixes[i]);
 				break;
