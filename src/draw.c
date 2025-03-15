@@ -314,7 +314,7 @@ void disp_string(unsigned x, unsigned y, const char* message, int color) {
                     y_offset = 11 - h;
                     break;
             } 
-            copy_sprite_1bit(charmap[(int) message[i]], x + x_offset, y + y_offset + (line * 18), w, h, charmap_palette, color);
+            copy_sprite_1bit(charmap[(int) message[i]], x + x_offset, y + y_offset + (line * 13), w, h, charmap_palette, color);
             x_offset += (message[i] == ' ') ? 5 : (w + (message[i] == 'Q' ? -1 : 1) + (message[i] == '(' || message[i] == ')' ? 1 : 0));
         }
         if (x + x_offset >= 384) {
@@ -357,30 +357,36 @@ int text_height(const char *msg) {
     int total = 1;
     for (int i = 0; i < strlen(msg); i++) {
         if (msg[i] == '\n')
-            total ++;
+            total++;
     }
     return total;
 }
 
 // small font
 
-void small_disp_string(unsigned x, unsigned y, const char* message, int color) {
+void small_disp_string(unsigned x, unsigned y, const char* message, int color, bool caps) {
     int l = strlen(message);
     int i;
     unsigned line = 0;
     int x_offset = 0;
     int y_offset = 0;
+    char c;
     for (i = 0; i < l; i++) {
-        int w = small_char_width[(int) message[i]];
-        int h = small_char_height[(int) message[i]];
-        if (message[i] == '\n') {
+        c = message[i] - ((caps && message[i] > 0x60 && message[i] < 0x7b) ? 0x20 : 0);
+        int w = small_char_width[(int) c];
+        int h = small_char_height[(int) c];
+        if (c == '\n') {
             x_offset = 0;
             ++line;
         }
-        else if (message[i] == '\t') {}
+        else if (c == '\t') {}
             //x_offset += 20;
         else {
-            switch (message[i]) {
+            switch (c) {
+                case '[':
+                case ']':
+                    y_offset = -1;
+                    break;
                 case '(':
                 case ')':
                 case 'j':
@@ -406,8 +412,8 @@ void small_disp_string(unsigned x, unsigned y, const char* message, int color) {
                     y_offset = 6 - h;
                     break;
             } 
-            copy_sprite_1bit(small_charmap[(int) message[i]], x + x_offset, y + y_offset + (line * 9), w, h, charmap_palette, color);
-            x_offset += (message[i] == ' ') ? 3 : (w + 1 + (message[i] == '(' || message[i] == ')' ? 1 : 0));
+            copy_sprite_1bit(small_charmap[(int) c], x + x_offset, y + y_offset + (line * 9), w, h, charmap_palette, color);
+            x_offset += (c == ' ') ? 3 : (w + 1 + (c == '(' || c == ')' ? 1 : 0));
         }
         if (x + x_offset >= 384) {
             x_offset = 0;
@@ -418,15 +424,17 @@ void small_disp_string(unsigned x, unsigned y, const char* message, int color) {
     }
 }
 
-int small_text_width(const char *msg) {
+int small_text_width(const char *msg, bool caps) {
     int total = 0, max_total = 0;
+    char c;
 	for (int i = 0; i < strlen(msg); i++) {
-        if (msg[i] == '\n') {
+        c = msg[i] - ((caps && msg[i] > 0x60 && msg[i] < 0x7b) ? 0x20 : 0);
+        if (c == '\n') {
             max_total = max(total, max_total);
             total = 0;
         } else {
-            int w = small_char_width[(int) msg[i]];
-            switch (msg[i]) {
+            int w = small_char_width[(int) c];
+            switch (c) {
                 case ' ':
                     total += 3;
                     break;
