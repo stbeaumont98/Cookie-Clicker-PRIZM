@@ -255,11 +255,19 @@ double ten_pow(int16_t n) {
 
 void load_game(struct CookieData *data, struct GoldenData *gold) {
 	reset_buildings(data);
+	gold->time_modifier = 1;
+	gold->effect_modifier = 1;
 	reset_gold(gold);
+
+    int i, j;
 
 	data->buildings_unlocked = 2;
 
-    int i, j;
+	for (i = 0; i < 318; i++) {
+		data->upgrades[i] = false;
+		data->upgrades_unlocked[i] = false;
+	}
+
     unsigned short p_file[sizeof(PATH) * 2];
 	char *buf = malloc(0x400);
     Bfile_StrToName_ncpy(p_file, (unsigned char *) PATH, sizeof(PATH));
@@ -278,10 +286,6 @@ void load_game(struct CookieData *data, struct GoldenData *gold) {
 			data->buildings[i].percent_cps = 0;
 		}
 		data->total_buildings = 0;
-		for (i = 0; i < 318; i++) {
-			data->upgrades[i] = false;
-			data->upgrades_unlocked[i] = false;
-		}
 		gold->frenzy_time = 0;
 		gold->cps_multiplier = 1;
 		gold->click_frenzy_time = 0;
@@ -371,18 +375,13 @@ void load_game(struct CookieData *data, struct GoldenData *gold) {
 
 	gold->boost_multiplier = strtod(dec, NULL) * ten_pow(strtod(pow, NULL));
 
-	if (strlen(upgrades) != 318) {
-		for (i = 0; i < 318; i++) {
-			data->upgrades[i] = false;
-			data->upgrades_unlocked[i] = false;
-		}
-	} else {
+	if (strlen(upgrades) == 318) {
 		for (i = 0; i < 318; i++) {
 			bool isowned = (upgrades[i] == '1');
 			data->upgrades[i] = isowned;
 			data->upgrades_unlocked[i] = isowned;
 			if (isowned)
-				enable_upgrade(data, i);
+				enable_upgrade(data, gold, i);
 		}
 	}
 

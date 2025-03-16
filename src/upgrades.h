@@ -386,6 +386,6 @@ static struct Upgrade upgrades[] = {
 };
 
 void unlock_upgrades(struct CookieData *data);
-void enable_upgrade(struct CookieData *data, int id);
+void enable_upgrade(struct CookieData *data, struct GoldenData *gold, int id);
 
 #endif

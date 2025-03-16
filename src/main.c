@@ -379,7 +379,7 @@ int main() {
 							strcat(desc, " are twice as efficient.");
 							break;
 					}
-					
+
 					// copy_sprite_masked(upgrade_frame, 23, 54 + i * 42, 30, 30, COLOR_RED);
 					// if (upgrades[i + u_sel_offset].sprite != NULL)
 					// 	copy_sprite_4bit(upgrades[i + u_sel_offset].sprite, 26, 57 + i * 42, 24, 24, upgrades[i + u_sel_offset].palette);
@@ -430,7 +430,7 @@ int main() {
 				if (((keydownlast(KEY_PRGM_ALPHA) && !keydownhold(KEY_PRGM_ALPHA)) || key == KEY_PRGM_ALPHA) && data.cookies >= upgrades[u_sel + u_sel_offset].price && !data.upgrades[u_sel + u_sel_offset] && data.upgrades_unlocked[u_sel + u_sel_offset]) {
 					data.cookies -= upgrades[u_sel + u_sel_offset].price;
 					data.upgrades[u_sel + u_sel_offset] = true;
-					enable_upgrade(&data, u_sel + u_sel_offset);
+					enable_upgrade(&data, &gold, u_sel + u_sel_offset);
 					unlock_upgrades(&data);
 				}
 
@@ -561,28 +561,28 @@ int main() {
 					gold.cps_multiplier = 1;
 				else
 					fill_area(0,
-						(((double) gold.frenzy_time / MAX_FRENZY) < ((double) gold.click_frenzy_time / MAX_CLICK_FRENZY) && ((double) gold.frenzy_time / MAX_FRENZY) > ((double) gold.boost_time / MAX_BOOST)) || 
-						(((double) gold.frenzy_time / MAX_FRENZY) < ((double) gold.boost_time / MAX_BOOST) && ((double) gold.frenzy_time / MAX_FRENZY) > ((double) gold.click_frenzy_time / MAX_CLICK_FRENZY)) ? 3 :
-						(((double) gold.frenzy_time / MAX_FRENZY) < ((double) gold.click_frenzy_time / MAX_CLICK_FRENZY) && ((double) gold.frenzy_time / MAX_FRENZY) < ((double) gold.boost_time / MAX_BOOST)) ? 6 : 0,
-						round2(164. * ((double) gold.frenzy_time / MAX_FRENZY)), 3, 0xddeb);
+						(((double) gold.frenzy_time / (MAX_FRENZY * gold.effect_modifier)) < ((double) gold.click_frenzy_time / (MAX_CLICK_FRENZY * gold.effect_modifier)) && ((double) gold.frenzy_time / (MAX_FRENZY * gold.effect_modifier)) > ((double) gold.boost_time / (MAX_BOOST * gold.effect_modifier))) || 
+						(((double) gold.frenzy_time / (MAX_FRENZY * gold.effect_modifier)) < ((double) gold.boost_time / (MAX_BOOST * gold.effect_modifier)) && ((double) gold.frenzy_time / (MAX_FRENZY * gold.effect_modifier)) > ((double) gold.click_frenzy_time / (MAX_CLICK_FRENZY * gold.effect_modifier))) ? 3 :
+						(((double) gold.frenzy_time / (MAX_FRENZY * gold.effect_modifier)) < ((double) gold.click_frenzy_time / (MAX_CLICK_FRENZY * gold.effect_modifier)) && ((double) gold.frenzy_time / (MAX_FRENZY * gold.effect_modifier)) < ((double) gold.boost_time / (MAX_BOOST * gold.effect_modifier))) ? 6 : 0,
+						round2(164. * ((double) gold.frenzy_time / (MAX_FRENZY * gold.effect_modifier))), 3, 0xddeb);
 
 				if (gold.click_frenzy_time <= 0)
 					gold.click_multiplier = 1;
 				else
 					fill_area(0,
-						(((double) gold.click_frenzy_time / MAX_CLICK_FRENZY) < ((double) gold.frenzy_time / MAX_FRENZY) && ((double) gold.click_frenzy_time / MAX_CLICK_FRENZY) > ((double) gold.boost_time / MAX_BOOST)) || 
-						(((double) gold.click_frenzy_time / MAX_CLICK_FRENZY) < ((double) gold.boost_time / MAX_BOOST) && ((double) gold.click_frenzy_time / MAX_CLICK_FRENZY) > ((double) gold.frenzy_time / MAX_FRENZY)) ? 3 :
-						(((double) gold.click_frenzy_time / MAX_CLICK_FRENZY) < ((double) gold.frenzy_time / MAX_FRENZY) && ((double) gold.click_frenzy_time / MAX_CLICK_FRENZY) < ((double) gold.boost_time / MAX_BOOST)) ? 6 : 0,
-						round2(164. * ((double) gold.click_frenzy_time / MAX_CLICK_FRENZY)), 3, 0xddeb);
+						(((double) gold.click_frenzy_time / (MAX_CLICK_FRENZY * gold.effect_modifier)) < ((double) gold.frenzy_time / (MAX_FRENZY * gold.effect_modifier)) && ((double) gold.click_frenzy_time / (MAX_CLICK_FRENZY * gold.effect_modifier)) > ((double) gold.boost_time / (MAX_BOOST * gold.effect_modifier))) || 
+						(((double) gold.click_frenzy_time / (MAX_CLICK_FRENZY * gold.effect_modifier)) < ((double) gold.boost_time / (MAX_BOOST * gold.effect_modifier)) && ((double) gold.click_frenzy_time / (MAX_CLICK_FRENZY * gold.effect_modifier)) > ((double) gold.frenzy_time / (MAX_FRENZY * gold.effect_modifier))) ? 3 :
+						(((double) gold.click_frenzy_time / (MAX_CLICK_FRENZY * gold.effect_modifier)) < ((double) gold.frenzy_time / (MAX_FRENZY * gold.effect_modifier)) && ((double) gold.click_frenzy_time / (MAX_CLICK_FRENZY * gold.effect_modifier)) < ((double) gold.boost_time / (MAX_BOOST * gold.effect_modifier))) ? 6 : 0,
+						round2(164. * ((double) gold.click_frenzy_time / (MAX_CLICK_FRENZY * gold.effect_modifier))), 3, 0xddeb);
 
 				if (gold.boost_time <= 0) 
 					gold.boost_multiplier = 0;
 				else
 					fill_area(0,
-						(((double) gold.boost_time / MAX_BOOST) < ((double) gold.frenzy_time / MAX_FRENZY) && ((double) gold.boost_time / MAX_BOOST) > ((double) gold.click_frenzy_time / MAX_CLICK_FRENZY)) || 
-						(((double) gold.boost_time / MAX_BOOST) < ((double) gold.click_frenzy_time / MAX_CLICK_FRENZY) && ((double) gold.boost_time / MAX_BOOST) > ((double) gold.frenzy_time / MAX_FRENZY)) ? 3 :
-						(((double) gold.boost_time / MAX_BOOST) < ((double) gold.frenzy_time / MAX_FRENZY) && ((double) gold.boost_time / MAX_BOOST) < ((double) gold.click_frenzy_time / MAX_CLICK_FRENZY)) ? 6 : 0,
-						round2(164. * ((double) gold.boost_time / MAX_BOOST)), 3, 0xddeb);
+						(((double) gold.boost_time / (MAX_BOOST * gold.effect_modifier)) < ((double) gold.frenzy_time / (MAX_FRENZY * gold.effect_modifier)) && ((double) gold.boost_time / (MAX_BOOST * gold.effect_modifier)) > ((double) gold.click_frenzy_time / (MAX_CLICK_FRENZY * gold.effect_modifier))) || 
+						(((double) gold.boost_time / (MAX_BOOST * gold.effect_modifier)) < ((double) gold.click_frenzy_time / (MAX_CLICK_FRENZY * gold.effect_modifier)) && ((double) gold.boost_time / (MAX_BOOST * gold.effect_modifier)) > ((double) gold.frenzy_time / (MAX_FRENZY * gold.effect_modifier))) ? 3 :
+						(((double) gold.boost_time / (MAX_BOOST * gold.effect_modifier)) < ((double) gold.frenzy_time / (MAX_FRENZY * gold.effect_modifier)) && ((double) gold.boost_time / (MAX_BOOST * gold.effect_modifier)) < ((double) gold.click_frenzy_time / (MAX_CLICK_FRENZY * gold.effect_modifier))) ? 6 : 0,
+						round2(164. * ((double) gold.boost_time / (MAX_BOOST * gold.effect_modifier))), 3, 0xddeb);
 				break;
 		}
 
@@ -592,7 +592,7 @@ int main() {
 				msg.time = 0;
 		}
 		
-		if (((keydownlast(f_buttons[gold.x]) && !keydownhold(f_buttons[gold.x])) || key == f_buttons[gold.x]) && gold.time <= 13) {
+		if (((keydownlast(f_buttons[gold.x]) && !keydownhold(f_buttons[gold.x])) || key == f_buttons[gold.x]) && gold.time <= (13 * gold.time_modifier)) {
 			data.gold_click_count++;
 			if (gold.effect > 0 && gold.effect <= 425) {
 				// Lucky!
@@ -611,14 +611,36 @@ int main() {
 				data.cookies += earned;
 			} else if (gold.effect > 425 && gold.effect <= 850) {
 				// Frenzy
-				set_message(&msg, "Frenzy", "Cookie production x7 for 77 seconds!", 6);
+				gold.frenzy_time = 77 * gold.effect_modifier;
 				gold.cps_multiplier = 7;
-				gold.frenzy_time = 77;
+
+				char msg_buf[40];
+				strcpy(msg_buf, "Cookie production x7 for ");
+
+				char *tmp = malloc(3);
+				itoa(gold.frenzy_time, tmp, 10);
+				strcat(msg_buf, tmp);
+				free(tmp);
+
+				strcat(msg_buf, " seconds!");
+
+				set_message(&msg, "Frenzy", msg_buf, 6);
 			} else if (gold.effect > 850 && gold.effect <= 893) {
 				// Click Frenzy
-				set_message(&msg, "Click Frenzy", "Clicking power x777 for 13 seconds!", 6);
+				gold.click_frenzy_time = 13 * gold.effect_modifier;
 				gold.click_multiplier = 777;
-				gold.click_frenzy_time = 13;
+
+				char msg_buf[40];
+				strcpy(msg_buf, "Clicking power x777 for ");
+
+				char *tmp = malloc(3);
+				itoa(gold.click_frenzy_time, tmp, 10);
+				strcat(msg_buf, tmp);
+				free(tmp);
+
+				strcat(msg_buf, " seconds!");
+
+				set_message(&msg, "Click Frenzy", msg_buf, 6);
 			} else if (gold.effect > 893 && gold.effect <= 996) {
 				// Building special
 				int cnt = 0;
@@ -627,9 +649,14 @@ int main() {
 						cnt++;
 				}
 				if (cnt > 0) {
+					
+					gold.boost_time = 30 * gold.effect_modifier;
+
 					int r_b = random() % 20; 
 					while (data.buildings[r_b].owned < 10)
 						r_b = random() % 20;
+
+					gold.boost_multiplier = data.buildings[r_b].owned / 10.0;
 
 					char msg_buf[150];
 
@@ -654,12 +681,15 @@ int main() {
 
 					strcat(msg_buf, "% for");
 					strcat(msg_buf, strlen(buildings[r_b]) >= 15 ? "\n" : " ");
-					strcat(msg_buf, "30 seconds!");
+
+					tmp = malloc(3);
+					itoa(gold.boost_time, tmp, 10);
+					strcat(msg_buf, tmp);
+					free(tmp);
+
+					strcat(msg_buf, " seconds!");
 
 					set_message(&msg, building_specials[r_b], msg_buf, 6);
-
-					gold.boost_multiplier = data.buildings[r_b].owned / 10.0;
-					gold.boost_time = 30;
 				} else {
 					// Lucky!
 					double earned = (data.cookies >= current_cps * 6000) ?
@@ -684,9 +714,8 @@ int main() {
 			reset_gold(&gold);
 		}
 		
-		if (gold.time <= 13) {
-			if (mode != SCREEN_STATS)
-				copy_sprite_scaled(gold_cookie, 4 + gold.x * 66 + (23 - (gold.scale / 2)), gold.y + (23 - (gold.scale / 2)) , 23, 23, gold.scale, gold.scale, false, 0);
+		if (gold.time <= (13 * gold.time_modifier)) {
+			copy_sprite_scaled(gold_cookie, 4 + gold.x * 66 + (23 - (gold.scale / 2)), gold.y + (23 - (gold.scale / 2)) , 23, 23, gold.scale, gold.scale, false, 0);
 
 			if (gold.time > 0 && gold.scale < 46)
 				gold.scale += 2;
@@ -700,8 +729,9 @@ int main() {
 		if ((keydownlast(KEY_PRGM_VARS) && !keydownhold(KEY_PRGM_VARS)) || key == KEY_PRGM_VARS)
 			mode = mode == SCREEN_STATS ? SCREEN_DEFAULT : SCREEN_STATS;
 
+		// TODO: remove
 		if (key == KEY_PRGM_7)
-			set_message(&msg, "Test", "This is a test message", 6);
+			set_message(&msg, "Test", "This is a test message.", 6);
 
 		if (one_second) {
 			data.cookies += current_cps;

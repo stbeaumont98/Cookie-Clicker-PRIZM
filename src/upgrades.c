@@ -118,7 +118,7 @@ void unlock_upgrades(struct CookieData *data) {
         data->upgrades_unlocked[(TYPE_GOLDEN * 15) + 2] = true;
 }
 
-void enable_upgrade(struct CookieData *data, int id) {
+void enable_upgrade(struct CookieData *data, struct GoldenData *gold, int id) {
 
     uint8_t building_id = id / 15;
 
@@ -140,9 +140,10 @@ void enable_upgrade(struct CookieData *data, int id) {
     else if (id >= 300 && id < 315)
         // Clicking gains +1% of your CpS.
         data->buildings[TYPE_CURSOR].percent_cps += 0.01;
-    else if (id >= 315 && id < 317) {
+    else if (id >= 315 && id < 317)
         // Golden cookies appear twice as often and last twice as long on screen.
-    } else {
+        gold->time_modifier *= 2;
+    else if (id == 317)
         // Golden cookie effects last twice as long.
-    }
+        gold->effect_modifier *= 2;
 }

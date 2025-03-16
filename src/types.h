@@ -50,6 +50,8 @@ struct GoldenData {
 	double click_multiplier;
 	uint8_t boost_time;
 	double boost_multiplier;
+	uint8_t time_modifier;
+	uint8_t effect_modifier;
 };
 
 struct CookieData {
