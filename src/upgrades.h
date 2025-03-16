@@ -9,57 +9,36 @@
 #define MODE_MODIFY 2
 #define MODE_CPS_PERCENT 3
 
-// static const char *upgrade_name[] = {
-//     "Reinforced index finger", "Carpal tunnel prevention cream", "Ambidextrous", "Thousand fingers", "Million fingers", "Billion fingers", "Trillion fingers", "Quadrillion fingers", "Quintillion fingers", "Sextillion fingers", "Septillion fingers", "Octillion fingers", "Nonillion fingers", "Decillion fingers", "Undecillion fingers",
+#define TYPE_CURSOR 0
+#define TYPE_GRANDMA 1
+#define TYPE_FARM 2
+#define TYPE_MINE 3
+#define TYPE_FACTORY 4
+#define TYPE_BANK 5
+#define TYPE_TEMPLE 6
+#define TYPE_WIZARD_TOWER 7
+#define TYPE_SHIPMENT 8
+#define TYPE_ALCHEMY_LAB 9
+#define TYPE_PORTAL 10
+#define TYPE_TIME_MACHINE 11
+#define TYPE_ANTIMATTER_CONDENSER 12
+#define TYPE_PRISM 13
+#define TYPE_CHANCEMAKER 14
+#define TYPE_FRACTAL_ENGINE 15
+#define TYPE_JAVASCRIPT_CONSOLE 16
+#define TYPE_IDLEVERSE 17
+#define TYPE_CORTEX_BAKER 18
+#define TYPE_YOU 19
+#define TYPE_MOUSE 20
+#define TYPE_GOLDEN 21
 
-//     "Forwards from grandma", "Steel-plated rolling pins", "Lubricated dentures", "Prune juice", "Double-thick glasses", "Aging agents", "Xtreme walkers", "The Unbridling", "Reverse dementia", "Timeproof hair dyes", "Good manners", "Generation degeneration", "Visits", "Kitchen cabinets", "Foam-tipped canes",
-
-//     "Cheap hoes", "Fertilizer", "Cookie trees", "Genetically-modified cookies", "Gingerbread scarecrows", "Pulsar sprinklers", "Fudge fungus", "Wheat triffids", "Humane pesticides", "Barnstars", "Lindworms", "Global seed vault", "Reverse-veganism", "Cookie mulch", "Self-driving tractors",
-
-//     "Sugar gas", "Megadrill", "Ultradrill", "Ultimadrill", "H-bomb mining", "Coreforge", "Planetsplitters", "Canola oil wells", "Mole people", "Mine canaries", "Bore again", "Air mining", "Caramel alloys", "Delicious mineralogy", "Mineshaft supports",
-
-//     "Sturdier conveyor belts", "Child labor", "Sweatshop", "Radium reactors", "Recombobulators", "Deep-bake process", "Cyborg workforce", "78-hour days", "Machine learning", "Brownie point system", "\"Volunteer\" interns", "Behavioral reframing", "The infinity engine", "N-dimensional assembly lines", "Universal automation",
-
-//     "Taller tellers", "Scissor-resistant credit cards", "Acid-proof vaults", "Chocolate coins", "Exponential interest rates", "Financial zen", "Way of the wallet", "The stuff rationale", "Edible money", "Grand supercycle", "Rules of aquisition", "Altruistic loop", "Diminishing tax returns", "Cookie Points", "The big shortcake",
-
-//     "Golden idols", "Sacrifices", "Delicious blessing", "Sun festival", "Enlarged pantheon", "Great Baker in the sky", "Creation myth", "Theocracy", "Sick rap prayers", "Psalm-reading", "War of the gods", "A novel idea", "Apparitions", "Negatheism", "Temple traps",
-
-//     "Pointier hats", "Beardlier beards", "Ancient grimoires", "Kitchen curses", "School of sorcery", "Dark formulas", "Cookiemancy", "Rabbit trick", "Deluxe tailored wands", "Immobile spellcasting", "Electricity", "Spelling bees", "Wizard basements", "Magical realism", "Polymorphism",
-
-//     "Vanilla nebulae", "Wormholes", "Frequent flyer", "Warp drive", "Chocolate monoliths", "Generation ship", "Dyson sphere", "The final frontier", "Autopilot", "Restaurants at the end of the universe", "Universal alphabet", "Toroid universe", "Prime directive", "Cosmic foreground radiation", "At your doorstep in 30 minutes or your money back",
-
-//     "Antimony", "Essence of dough", "True chocolate", "Ambrosia", "Aqua crustulae", "Origin crucible", "Theory of atomic fluidity", "Beige goo", "The advent of chemistry", "On second thought", "Public betterment", "Hermetic reconciliation", "Chromatic cycling", "Arcanized glassware", "The dose makes the poison",
-
-//     "Ancient tablet", "Insane oatling workers", "Soul bond",
-
-//     "Flux capacitors", "Time paradox resolver", "Quantum conundrum"
-// };
-
-// static const double upgrade_price[] = {
-//     1.0E2, 5.0E2, 1.0E4, 1.0E5, 1.0E7, 1.0E8, 1.0E9, 1.0E10, 1.0E13, 1.0E16, 1.0E19, 1.0E22, 1.0E25, 1.0E28, 1.0E31,
-
-//     1.0E3, 5.0E3, 5.0E4, 5.0E6, 5.0E8, 5.0E10, 5.0E13, 5.0E16, 5.0E19, 5.0E22, 5.0E25, 5.0E28, 5.0E31, 5.0E34, 5.0E37,
-
-//     1.1E4, 5.5E4, 5.5E5, 5.5E7, 5.5E9, 5.5E11, 5.5E14, 5.5E17, 5.5E20, 5.5E23, 5.5E27, 5.5E31, 5.5E34, 5.5E39, 5.5E43, 
-
-//     1.2E5, 6.0E5, 6.0E6, 6.0E8, 6.0E10, 6.0E12, 6.0E15, 6.0E18, 6.0E21, 6.0E24, 6.0E28, 6.0E32, 6.0E36, 6.0E40, 6.0E44, 
-
-//     1.3E6, 6.5E6, 6.5E7, 6.5E9, 6.5E11, 6.5E13, 6.5E16, 6.5E19, 6.5E22, 6.5E25, 6.5E29, 6.5E33, 6.5E37, 6.5E41, 6.5E45, 
-
-//     1.4E7, 7.0E7, 7.0E8, 7.0E10, 7.0E12, 7.0E14, 7.0E17, 7.0E20, 7.0E23, 7.0E26, 7.0E30, 7.0E34, 7.0E38, 7.0E42, 7.0E46, 
-
-//     2.0E8, 1.0E9, 1.0E10, 1.0E12, 1.0E14, 1.0E16, 1.0E19, 1.0E22, 1.0E25, 1.0E28, 1.0E32, 1.0E36, 1.0E40, 1.0E44, 1.0E48, 
-
-//     3.3E9, 1.65E10, 1.65E11, 1.65E13, 1.65E15, 1.65E17, 1.65E20, 1.65E23, 1.65E26, 1.65E29, 1.65E33, 1.65E37, 1.65E41, 1.65E45, 1.65E49, 
-
-//     5.1E10, 2.55E11, 2.55E12, 2.55E14, 2.55E16, 2.55E18, 2.55E21, 2.55E24, 2.55E27, 2.55E30, 2.55E34, 2.55E38, 2.55E42, 2.55E46, 2.55E50, 
-
-//     7.5E11, 3.75E12, 3.75E13, 3.75E15, 3.75E17, 3.75E19, 3.75E22, 3.75E25, 3.75E28, 3.75E31, 3.75E35, 3.75E39, 3.75E43, 3.75E47, 3.75E51, 
-
-//     1.0E13, 5.0E13, 5.0E14, 
-
-//     1.0E13, 5.0E13, 5.0E14
-// };
+static const char *upgrade_types[22] = {
+	"Cursor", "Grandma", "Farm", "Mine", "Factory", "Bank", "Temple",
+	"Wizard tower", "Shipment", "Alchemy lab", "Portal",
+	"Time machine", "Antimatter condenser", "Prism", "Chancemaker",
+	"Fractal engine", "Javascript console", "Idleverse", "Cortex baker", "You",
+    "Mouse", "Golden cookie"
+};
 
 static struct Upgrade upgrades[] = {
 
@@ -382,7 +361,28 @@ static struct Upgrade upgrades[] = {
     {2.7E55,  "Clone rights"},
     {2.7E59,  "One big family"},
     {2.7E63,  "Fine-tuned body plans"},
-    {2.7E67,  "Reading your clones bedtime\nstories"} // too long
+    {2.7E67,  "Reading your clones bedtime\nstories"}, // too long
+
+    {5.0E4, "Plastic mouse"},
+    {5.0E6, "Iron mouse"},
+    {5.0E8, "Titanium mouse"},
+    {5.0E10, "Adamantium mouse"},
+    {5.0E12, "Unobtainium mouse"},
+    {5.0E14, "Eludium mouse"},
+    {5.0E16, "Wishalloy mouse"},
+    {5.0E18, "Fantasteel mouse"},
+    {5.0E20, "Nevercrack mouse"},
+    {5.0E22, "Armythril mouse"},
+    {5.0E24, "Technobsidian mouse"},
+    {5.0E26, "Plasmarble mouse"},
+    {5.0E28, "Miraculite mouse"},
+    {5.0E30, "Aetherice mouse"},
+    {5.0E32, "Omniplast mouse"},
+
+    {7.77778E8, "Lucky day"},
+    {7.77778E10, "Serendipity"},
+    {7.77778E13, "Get lucky"}
+
 };
 
 void unlock_upgrades(struct CookieData *data);

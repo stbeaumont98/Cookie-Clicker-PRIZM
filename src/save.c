@@ -212,7 +212,7 @@ void save_game(const struct CookieData data, const struct GoldenData gold) {
 	ProgressBar2((unsigned char *) heading, 18, 21);
 
 	tmp = malloc(2);
-	for (i = 0; i < 300; i++) {
+	for (i = 0; i < 318; i++) {
 		itoa(data.upgrades[i], tmp, 10);
 		strcat(save_buf, tmp);
 	}
@@ -278,7 +278,7 @@ void load_game(struct CookieData *data, struct GoldenData *gold) {
 			data->buildings[i].percent_cps = 0;
 		}
 		data->total_buildings = 0;
-		for (i = 0; i < 300; i++) {
+		for (i = 0; i < 318; i++) {
 			data->upgrades[i] = false;
 			data->upgrades_unlocked[i] = false;
 		}
@@ -371,13 +371,13 @@ void load_game(struct CookieData *data, struct GoldenData *gold) {
 
 	gold->boost_multiplier = strtod(dec, NULL) * ten_pow(strtod(pow, NULL));
 
-	if (strlen(upgrades) != 300) {
-		for (i = 0; i < 300; i++) {
+	if (strlen(upgrades) != 318) {
+		for (i = 0; i < 318; i++) {
 			data->upgrades[i] = false;
 			data->upgrades_unlocked[i] = false;
 		}
 	} else {
-		for (i = 0; i < 300; i++) {
+		for (i = 0; i < 318; i++) {
 			bool isowned = (upgrades[i] == '1');
 			data->upgrades[i] = isowned;
 			data->upgrades_unlocked[i] = isowned;

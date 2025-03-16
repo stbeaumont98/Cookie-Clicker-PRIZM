@@ -5,27 +5,6 @@
 #include <stdbool.h>
 #include <fxcg/display.h>
 
-#define BUILDING_CURSOR 0
-#define BUILDING_GRANDMA 1
-#define BUILDING_FARM 2
-#define BUILDING_MINE 3
-#define BUILDING_FACTORY 4
-#define BUILDING_BANK 5
-#define BUILDING_TEMPLE 6
-#define BUILDING_WIZARD_TOWER 7
-#define BUILDING_SHIPMENT 8
-#define BUILDING_ALCHEMY_LAB 9
-#define BUILDING_PORTAL 10
-#define BUILDING_TIME_MACHINE 11
-#define BUILDING_ANTIMATTER_CONDENSER 12
-#define BUILDING_PRISM 13
-#define BUILDING_CHANCEMAKER 14
-#define BUILDING_FRACTAL_ENGINE 15
-#define BUILDING_JAVASCRIPT_CONSOLE 16
-#define BUILDING_IDLEVERSE 17
-#define BUILDING_CORTEX_BAKER 18
-#define BUILDING_YOU 19
-
 static const char *building_types[20] = {
 	"Cursor", "Grandma", "Farm", "Mine", "Factory", "Bank", "Temple",
 	"Wizard tower", "Shipment", "Alchemy lab", "Portal",
@@ -82,8 +61,8 @@ struct CookieData {
 	uint32_t click_count;
 	uint16_t gold_click_count;
 	uint16_t total_buildings;
-	bool upgrades[300];
-	bool upgrades_unlocked[300];
+	bool upgrades[318];
+	bool upgrades_unlocked[318];
 };
 
 struct Message {

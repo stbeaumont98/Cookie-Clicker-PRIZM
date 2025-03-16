@@ -121,15 +121,15 @@ void draw_store_tile(uint16_t x, uint8_t y) {
 
 double get_cps(struct CookieData data) {
 	double raw_cps = 0;
-	double non_cursors = data.total_buildings - data.buildings[BUILDING_CURSOR].owned;
+	double non_cursors = data.total_buildings - data.buildings[TYPE_CURSOR].owned;
 	for (int i = 0; i < 20; i++)
-		raw_cps += (base_cps[i] * data.buildings[i].owned * data.buildings[i].multiplier) + (data.buildings[i].modifier * data.buildings[i].owned * (i == BUILDING_CURSOR ? non_cursors : 1.0));
+		raw_cps += (base_cps[i] * data.buildings[i].owned * data.buildings[i].multiplier) + (data.buildings[i].modifier * data.buildings[i].owned * (i == TYPE_CURSOR ? non_cursors : 1.0));
 	return raw_cps;
 }
 
 double get_cpc(struct CookieData data, double cps) {
-	int non_cursors = data.total_buildings - data.buildings[BUILDING_CURSOR].owned;
-	return data.buildings[BUILDING_CURSOR].multiplier + (data.buildings[BUILDING_CURSOR].modifier * non_cursors) + (data.buildings[BUILDING_CURSOR].percent_cps * cps);
+	int non_cursors = data.total_buildings - data.buildings[TYPE_CURSOR].owned;
+	return data.buildings[TYPE_CURSOR].multiplier + (data.buildings[TYPE_CURSOR].modifier * non_cursors) + (data.buildings[TYPE_CURSOR].percent_cps * cps);
 }
 
 int main() {
@@ -297,8 +297,12 @@ int main() {
 				
 				disp_string(172, 10, "Store", 0xffff);
 				small_disp_string(18, 37, "UPGRADES", 0xffff, true);
-				uint8_t b_type = (u_sel + u_sel_offset) / 15;
-				small_disp_string(366 - small_text_width(!data.buildings[b_type].hidden ? building_types[b_type] : "???", true), 37, !data.buildings[b_type].hidden ? building_types[b_type] : "???", 0xffff, true);
+				uint8_t u_type = (u_sel + u_sel_offset) / 15;
+				if (u_type < 20) {
+					small_disp_string(366 - small_text_width(!data.buildings[u_type].hidden ? upgrade_types[u_type] : "???", true), 37, !data.buildings[u_type].hidden ? upgrade_types[u_type] : "???", 0xffff, true);
+				} else {
+					small_disp_string(366 - small_text_width(data.upgrades_unlocked[u_type * 15] ? upgrade_types[u_type] : "???", true), 37, data.upgrades_unlocked[u_type * 15] ? upgrade_types[u_type] : "???", 0xffff, true);
+				}
 				small_disp_string(28, 5, "[OPTN]", 0xffff, true);
 		
 				copy_sprite_1bit(arrow[1], 20, 5, 6, 6, arrow_palette, 0xffff);
@@ -326,36 +330,56 @@ int main() {
 				small_disp_string(365 - small_text_width(cps_buf, false), 22, cps_buf, 0xffff, false);
 
 				for (int i = 0; i < 4; i++) {
-					if (i + u_sel_offset > 300)
+					if (i + u_sel_offset > 318)
 						continue;
-					uint8_t building_i = (i + u_sel_offset) / 15;
+					
+					// upgrade descriptions
+
+					u_type = (i + u_sel_offset) / 15;
 					char desc[0xff];
-					if (building_i == BUILDING_CURSOR) {
-						switch (i + u_sel_offset) {
-							case 0:
-							case 1:
-							case 2:
-								strcpy(desc, "The mouse and cursors are twice as efficient.");
-								break;
-							case 3:
-								strcpy(desc, "The mouse and cursors gain +0.1 cookies for each non-cursor object\nowned.");
-								break;
-							case 4:
-								strcpy(desc, "Multiplies the gain from Thousand fingers by 5.");
-								break;
-							case 5:
-								strcpy(desc, "Multiplies the gain from Thousand fingers by 10.");
-								break;
-							default:
-								strcpy(desc, "Multiplies the gain from Thousand fingers by 20.");
-								break;
-						}
-					} else {
-						strcpy(desc, building_types[building_i]);
-						if (building_i < 19)
-							strcat(desc, "s");
-						strcat(desc, " are twice as efficient.");
+					switch (u_type) {
+						case TYPE_CURSOR: 
+							switch (i + u_sel_offset) {
+								case 0:
+								case 1:
+								case 2:
+									strcpy(desc, "The mouse and cursors are twice as efficient.");
+									break;
+								case 3:
+									strcpy(desc, "The mouse and cursors gain +0.1 cookies for each non-cursor object\nowned.");
+									break;
+								case 4:
+									strcpy(desc, "Multiplies the gain from Thousand fingers by 5.");
+									break;
+								case 5:
+									strcpy(desc, "Multiplies the gain from Thousand fingers by 10.");
+									break;
+								default:
+									strcpy(desc, "Multiplies the gain from Thousand fingers by 20.");
+									break;
+							}
+							break;
+						case TYPE_MOUSE:
+							strcpy(desc, "Clicking gains +1% of your CpS.");
+							break;
+						case TYPE_GOLDEN:
+							switch (i + u_sel_offset) {
+								case (TYPE_GOLDEN * 15) + 2:
+									strcpy(desc, "Golden cookie effects last twice as long.");
+									break;
+								default:
+									strcpy(desc, "Golden cookies appear twice as often and last twice as long on\nscreen.");
+									break;
+							}
+							break;
+						default:
+							strcpy(desc, upgrade_types[u_type]);
+							if (u_type < 19)
+								strcat(desc, "s");
+							strcat(desc, " are twice as efficient.");
+							break;
 					}
+					
 					// copy_sprite_masked(upgrade_frame, 23, 54 + i * 42, 30, 30, COLOR_RED);
 					// if (upgrades[i + u_sel_offset].sprite != NULL)
 					// 	copy_sprite_4bit(upgrades[i + u_sel_offset].sprite, 26, 57 + i * 42, 24, 24, upgrades[i + u_sel_offset].palette);
@@ -380,7 +404,7 @@ int main() {
 
 				if (((keydownlast(KEY_PRGM_DOWN) && !keydownhold(KEY_PRGM_DOWN)) || key == KEY_PRGM_DOWN) && u_sel < 3) {
 					u_sel++;
-				} else if (((keydownlast(KEY_PRGM_DOWN) && !keydownhold(KEY_PRGM_DOWN)) || key == KEY_PRGM_DOWN) && u_sel == 3 && u_sel_offset < 300 - 4) {
+				} else if (((keydownlast(KEY_PRGM_DOWN) && !keydownhold(KEY_PRGM_DOWN)) || key == KEY_PRGM_DOWN) && u_sel == 3 && u_sel_offset < 318 - 4) {
 					u_sel_offset++;
 				}
 				if (((keydownlast(KEY_PRGM_UP) && !keydownhold(KEY_PRGM_UP)) || key == KEY_PRGM_UP) && u_sel > 0) {
@@ -389,11 +413,11 @@ int main() {
 					u_sel_offset--;
 				}
 
-				if (((keydownlast(KEY_PRGM_RIGHT) && !keydownhold(KEY_PRGM_RIGHT)) || key == KEY_PRGM_RIGHT) && u_sel_offset <= 300 - 15)
+				if (((keydownlast(KEY_PRGM_RIGHT) && !keydownhold(KEY_PRGM_RIGHT)) || key == KEY_PRGM_RIGHT) && u_sel_offset <= 318 - 15)
 					u_sel_offset += 15;
-				else if (((keydownlast(KEY_PRGM_RIGHT) && !keydownhold(KEY_PRGM_RIGHT)) || key == KEY_PRGM_RIGHT) && u_sel_offset > 300 - 15) {
+				else if (((keydownlast(KEY_PRGM_RIGHT) && !keydownhold(KEY_PRGM_RIGHT)) || key == KEY_PRGM_RIGHT) && u_sel_offset > 318 - 15) {
 					u_sel = 3;
-					u_sel_offset = 300 - 4;
+					u_sel_offset = 318 - 4;
 				}
 
 				if (((keydownlast(KEY_PRGM_LEFT) && !keydownhold(KEY_PRGM_LEFT)) || key == KEY_PRGM_LEFT) && u_sel_offset >= 15)
