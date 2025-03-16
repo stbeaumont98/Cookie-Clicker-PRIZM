@@ -18,10 +18,6 @@
 #include "convert.h"
 #include "upgrades.h"
 
-#define SCREEN_DEFAULT 0
-#define SCREEN_UPGRADES 1
-#define SCREEN_STATS 2
-
 static const double MAX_FRENZY = 77.;
 static const double MAX_CLICK_FRENZY = 13.;
 static const double MAX_BOOST = 30.;
@@ -160,16 +156,18 @@ int main() {
 	int u_sel = 0;
 	int u_sel_offset = 0;
 
-	int mode = 0;
-
 	double raw_cps = get_cps(data);
 	double current_cps = (raw_cps * gold.cps_multiplier) + (raw_cps * gold.cps_multiplier * gold.boost_multiplier);
 
 	double cpc = get_cpc(data, current_cps);
 
+	char *tmp;
 	char *cookie_buf;
 	char *price_buf;
 	char cps_buf[30];
+
+	bool upgrades_toggle = false;
+	bool stats_toggle = false;
 
 	while (1) {
         int key = PRGM_GetKey();
@@ -192,99 +190,99 @@ int main() {
 
 		cpc =  get_cpc(data, current_cps);
 
-		switch (mode) {
-			case SCREEN_STATS:
-				fill_scr(0x0000);
-				draw_line(148, 22, 236, 22, rgb_color(100, 100, 100), 0);
-				disp_string(150, 29, "STATISTICS", 0xFFFF);
-				draw_line(148, 46, 236, 46, rgb_color(100, 100, 100), 0);
+		if (stats_toggle) {
+			fill_scr(0x0000);
+			draw_line(148, 22, 236, 22, rgb_color(100, 100, 100), 0);
+			disp_string(150, 29, "STATISTICS", 0xFFFF);
+			draw_line(148, 46, 236, 46, rgb_color(100, 100, 100), 0);
 
-				copy_sprite_scaled(panel_horizontal, 0, 0, 99, 8, 198, 16, false, 0);
-				copy_sprite_scaled(panel_horizontal, 198, 0, 99, 8, 198, 16, false, 0);
-				copy_sprite_scaled(panel_vertical, 0, 0, 8, 108, 16, 216, false, 0);
-				copy_sprite_scaled(panel_vertical, 368, 0, 8, 108, 16, 216, false, 0);
-				
-				disp_string(21, 54, "Cookies in bank:", rgb_color(150, 150, 150));
-				disp_string(21, 72, "Cookies baked (all time):", rgb_color(150, 150, 150));
-				disp_string(21, 90, "Buildings owned:", rgb_color(150, 150, 150));
-				disp_string(21, 108, "Cookies per second:", rgb_color(150, 150, 150));
-				disp_string(21, 126, "Raw cookies per second:", rgb_color(150, 150, 150));
-				disp_string(21, 144, "Cookies per click:", rgb_color(150, 150, 150));
-				disp_string(21, 162, "Cookie clicks:", rgb_color(150, 150, 150));
-				disp_string(21, 180, "Hand-made cookies:", rgb_color(150, 150, 150));
-				disp_string(21, 198, "Golden cookie clicks:", rgb_color(150, 150, 150));
-				
-				copy_sprite_masked(money, 152, 54, 14, 14, COLOR_RED);
-				copy_sprite_masked(money, 214, 72, 14, 14, COLOR_RED);
+			copy_sprite_scaled(panel_horizontal, 0, 0, 99, 8, 198, 16, false, 0);
+			copy_sprite_scaled(panel_horizontal, 198, 0, 99, 8, 198, 16, false, 0);
+			copy_sprite_scaled(panel_vertical, 0, 0, 8, 108, 16, 216, false, 0);
+			copy_sprite_scaled(panel_vertical, 368, 0, 8, 108, 16, 216, false, 0);
+			
+			disp_string(21, 54, "Cookies in bank:", rgb_color(150, 150, 150));
+			disp_string(21, 72, "Cookies baked (all time):", rgb_color(150, 150, 150));
+			disp_string(21, 90, "Buildings owned:", rgb_color(150, 150, 150));
+			disp_string(21, 108, "Cookies per second:", rgb_color(150, 150, 150));
+			disp_string(21, 126, "Raw cookies per second:", rgb_color(150, 150, 150));
+			disp_string(21, 144, "Cookies per click:", rgb_color(150, 150, 150));
+			disp_string(21, 162, "Cookie clicks:", rgb_color(150, 150, 150));
+			disp_string(21, 180, "Hand-made cookies:", rgb_color(150, 150, 150));
+			disp_string(21, 198, "Golden cookie clicks:", rgb_color(150, 150, 150));
+			
+			copy_sprite_masked(money, 152, 54, 14, 14, COLOR_RED);
+			copy_sprite_masked(money, 214, 72, 14, 14, COLOR_RED);
 
-				char *tmp = get_display_val(data.cookies, false, false);
-				if (text_width(tmp) > 197) {
-					free(tmp);
-					tmp = get_display_val(data.cookies, false, true);
-				}
-				disp_string(170, 54, tmp, 0xFFFF);
+			tmp = get_display_val(data.cookies, false, false);
+			if (text_width(tmp) > 197) {
 				free(tmp);
+				tmp = get_display_val(data.cookies, false, true);
+			}
+			disp_string(170, 54, tmp, 0xFFFF);
+			free(tmp);
 
-				tmp = get_display_val(data.cookies_all_time, false, false);
-				if (text_width(tmp) > 135) {
-					free(tmp);
-					tmp = get_display_val(data.cookies_all_time, false, true);
-				}
-				disp_string(232, 72, tmp, 0xFFFF);
+			tmp = get_display_val(data.cookies_all_time, false, false);
+			if (text_width(tmp) > 135) {
 				free(tmp);
+				tmp = get_display_val(data.cookies_all_time, false, true);
+			}
+			disp_string(232, 72, tmp, 0xFFFF);
+			free(tmp);
 
-				int num_buildings = 0;
-				for (int i = 0; i < 20; i++)
-					num_buildings += data.buildings[i].owned;
+			int num_buildings = 0;
+			for (int i = 0; i < 20; i++)
+				num_buildings += data.buildings[i].owned;
 
-				tmp = disp_comma(num_buildings);
-				disp_string(156, 90, tmp, 0xFFFF);
+			tmp = disp_comma(num_buildings);
+			disp_string(156, 90, tmp, 0xFFFF);
+			free(tmp);
+
+			tmp = get_display_val(current_cps, true, false);
+			if (text_width(tmp) > 190) {
 				free(tmp);
-
-				tmp = get_display_val(current_cps, true, false);
-				if (text_width(tmp) > 190) {
-					free(tmp);
-					tmp = get_display_val(current_cps, true, true);
-				}
-				disp_string(177, 108, tmp, 0xFFFF);
+				tmp = get_display_val(current_cps, true, true);
+			}
+			disp_string(177, 108, tmp, 0xFFFF);
+			free(tmp);
+			
+			tmp = get_display_val(raw_cps, true, false);
+			if (text_width(tmp) > 154) {
 				free(tmp);
-				
-				tmp = get_display_val(raw_cps, true, false);
-				if (text_width(tmp) > 154) {
-					free(tmp);
-					tmp = get_display_val(raw_cps, true, true);
-				}
-				disp_string(213, 126, tmp, 0xFFFF);
-				free(tmp);
+				tmp = get_display_val(raw_cps, true, true);
+			}
+			disp_string(213, 126, tmp, 0xFFFF);
+			free(tmp);
 
-				tmp = get_display_val(cpc * gold.click_multiplier, true, false);
-				if (text_width(tmp) > 207) {
-					free(tmp);
-					tmp = get_display_val(cpc * gold.click_multiplier, true, true);
-				}
-				disp_string(160, 144, tmp, 0xFFFF);
+			tmp = get_display_val(cpc * gold.click_multiplier, true, false);
+			if (text_width(tmp) > 207) {
 				free(tmp);
+				tmp = get_display_val(cpc * gold.click_multiplier, true, true);
+			}
+			disp_string(160, 144, tmp, 0xFFFF);
+			free(tmp);
 
-				tmp = get_display_val(data.click_count, false, false);
-				disp_string(130, 162, tmp, 0xFFFF);
+			tmp = get_display_val(data.click_count, false, false);
+			disp_string(130, 162, tmp, 0xFFFF);
+			free(tmp);
+
+			tmp = get_display_val(data.handmade_cookies, false, false);
+			if (text_width(tmp) > 187) {
 				free(tmp);
+				tmp = get_display_val(data.handmade_cookies, false, true);
+			}
+			disp_string(180, 180, tmp, 0xFFFF);
+			free(tmp);
 
-				tmp = get_display_val(data.handmade_cookies, false, false);
-				if (text_width(tmp) > 187) {
-					free(tmp);
-					tmp = get_display_val(data.handmade_cookies, false, true);
-				}
-				disp_string(180, 180, tmp, 0xFFFF);
-				free(tmp);
+			tmp = get_display_val(data.gold_click_count, false, false);
+			disp_string(185, 198, tmp, 0xFFFF);
+			free(tmp);
 
-				tmp = get_display_val(data.gold_click_count, false, false);
-				disp_string(185, 198, tmp, 0xFFFF);
-				free(tmp);
+			if ((keydownlast(KEY_PRGM_EXIT) && !keydownhold(KEY_PRGM_EXIT)) || key == KEY_PRGM_EXIT)
+				stats_toggle = false;
+		} else {
 
-				if ((keydownlast(KEY_PRGM_EXIT) && !keydownhold(KEY_PRGM_EXIT)) || key == KEY_PRGM_EXIT)
-						mode = SCREEN_DEFAULT;
-				break;
-			case SCREEN_UPGRADES:
+			if (upgrades_toggle) {
 
 				// upgrades store
 
@@ -304,7 +302,7 @@ int main() {
 					small_disp_string(366 - small_text_width(data.upgrades_unlocked[u_type * 15] ? upgrade_types[u_type] : "???", true), 37, data.upgrades_unlocked[u_type * 15] ? upgrade_types[u_type] : "???", 0xffff, true);
 				}
 				small_disp_string(28, 5, "[OPTN]", 0xffff, true);
-		
+			
 				copy_sprite_1bit(arrow[1], 20, 5, 6, 6, arrow_palette, 0xffff);
 
 				cookie_buf = get_display_val(data.cookies, false, false);
@@ -319,10 +317,10 @@ int main() {
 
 				strcpy(cps_buf, "CpS: ");
 
-				tmp = get_display_val(raw_cps, true, false);
+				tmp = get_display_val(current_cps, true, false);
 				if (text_width(tmp) > 126) {
 					free(tmp);
-					tmp = get_display_val(raw_cps, true, true);
+					tmp = get_display_val(current_cps, true, true);
 				}
 				strcat(cps_buf, tmp);
 				free(tmp);
@@ -398,9 +396,6 @@ int main() {
 				}
 
 				draw_rect(17, 49 + u_sel * 42, 349, 39, 0xff80, 1);
-				
-				if (((keydownlast(KEY_PRGM_OPTN) && !keydownhold(KEY_PRGM_OPTN)) || key == KEY_PRGM_OPTN) && mode == SCREEN_UPGRADES)
-					mode = SCREEN_DEFAULT;
 
 				if (((keydownlast(KEY_PRGM_DOWN) && !keydownhold(KEY_PRGM_DOWN)) || key == KEY_PRGM_DOWN) && u_sel < 3) {
 					u_sel++;
@@ -434,8 +429,7 @@ int main() {
 					unlock_upgrades(&data);
 				}
 
-				break;
-			default:
+			} else {
 				draw_background();
 
 				// start store code
@@ -445,7 +439,7 @@ int main() {
 				disp_string(262, 10, "Store", 0xffff);
 				small_disp_string(182, 37, "BUILDINGS", 0xffff, true);
 				small_disp_string(339, 5, "[OPTN]", 0xffff, true);
-		
+			
 				copy_sprite_1bit(arrow[0], 374, 5, 6, 6, arrow_palette, 0xffff);
 
 				int store_size = (data.buildings_unlocked < 4) ? data.buildings_unlocked : 4;
@@ -477,11 +471,6 @@ int main() {
 				}
 
 				draw_rect(181, 49 + b_sel * 42, 201, 39, 0xff80, 1);
-
-				if (((keydownlast(KEY_PRGM_OPTN) && !keydownhold(KEY_PRGM_OPTN)) || key == KEY_PRGM_OPTN) && mode == SCREEN_DEFAULT) {
-					unlock_upgrades(&data);
-					mode = SCREEN_UPGRADES;
-				}
 
 				if (((keydownlast(KEY_PRGM_DOWN) && !keydownhold(KEY_PRGM_DOWN)) || key == KEY_PRGM_DOWN) && b_sel < store_size - 1) {
 					b_sel++;
@@ -583,8 +572,17 @@ int main() {
 						(((double) gold.boost_time / (MAX_BOOST * gold.effect_modifier)) < ((double) gold.click_frenzy_time / (MAX_CLICK_FRENZY * gold.effect_modifier)) && ((double) gold.boost_time / (MAX_BOOST * gold.effect_modifier)) > ((double) gold.frenzy_time / (MAX_FRENZY * gold.effect_modifier))) ? 3 :
 						(((double) gold.boost_time / (MAX_BOOST * gold.effect_modifier)) < ((double) gold.frenzy_time / (MAX_FRENZY * gold.effect_modifier)) && ((double) gold.boost_time / (MAX_BOOST * gold.effect_modifier)) < ((double) gold.click_frenzy_time / (MAX_CLICK_FRENZY * gold.effect_modifier))) ? 6 : 0,
 						round2(164. * ((double) gold.boost_time / (MAX_BOOST * gold.effect_modifier))), 3, 0xddeb);
-				break;
+			}
 		}
+		
+		if ((keydownlast(KEY_PRGM_OPTN) && !keydownhold(KEY_PRGM_OPTN)) || key == KEY_PRGM_OPTN) {
+			if (!upgrades_toggle)
+				unlock_upgrades(&data);
+			upgrades_toggle = !upgrades_toggle;
+		}
+		
+		if ((keydownlast(KEY_PRGM_VARS) && !keydownhold(KEY_PRGM_VARS)) || key == KEY_PRGM_VARS)
+			stats_toggle = !stats_toggle;
 
 		if (msg.time > 0) {
 			display_msg(msg);
@@ -601,7 +599,7 @@ int main() {
 					(min(data.cookies * 0.15, current_cps * 900) + 13);
 				char msg_buf[30];
 				strcpy(msg_buf, "+");
-				char *tmp = get_display_val(earned, false, false);
+				tmp = get_display_val(earned, false, false);
 				strcat(msg_buf, tmp);
 				free(tmp);
 				strcat(msg_buf, " cookies!");
@@ -617,7 +615,7 @@ int main() {
 				char msg_buf[40];
 				strcpy(msg_buf, "Cookie production x7 for ");
 
-				char *tmp = malloc(3);
+				tmp = malloc(3);
 				itoa(gold.frenzy_time, tmp, 10);
 				strcat(msg_buf, tmp);
 				free(tmp);
@@ -633,7 +631,7 @@ int main() {
 				char msg_buf[40];
 				strcpy(msg_buf, "Clicking power x777 for ");
 
-				char *tmp = malloc(3);
+				tmp = malloc(3);
 				itoa(gold.click_frenzy_time, tmp, 10);
 				strcat(msg_buf, tmp);
 				free(tmp);
@@ -697,7 +695,7 @@ int main() {
 						(min(data.cookies * 0.15, current_cps * 900) + 13);
 					char msg_buf[30];
 					strcpy(msg_buf, "+");
-					char *tmp = get_display_val(earned, false, false);
+					tmp = get_display_val(earned, false, false);
 					strcat(msg_buf, tmp);
 					free(tmp);
 					strcat(msg_buf, " cookies!");
@@ -725,9 +723,6 @@ int main() {
 			if (gold.time <= 0 && gold.scale <= 2)
 				reset_gold(&gold);
 		}
-
-		if ((keydownlast(KEY_PRGM_VARS) && !keydownhold(KEY_PRGM_VARS)) || key == KEY_PRGM_VARS)
-			mode = mode == SCREEN_STATS ? SCREEN_DEFAULT : SCREEN_STATS;
 
 		// TODO: remove
 		if (key == KEY_PRGM_7)
