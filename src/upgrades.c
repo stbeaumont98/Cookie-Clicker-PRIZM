@@ -13,28 +13,31 @@ void unlock_upgrades(struct CookieData *data) {
         data->upgrades_unlocked[2] = true;
     if (data->buildings[BUILDING_CURSOR].owned >= 25)
         data->upgrades_unlocked[3] = true;
-    if (data->buildings[BUILDING_CURSOR].owned >= 50)
-        data->upgrades_unlocked[4] = true;
-    if (data->buildings[BUILDING_CURSOR].owned >= 100)
-        data->upgrades_unlocked[5] = true;
-    if (data->buildings[BUILDING_CURSOR].owned >= 150)
-        data->upgrades_unlocked[6] = true;
-    if (data->buildings[BUILDING_CURSOR].owned >= 200)
-        data->upgrades_unlocked[7] = true;
-    if (data->buildings[BUILDING_CURSOR].owned >= 250)
-        data->upgrades_unlocked[8] = true;
-    if (data->buildings[BUILDING_CURSOR].owned >= 300)
-        data->upgrades_unlocked[9] = true;
-    if (data->buildings[BUILDING_CURSOR].owned >= 350)
-        data->upgrades_unlocked[10] = true;
-    if (data->buildings[BUILDING_CURSOR].owned >= 400)
-        data->upgrades_unlocked[11] = true;
-    if (data->buildings[BUILDING_CURSOR].owned >= 450)
-        data->upgrades_unlocked[12] = true;
-    if (data->buildings[BUILDING_CURSOR].owned >= 500)
-        data->upgrades_unlocked[13] = true;
-    if (data->buildings[BUILDING_CURSOR].owned >= 550)
-        data->upgrades_unlocked[14] = true;
+
+    if (data->upgrades[3]) {
+        if (data->buildings[BUILDING_CURSOR].owned >= 50)
+            data->upgrades_unlocked[4] = true;
+        if (data->buildings[BUILDING_CURSOR].owned >= 100)
+            data->upgrades_unlocked[5] = true;
+        if (data->buildings[BUILDING_CURSOR].owned >= 150)
+            data->upgrades_unlocked[6] = true;
+        if (data->buildings[BUILDING_CURSOR].owned >= 200)
+            data->upgrades_unlocked[7] = true;
+        if (data->buildings[BUILDING_CURSOR].owned >= 250)
+            data->upgrades_unlocked[8] = true;
+        if (data->buildings[BUILDING_CURSOR].owned >= 300)
+            data->upgrades_unlocked[9] = true;
+        if (data->buildings[BUILDING_CURSOR].owned >= 350)
+            data->upgrades_unlocked[10] = true;
+        if (data->buildings[BUILDING_CURSOR].owned >= 400)
+            data->upgrades_unlocked[11] = true;
+        if (data->buildings[BUILDING_CURSOR].owned >= 450)
+            data->upgrades_unlocked[12] = true;
+        if (data->buildings[BUILDING_CURSOR].owned >= 500)
+            data->upgrades_unlocked[13] = true;
+        if (data->buildings[BUILDING_CURSOR].owned >= 550)
+            data->upgrades_unlocked[14] = true;
+    }
 
 
     for (int i = 1; i < 20; i++) {
@@ -79,13 +82,13 @@ void enable_upgrade(struct CookieData *data, int id) {
     switch (id) {
         case 3:
             // Thousand fingers
-            data->buildings[building_id].modifier += 0.1;
+            data->buildings[BUILDING_CURSOR].modifier += 0.1;
             break;
         case 4:
-            data->buildings[building_id].modifier *= 5;
+            data->buildings[BUILDING_CURSOR].modifier *= 5.0;
             break;
         case 5:
-            data->buildings[building_id].modifier *= 10;
+            data->buildings[BUILDING_CURSOR].modifier *= 10.0;
             break;
         case 6:
         case 7:
@@ -96,11 +99,11 @@ void enable_upgrade(struct CookieData *data, int id) {
         case 12:
         case 13:
         case 14:
-            data->buildings[building_id].modifier *= 20;
+            data->buildings[BUILDING_CURSOR].modifier *= 20.0;
             break;
         default:
             // multiply building cps by 2
-            data->buildings[building_id].multiplier *= 2;
+            data->buildings[building_id].multiplier *= 2.0;
             break;
     }
 
