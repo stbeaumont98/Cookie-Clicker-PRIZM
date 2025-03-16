@@ -121,9 +121,9 @@ void draw_store_tile(uint16_t x, uint8_t y) {
 
 double get_cps(struct CookieData data) {
 	double raw_cps = 0;
-	int non_cursors = data.total_buildings - data.buildings[BUILDING_CURSOR].owned;
+	double non_cursors = data.total_buildings - data.buildings[BUILDING_CURSOR].owned;
 	for (int i = 0; i < 20; i++)
-		raw_cps += ((base_cps[i] * data.buildings[i].owned) * data.buildings[i].multiplier) + (data.buildings[i].modifier * data.buildings[i].owned * (i == BUILDING_CURSOR ? non_cursors : 1));
+		raw_cps += (base_cps[i] * data.buildings[i].owned * data.buildings[i].multiplier) + (data.buildings[i].modifier * data.buildings[i].owned * (i == BUILDING_CURSOR ? non_cursors : 1.0));
 	return raw_cps;
 }
 
@@ -169,6 +169,7 @@ int main() {
 
 	char *cookie_buf;
 	char *price_buf;
+	char cps_buf[30];
 
 	while (1) {
         int key = PRGM_GetKey();
@@ -256,7 +257,11 @@ int main() {
 				disp_string(213, 126, tmp, 0xFFFF);
 				free(tmp);
 
-				tmp = get_display_val(cpc * gold.click_multiplier, true, true);
+				tmp = get_display_val(cpc * gold.click_multiplier, true, false);
+				if (text_width(tmp) > 207) {
+					free(tmp);
+					tmp = get_display_val(cpc * gold.click_multiplier, true, true);
+				}
 				disp_string(160, 144, tmp, 0xFFFF);
 				free(tmp);
 
@@ -292,7 +297,8 @@ int main() {
 				
 				disp_string(172, 10, "Store", 0xffff);
 				small_disp_string(18, 37, "UPGRADES", 0xffff, true);
-				small_disp_string(366 - small_text_width(building_types[(u_sel + u_sel_offset) / 15], true), 37, building_types[(u_sel + u_sel_offset) / 15], 0xffff, true);
+				uint8_t b_type = (u_sel + u_sel_offset) / 15;
+				small_disp_string(366 - small_text_width(!data.buildings[b_type].hidden ? building_types[b_type] : "???", true), 37, !data.buildings[b_type].hidden ? building_types[b_type] : "???", 0xffff, true);
 				small_disp_string(28, 5, "[OPTN]", 0xffff, true);
 		
 				copy_sprite_1bit(arrow[1], 20, 5, 6, 6, arrow_palette, 0xffff);
@@ -306,6 +312,18 @@ int main() {
 				free(cookie_buf);
 				
 				small_disp_string(365 - small_text_width("cookies", false), 12, "cookies", 0xffff, false);
+
+				strcpy(cps_buf, "CpS: ");
+
+				tmp = get_display_val(raw_cps, true, false);
+				if (text_width(tmp) > 126) {
+					free(tmp);
+					tmp = get_display_val(raw_cps, true, true);
+				}
+				strcat(cps_buf, tmp);
+				free(tmp);
+
+				small_disp_string(365 - small_text_width(cps_buf, false), 22, cps_buf, 0xffff, false);
 
 				for (int i = 0; i < 4; i++) {
 					if (i + u_sel_offset > 300)
@@ -385,10 +403,11 @@ int main() {
 					u_sel_offset = 0;
 				}
 
-				if (((keydownlast(KEY_PRGM_ALPHA) && !keydownhold(KEY_PRGM_ALPHA)) || key == KEY_PRGM_ALPHA) && data.cookies >= upgrades[u_sel + u_sel_offset].price && !data.upgrades[u_sel + u_sel_offset]) {
+				if (((keydownlast(KEY_PRGM_ALPHA) && !keydownhold(KEY_PRGM_ALPHA)) || key == KEY_PRGM_ALPHA) && data.cookies >= upgrades[u_sel + u_sel_offset].price && !data.upgrades[u_sel + u_sel_offset] && data.upgrades_unlocked[u_sel + u_sel_offset]) {
 					data.cookies -= upgrades[u_sel + u_sel_offset].price;
 					data.upgrades[u_sel + u_sel_offset] = true;
 					enable_upgrade(&data, u_sel + u_sel_offset);
+					unlock_upgrades(&data);
 				}
 
 				break;
@@ -491,8 +510,6 @@ int main() {
 				
 				copy_sprite_scaled(perfect_cookie, (scale_w < 124) ? 26 : 20, (scale_h < 126) ? 86 : 80, 62, 63, scale_w, scale_h, false, 0);
 				fill_area(0, 10, 164, 60, 0x0000);
-				
-				char cps_buf[30];
 
 				strcpy(cps_buf, "CpS: ");
 
