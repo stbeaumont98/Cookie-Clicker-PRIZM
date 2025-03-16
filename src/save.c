@@ -339,7 +339,7 @@ void load_game(struct CookieData *data, struct GoldenData *gold) {
 	char *click_multiplier = strtok(NULL, "\n");
 	gold->boost_time = (uint8_t) strtod(strtok(NULL, "\n"), NULL);
 	char *boost_multiplier = strtok(NULL, "\n");
-	char *owned = strtok(NULL, "\n");
+	char *upgrades = strtok(NULL, "\n");
 	
 	char *dec = strtok(all_time, "E");
 	char *pow = strtok(NULL, "E");
@@ -371,17 +371,17 @@ void load_game(struct CookieData *data, struct GoldenData *gold) {
 
 	gold->boost_multiplier = strtod(dec, NULL) * ten_pow(strtod(pow, NULL));
 
-	if (strlen(owned) != 300) {
+	if (strlen(upgrades) != 300) {
 		for (i = 0; i < 300; i++) {
 			data->upgrades[i] = false;
 			data->upgrades_unlocked[i] = false;
 		}
 	} else {
 		for (i = 0; i < 300; i++) {
-			bool val = (owned[i] == '1');
-			data->upgrades[i] = val;
-			data->upgrades_unlocked[i] = val;
-			if (val)
+			bool isowned = (upgrades[i] == '1');
+			data->upgrades[i] = isowned;
+			data->upgrades_unlocked[i] = isowned;
+			if (isowned)
 				enable_upgrade(data, i);
 		}
 	}
