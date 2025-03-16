@@ -137,7 +137,7 @@ static struct Upgrade upgrades[] = {
     {6.5E19,  "78-hour days"},
     {6.5E22,  "Machine learning"},
     {6.5E25,  "Brownie point system"},
-    {6.5E29,  "\"Volunteer\" interns"},
+    {6.5E29,  "\"Volunteer\' interns"},
     {6.5E33,  "Behavioral reframing"},
     {6.5E37,  "The infinity engine"},
     {6.5E41,  "N-dimensional assembly lines"},
@@ -289,7 +289,7 @@ static struct Upgrade upgrades[] = {
     {1.05E56, "Lab goggles but like cool shades"},
     
     {2.6E17,  "Your lucky cookie"},
-    {1.3E18,  "\"All Bets Are Off\" magic coin"},
+    {1.3E18,  "\"All Bets Are Off\' magic coin"},
     {1.3E19,  "Winning lottery ticket"},
     {1.3E21,  "Four-leaf clover field"},
     {1.3E23,  "A recipe book about books"},

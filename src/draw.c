@@ -276,6 +276,10 @@ void disp_string(unsigned x, unsigned y, const char* message, int color) {
             //x_offset += 20;
         else {
             switch (message[i]) {
+                case '\"':
+                case '\'':
+                    y_offset = -2;
+                    break;
                 case '(':
                 case ')':
                     y_offset = -1;

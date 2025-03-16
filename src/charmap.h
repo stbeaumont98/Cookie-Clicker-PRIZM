@@ -332,11 +332,20 @@ const unsigned char r_parenthesis[14] = {
 	0x70, 0xb0, 0x90, 0x90, 0xc0, 0xc0, 0xc0, 0xc0, 0xc0, 0xc0, 0x90, 0x90, 0xb0, 0x70
 };
 
-static const uint8_t char_width[0xFF] = {
+const unsigned char l_quote[7] = {
+    0xdd, 0xbb, 0xbb, 0x33, 0x11, 0x11, 0xbb
+};
+
+const unsigned char r_quote[7] = {
+    0xbb, 0x11, 0x11, 0x99, 0xbb, 0xbb, 0x77
+};
+
+static const uint8_t char_width[] = {
     ['\n'] = 0,
     // symbols
     ['!'] = 2, ['%'] = 16, ['+'] = 7, ['-'] = 7, [','] = 2, ['.'] = 2,
-    [':'] = 2, [';'] = 2, ['?'] = 6, ['('] = 4, [')'] = 4,
+    [':'] = 2, [';'] = 2, ['?'] = 6, ['('] = 4, [')'] = 4, ['\"'] = 7,
+    ['\''] = 7,
     // numbers
     ['0'] = 8, ['1'] = 4, ['2'] = 7, ['3'] = 7, ['4'] = 9,
     ['5'] = 7, ['6'] = 8, ['7'] = 8, ['8'] = 8, ['9'] = 8,
@@ -354,11 +363,12 @@ static const uint8_t char_width[0xFF] = {
     ['y'] = 8, ['z'] = 7,
 };
 
-static const uint8_t char_height[0xFF] = {
+static const uint8_t char_height[] = {
     ['\n'] = 0,
     // symbols
-    ['!'] = 12, ['%'] = 11, ['+'] = 7, ['-'] = 1, [','] = 5,
-    ['.'] = 2, [':'] = 8, [';'] = 11, ['?'] = 12, ['('] = 14, [')'] = 14,
+    ['!'] = 12, ['%'] = 11, ['+'] = 7, ['-'] = 1, [','] = 5, ['.'] = 2,
+    [':'] = 8, [';'] = 11, ['?'] = 12, ['('] = 14, [')'] = 14, ['\"'] = 7,
+    ['\''] = 7,
     // numbers
     ['0'] = 9, ['1'] = 9, ['2'] = 9, ['3'] = 11, ['4'] = 12,
     ['5'] = 12, ['6'] = 12, ['7'] = 12, ['8'] = 11, ['9'] = 12,
@@ -381,6 +391,7 @@ static const unsigned char *charmap[] = {
     ['!'] = exclamation, ['%'] = percent, ['+'] = plus, ['-'] = minus,
     [','] = comma, ['.'] = period, [':'] = colon, [';'] = semicolon,
     ['?'] = question, ['('] = l_parenthesis, [')'] = r_parenthesis,
+    ['\"'] = l_quote, ['\''] = r_quote,
     // numbers
     ['0'] = zero, ['1'] = one, ['2'] = two, ['3'] = three, ['4'] = four,
     ['5'] = five, ['6'] = six, ['7'] = seven, ['8'] = eight, ['9'] = nine,
@@ -673,7 +684,7 @@ const unsigned char small_plus[] = {
 };
 
 const unsigned char small_question[] = {
-    0x9f, 0x0f, 0x4f, 0xcf, 0x9f, 0xff, 0x9f
+    0x10, 0x00, 0xc0, 0xc0, 0x90, 0xf0, 0x90
 };
 
 const unsigned char small_semicolon[] = {
@@ -696,7 +707,7 @@ const unsigned char small_r_bracket[] = {
     0x00, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x00
 };
 
-static const uint8_t small_char_width[0xFF] = {
+static const uint8_t small_char_width[] = {
     ['\n'] = 0,
     // symbols
     ['!'] = 2, ['%'] = 7, ['+'] = 3, ['-'] = 3, [','] = 2, ['.'] = 2,
@@ -719,7 +730,7 @@ static const uint8_t small_char_width[0xFF] = {
     ['y'] = 5, ['z'] = 4,
 };
 
-static const uint8_t small_char_height[0xFF] = {
+static const uint8_t small_char_height[] = {
     ['\n'] = 0,
     // symbols
     ['!'] = 7, ['%'] = 7, ['+'] = 3, ['-'] = 1, [','] = 4, ['.'] = 2,
