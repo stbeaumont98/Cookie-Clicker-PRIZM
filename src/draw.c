@@ -65,51 +65,6 @@ void copy_sprite_masked(const void *datar, int x, int y, int width, int height, 
    }
 }
 
-/*Note it is up to the caller to ensure that alpha is in range of 1-31
- * For a value of 32 or greater just don't draw the image
- * For a value of 0 use a plain mask function that does not take into account alpha
- * Also make sure width is a multiple of two*/
-void copy_sprite_masked_alpha(const void *datar, unsigned x, unsigned y, unsigned width, unsigned height, unsigned maskcolor, unsigned alpha){
-    unsigned *data = (unsigned *) datar;
-    unsigned short *v = (unsigned short *) GetVRAMAddress();
-    unsigned *VRAM, w, alphai;
-    width /= 2;
-    v += 384 * y + x;
-    VRAM = (unsigned *) v;
-    alphai = 32 - alpha;
-    maskcolor |= maskcolor << 16;/*Note I have decided to do a minor tradeoff for speed. Make sure your alpha pixels are multiple of two*/
-    while(height--) {
-        w = width;
-        while(w--) {
-            unsigned color1 = *data++;
-            if(color1 != maskcolor) {
-                /*Note this is based on the source code of Fblend's function fblend_rect_trans_16*/
-                unsigned rbg_source, grb_source, temp1;
-                /* Split up components to allow us to do operations on all of them at the same time */
-                rbg_source = *VRAM & 0xF81F07E0,
-                grb_source = *VRAM & 0x07E0F81F;
-
-                /* Multiply the source by the factor */
-                rbg_source = ((rbg_source >> 5) * alpha) & 0xF81F07E0;
-                grb_source = ((grb_source * alpha) >> 5) & 0x07E0F81F;
-
-                /* Split up RGB -> R-B and G */
-                temp1 = color1 & 0x7E0F81F;
-                color1 &= 0xF81F07E0;
-
-                /* Multiply the source by the factor */
-                color1 = ((((color1 >> 5) * alphai) & 0xF81F07E0) + rbg_source) & 0xF81F07E0;
-                temp1  = ((((temp1 * alphai) >> 5)  & 0x07E0F81F) + grb_source) & 0x07E0F81F;
-
-                color1 |= temp1;
-                *VRAM++ = color1;
-            }else
-                ++VRAM;
-        }
-        VRAM += (384 / 2) - width;
-    }
-}
-
 void copy_sprite_scaled(const color_t *in, unsigned x, unsigned y, unsigned w1, unsigned h1, unsigned w2, unsigned h2, bool overlay, color_t overlay_color) {
 	color_t* VRAM = (color_t *) GetVRAMAddress();
    	VRAM += (LCD_WIDTH_PX * y + x);
@@ -265,17 +220,19 @@ void disp_string(unsigned x, unsigned y, const char* message, int color) {
     unsigned line = 0;
     int x_offset = 0;
     int y_offset = 0;
+    char c;
     for (i = 0; i < l; i++) {
-        int w = char_width[(int) message[i]];
-        int h = char_height[(int) message[i]];
-        if (message[i] == '\n') {
+        c = message[i];
+        int w = char_width[(int) c];
+        int h = char_height[(int) c];
+        if (c == '\n') {
             x_offset = 0;
             ++line;
         }
-        else if (message[i] == '\t') {}
+        else if (c == '\t') {}
             //x_offset += 20;
         else {
-            switch (message[i]) {
+            switch (c) {
                 case '\"':
                 case '\'':
                     y_offset = -2;
@@ -318,8 +275,9 @@ void disp_string(unsigned x, unsigned y, const char* message, int color) {
                     y_offset = 11 - h;
                     break;
             } 
-            copy_sprite_1bit(charmap[(int) message[i]], x + x_offset, y + y_offset + (line * 13), w, h, charmap_palette, color);
-            x_offset += (message[i] == ' ') ? 5 : (w + (message[i] == 'Q' ? -1 : 1) + (message[i] == '(' || message[i] == ')' ? 1 : 0));
+            copy_sprite_1bit(charmap[(int) c], x + x_offset, y + y_offset + (line * 13),
+                w, h, charmap_palette, color);
+            x_offset += (c == ' ') ? 5 : (w + (c == 'Q' ? -1 : 1) + (c == '(' || c == ')' ? 1 : 0));
         }
         if (x + x_offset >= 384) {
             x_offset = 0;
@@ -416,8 +374,9 @@ void small_disp_string(unsigned x, unsigned y, const char* message, int color, b
                     y_offset = 6 - h;
                     break;
             } 
-            copy_sprite_1bit(small_charmap[(int) c], x + x_offset, y + y_offset + (line * 9), w, h, charmap_palette, color);
-            x_offset += (c == ' ') ? 3 : (w + 1 + (c == '(' || c == ')' ? 1 : 0));
+            copy_sprite_1bit(small_charmap[(int) c], x + x_offset, y + y_offset + (line * 9),\
+                w, h, charmap_palette, color);
+            x_offset += (c == ' ') ? 3 : (w + (c == '(' || c == ')' ? 2 : 1));
         }
         if (x + x_offset >= 384) {
             x_offset = 0;

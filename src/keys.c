@@ -39,7 +39,7 @@ int keydownhold(int basic_keycode) {
 }
 
 int keyPressed(int basic_keycode){ 
-    const unsigned short* keyboard_register = (unsigned short *) 0xA44B0000; 
+    const unsigned short* keyboard_register = (unsigned short *) 0xA44B0000;
     int row, col, word, bit; 
     row = basic_keycode % 10; 
     col = basic_keycode / 10 - 1; 

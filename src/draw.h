@@ -9,7 +9,6 @@ void plot(int x0, int y0, int color);
 void fill_area(int x, int y, int width, int height, int color);
 void copy_sprite(const void* datar, int x, int y, int width, int height);
 void copy_sprite_masked(const void *datar, int x, int y, int width, int height, int maskcolor);
-void copy_sprite_masked_alpha(const void *datar, unsigned x, unsigned y, unsigned width, unsigned height, unsigned maskcolor, unsigned alpha);
 void copy_sprite_scaled(const color_t *in, unsigned x, unsigned y, unsigned w1, unsigned h1, unsigned w2, unsigned h2, bool overlay, color_t overlay_color);
 void draw_circle(int xs, int ys, int radius, int color);
 void draw_line(int x1, int y1, int x2, int y2, int color, int thickness);
