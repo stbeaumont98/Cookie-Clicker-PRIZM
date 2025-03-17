@@ -32,12 +32,28 @@
 #define TYPE_MOUSE 20
 #define TYPE_GOLDEN 21
 
-static const char *upgrade_types[22] = {
+static char *upgrade_types[22] = {
 	"Cursor", "Grandma", "Farm", "Mine", "Factory", "Bank", "Temple",
 	"Wizard tower", "Shipment", "Alchemy lab", "Portal",
 	"Time machine", "Antimatter condenser", "Prism", "Chancemaker",
 	"Fractal engine", "Javascript console", "Idleverse", "Cortex baker", "You",
     "Mouse", "Golden cookie"
+};
+
+static char *upgrade_descriptions[20] = {
+	"", "Grandmas are twice as efficient.", "Farms are twice as efficient.",
+    "Mines are twice as efficient.", "Factorys are twice as efficient.",
+    "Banks are twice as efficient.", "Temples are twice as efficient.",
+	"Wizard towers are twice as efficient.",
+    "Shipments are twice as efficient.",
+    "Alchemy labs are twice as efficient.", "Portals are twice as efficient.",
+	"Time machines are twice as efficient.",
+    "Antimatter condensers are twice as efficient.",
+    "Prisms are twice as efficient.", "Chancemakers are twice as efficient.",
+	"Fractal engines are twice as efficient.",
+    "Javascript consoles are twice as efficient.",
+    "Idleverses are twice as efficient.",
+    "Cortex bakers are twice as efficient.", "You are twice as efficient."
 };
 
 static struct Upgrade upgrades[] = {
@@ -338,8 +354,8 @@ static struct Upgrade upgrades[] = {
     {9.5E30,  "Neural networking"},
     {9.5E32,  "Cosmic brainstorms"},
     {9.5E35,  "Megatherapy"},
-    {9.5E37,  "Synaptic lubricant"},
-    {9.5E40,  "Psychokinesis"},
+    {9.5E38,  "Synaptic lubricant"},
+    {9.5E41,  "Psychokinesis"},
     {9.5E44,  "Spines"},
     {9.5E48,  "Neuraforming"},
     {9.5E52,  "Epistemological trickery"},
