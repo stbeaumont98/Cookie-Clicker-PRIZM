@@ -11,7 +11,7 @@
 
 #include "save.h"
 
-#define PATH "\\\\fls0\\cookies.sav"
+const char path[20] = "\\\\fls0\\cookies.sav";
 
 char *get_save_val(double val) {
 	char *val_buf = malloc(20);
@@ -59,9 +59,9 @@ void save_game(const struct CookieData data, const struct GoldenData gold) {
 
 	ProgressBar2((unsigned char *) heading, 0, 21);
 
-    unsigned short p_file[sizeof(PATH) * 2];
+    unsigned short p_file[sizeof(path) * 2];
 
-    Bfile_StrToName_ncpy(p_file, (unsigned char *) PATH, sizeof(PATH));
+    Bfile_StrToName_ncpy(p_file, path, sizeof(path));
 
     int h_file = Bfile_OpenFile_OS(p_file, 3, 0);
 
@@ -265,12 +265,13 @@ void load_game(struct CookieData *data, struct GoldenData *gold) {
 
 	for (i = 0; i < 318; i++) {
 		data->upgrades[i] = false;
-		data->upgrades_unlocked[i] = false;
+		data->upgrades_unlocked[i] = true;
 	}
 
-    unsigned short p_file[sizeof(PATH) * 2];
 	char *buf = malloc(0x400);
-    Bfile_StrToName_ncpy(p_file, (unsigned char *) PATH, sizeof(PATH));
+	
+    unsigned short p_file[sizeof(path) * 2];
+    Bfile_StrToName_ncpy(p_file, path, sizeof(path));
 
     int h_file = Bfile_OpenFile_OS(p_file, 3, 0);
 

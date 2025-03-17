@@ -132,7 +132,7 @@ void draw_store_tile(uint16_t x, uint8_t y) {
 	fill_area(x, y + 40, 204, 2, 0x39c5);
 }
 
-double get_cps(struct CookieData data) {
+double get_cps(const struct CookieData data) {
 	double raw_cps = 0;
 	double non_cursors = data.total_buildings - data.buildings[TYPE_CURSOR].owned;
 	for (int i = 0; i < 20; i++)
@@ -143,14 +143,14 @@ double get_cps(struct CookieData data) {
 	return raw_cps;
 }
 
-double get_cpc(struct CookieData data, double cps) {
+double get_cpc(const struct CookieData data, double cps) {
 	int non_cursors = data.total_buildings - data.buildings[TYPE_CURSOR].owned;
 	return data.buildings[TYPE_CURSOR].multiplier \
 		+ (data.buildings[TYPE_CURSOR].modifier * non_cursors) \
 		+ (data.buildings[TYPE_CURSOR].percent_cps * cps);
 }
 
-char *get_upgrade_type(struct CookieData data, uint8_t type) {
+char *get_upgrade_type(const struct CookieData data, uint8_t type) {
 	if ((type < 20 && !data.buildings[type].hidden)
 		|| (type >= 20 && data.upgrades_unlocked[type * 15]))
 		return upgrade_types[type];
@@ -158,7 +158,7 @@ char *get_upgrade_type(struct CookieData data, uint8_t type) {
 		return "???";
 }
 
-char *get_upgrade_description(struct CookieData data, uint16_t id) {
+char *get_upgrade_description(const struct CookieData data, uint16_t id) {
 	uint8_t type = id / 15;
 	if (!data.upgrades_unlocked[id])
 		return "???";
@@ -205,7 +205,7 @@ char *get_upgrade_description(struct CookieData data, uint16_t id) {
 	}
 }
 
-char *get_upgrade_name(struct CookieData data, uint16_t id) {
+char *get_upgrade_name(const struct CookieData data, uint16_t id) {
 	if (data.upgrades_unlocked[id])
 		return upgrades[id].name;
 	else
