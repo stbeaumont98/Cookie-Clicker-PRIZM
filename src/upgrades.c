@@ -2,16 +2,15 @@
 
 #include "upgrades.h"
 
-char *upgrade_types[22] = {
-	"Cursor", "Grandma", "Farm", "Mine", "Factory", "Bank", "Temple",
-	"Wizard tower", "Shipment", "Alchemy lab", "Portal",
-	"Time machine", "Antimatter condenser", "Prism", "Chancemaker",
-	"Fractal engine", "Javascript console", "Idleverse", "Cortex baker", "You",
-    "Mouse", "Golden cookie"
+char *upgrade_types[23] = {
+	"Cursor", "Mouse", "Grandma", "Farm", "Mine", "Factory", "Bank", "Temple",
+	"Wizard tower", "Shipment", "Alchemy lab", "Portal", "Time machine",
+    "Antimatter condenser", "Prism", "Chancemaker", "Fractal engine", "Javascript console",
+    "Idleverse", "Cortex baker", "You", "Golden cookie", "Flavored cookies"
 };
 
-char *upgrade_descriptions[20] = {
-	"", "Grandmas are twice as efficient.", "Farms are twice as efficient.",
+char *upgrade_descriptions[21] = {
+	"", "", "Grandmas are twice as efficient.", "Farms are twice as efficient.",
     "Mines are twice as efficient.", "Factorys are twice as efficient.",
     "Banks are twice as efficient.", "Temples are twice as efficient.",
 	"Wizard towers are twice as efficient.",
@@ -43,6 +42,23 @@ const struct Upgrade upgrades[] = {
     {1.0E25,  "Nonillion fingers"},
     {1.0E28,  "Decillion fingers"},
     {1.0E31,  "Undecillion fingers"},
+    
+    // mouse
+    {5.0E4, "Plastic mouse"},
+    {5.0E6, "Iron mouse"},
+    {5.0E8, "Titanium mouse"},
+    {5.0E10, "Adamantium mouse"},
+    {5.0E12, "Unobtainium mouse"},
+    {5.0E14, "Eludium mouse"},
+    {5.0E16, "Wishalloy mouse"},
+    {5.0E18, "Fantasteel mouse"},
+    {5.0E20, "Nevercrack mouse"},
+    {5.0E22, "Armythril mouse"},
+    {5.0E24, "Technobsidian mouse"},
+    {5.0E26, "Plasmarble mouse"},
+    {5.0E28, "Miraculite mouse"},
+    {5.0E30, "Aetherice mouse"},
+    {5.0E32, "Omniplast mouse"},
 
     // grandmas
     {1.0E3,   "Forwards from grandma"},
@@ -106,7 +122,7 @@ const struct Upgrade upgrades[] = {
     {6.5E19,  "78-hour days"},
     {6.5E22,  "Machine learning"},
     {6.5E25,  "Brownie point system"},
-    {6.5E29,  "\"Volunteer\' interns"},
+    {6.5E29,  "\"Volunteer\" interns"},
     {6.5E33,  "Behavioral reframing"},
     {6.5E37,  "The infinity engine"},
     {6.5E41,  "N-dimensional assembly lines"},
@@ -267,7 +283,7 @@ const struct Upgrade upgrades[] = {
 
     // chancemakers
     {2.6E17,  "Your lucky cookie"},
-    {1.3E18,  "\"All Bets Are Off\' magic coin"},
+    {1.3E18,  "\"All Bets Are Off\" magic coin"},
     {1.3E19,  "Winning lottery ticket"},
     {1.3E21,  "Four-leaf clover field"},
     {1.3E23,  "A recipe book about books"},
@@ -367,30 +383,158 @@ const struct Upgrade upgrades[] = {
     {2.7E63,  "Fine-tuned body plans"},
     {2.7E67,  "Reading your clones bedtime\nstories"},
 
-    // mouse
-    {5.0E4, "Plastic mouse"},
-    {5.0E6, "Iron mouse"},
-    {5.0E8, "Titanium mouse"},
-    {5.0E10, "Adamantium mouse"},
-    {5.0E12, "Unobtainium mouse"},
-    {5.0E14, "Eludium mouse"},
-    {5.0E16, "Wishalloy mouse"},
-    {5.0E18, "Fantasteel mouse"},
-    {5.0E20, "Nevercrack mouse"},
-    {5.0E22, "Armythril mouse"},
-    {5.0E24, "Technobsidian mouse"},
-    {5.0E26, "Plasmarble mouse"},
-    {5.0E28, "Miraculite mouse"},
-    {5.0E30, "Aetherice mouse"},
-    {5.0E32, "Omniplast mouse"},
-
     // golden cookies
     {7.77778E8, "Lucky day"},
     {7.77778E10, "Serendipity"},
-    {7.77778E13, "Get lucky"}
+    {7.77778E13, "Get lucky"},
+
+    // flavored cookies
+    {9.99999E5, "Plain cookies"},
+    {5.0E6, "Sugar cookies"},
+    {1.0E7, "Oatmeal raisin cookies"},
+    {5.0E7, "Peanut butter cookies"},
+    {1.0E8, "Coconut cookies"},
+    {1.0E8, "Macadamia nut cookies"},
+    {1.0E8, "Almond cookies"},
+    {1.0E8, "Hazelnut cookies"},
+    {1.0E8, "Walnut cookies"},
+    {1.0E8, "Cashew cookies"},
+    {5.0E8, "White chocolate cookies"},
+    {5.0E8, "Milk chocolate cookies"},
+    {5.0E9, "Double-chip cookies"},
+    {1.0E10, "White chocolate macadamia nut\ncookies"},
+    {5.0E10, "All-chocolate cookies"},
+    {1.0E11, "Dark chocolate-coated cookies"},
+    {1.0E11, "White chocolate-coated cookies"},
+    {5.0E11, "Eclipse cookies"},
+    {1.0E12, "Zebra cookies"},
+    {5.0E12, "Snickerdoodles"},
+    {1.0E13, "Stroopwafels"},
+    {5.0E13, "Macaroons"},
+    {1.0E14, "Empire biscuits"},
+    {5.0E14, "Madeleines"},
+    {5.0E14, "Palmiers"},
+    {1.0E15, "Palets"},
+    {1.0E15, "Sabl`s"},
+    {1.0E16, "Gingerbread men"},
+    {1.0E16, "Gingerbread trees"},
+    {5.0E16, "Pure black chocolate\ncookies"},
+    {5.0E16, "Pure white chocolate\ncookies"},
+    {1.0E17, "Ladyfingers"},
+    {5.0E17, "Tuiles"},
+    {1.0E18, "Chocolate-stuffed biscuits"},
+    {5.0E18, "Checker cookies"},
+    {1.0E19, "Butter cookies"},
+    {5.0E19, "Cream cookies"},
+    {1.0E20, "Gingersnaps"},
+    {5.0E20, "Cinnamon cookies"},
+    {1.0E21, "Vanity cookies"},
+    {5.0E21, "Cigars"},
+    {1.0E22, "Pinwheel cookies"},
+    {5.0E22, "Fudge squares"},
+    {1.0E23, "Shortbread biscuits"},
+    {5.0E23, "Millionaires' shortbreads"},
+    {1.0E24, "Caramel cookies"},
+    {5.0E24, "Pecan sandies"},
+    {1.0E25, "Moravian spice cookies"},
+    {5.0E25, "Anzac biscuits"},
+    {1.0E26, "Buttercakes"},
+    {5.0E26, "Ice cream sandwiches"},
+    {1.0E27, "Pink biscuits"},
+    {5.0E27, "Whole grain cookies"},
+    {1.0E28, "Candy cookies"},
+    {5.0E28, "Big chip cookies"},
+    {1.0E29, "One chip cookies"},
+    {5.0E29, "Sprinkles cookies"},
+    {1.0E30, "Peanut butter blossoms"},
+    {5.0E30, "No-bake cookies"},
+    {1.0E31, "Florentines"},
+    {5.0E31, "Chocolate crinkles"},
+    {1.0E32, "Maple cookies"},
+    {5.0E32, "Persian rice cookies"},
+    {1.0E33, "Norwegian cookies"},
+    {5.0E33, "Crispy rice cookies"},
+    {1.0E34, "Ube cookies"},
+    {5.0E34, "Butterscotch cookies"},
+    {1.0E35, "Speculaas"},
+    {5.0E35, "Chocolate oatmeal cookies"},
+    {1.0E36, "Molasses cookies"},
+    {5.0E36, "Biscotti"},
+    {1.0E37, "Waffle cookies"},
+    {5.0E37, "Custard creams"},
+    {1.0E38, "Bourbon biscuits"},
+    {5.0E38, "Mini-cookies"},
+    {1.0E39, "Whoopie pies"},
+    {3.162E39, "Caramel wafer biscuits"},
+    {1.0E40, "Chocolate chip mocha cookies"},
+    {3.1622E40, "Earl Grey cookies"},
+    {3.1622E40, "Chai tea cookies"},
+    {1.0E41, "Corn syrup cookies"},
+    {3.16227E41, "Icebox cookies"},
+    {1.0E42, "Graham crackers"},
+    {3.162E42, "Hardtack"},
+    {1.0E43, "Cornflake cookies"},
+    {3.1622E43, "Tofu cookies"},
+    {3.1622E43, "Gluten-free cookies"},
+    {1.0E44, "Russian bread cookies"},
+    {3.16227E44, "Lebkuchen"},
+    {1.0E45, "Aachener Printen"},
+    {3.162E45, "Canistrelli"},
+    {1.0E46, "Nice biscuits"},
+    {3.1622E46, "French pure butter cookies"},
+    {3.1622E46, "Petit beurre"},
+    {1.0E47, "Nanaimo bars"},
+    {3.16227E47, "Berger cookies"},
+    {1.0E48, "Chinsuko"},
+    {1.0E48, "Panda koala biscuits"},
+    {3.162E48, "Putri salju"},
+    {1.0E49, "Milk cookies"},
+    {3.1622E49, "Kruidnoten"},
+    {1.0E50, "Marie biscuits"},
+    {3.16227E50, "Meringue cookies"},
+    {1.0E51, "Yogurt cookies"},
+    {3.162E51, "Thumbprint cookies"},
+    {1.0E52, "Pizzelle"},
+    {3.1622E52, "Granola cookies"},
+    {1.0E53, "Ricotta cookies"},
+    {3.16227E53, "Roze koeken"},
+    {1.0E54, "Peanut butter cup cookies"},
+    {3.162E54, "Sesame cookies"},
+    {1.0E55, "Taiyaki"},
+    {3.1622E55, "Vanillekipferl"},
+    {1.0E56, "Battenberg biscuits"},
+    {3.16227E56, "Rosette cookies"},
+    {1.0E57, "Gangmakers"},
+    {3.1622E57, "Welsh cookies"},
+    {1.0E58, "Raspberry cheesecake cookies"},
+    {3.1622E58, "Bokkenpootjes"},
+    {1.0E59, "Fat rascals"},
+    {3.16227E59, "Ischler cookies"},
+    {3.16227E59, "Matcha cookies"},
+    {1.0E60, "Dalgona cookies"},
+    {3.162E60, "Spicy cookies"},
+    {1.0E61, "Smile cookies"},
+    {3.1622E61, "Kolachy cookies"},
+    {1.0E62, "Gomma cookies"},
+    {3.16228E62, "Vegan cookies"},
+    {1.0E63, "Coyotas"},
+    {3.162E63, "Frosted sugar cookies"},
+    {1.0E64, "Marshmallow sandwich cookies"},
+    {3.1623E64, "Calculated cookies"},
+    {1.0E65, "Havreflarn"},
+    {3.16228E65, "Alfajores"},
+    {1.0E66, "Gaufrettes"},
+    {3.162E66, "Cookie bars"},
+    {1.0E67, "Snowball cookies"},
+    {3.1623E67, "Sequilhos"},
+    {1.0E68, "Hazelnut swirlies"},
+    {3.16228E68, "Spritz cookies"},
+    {1.0E69, "Mbatata cookies"},
+    {3.162E69, "Springerles"}
 };
 
 void unlock_upgrades(struct CookieData *data) {
+    int i;
 
     // cursor upgrades
 
@@ -428,41 +572,6 @@ void unlock_upgrades(struct CookieData *data) {
             data->upgrades_unlocked[14] = true;
     }
 
-    // other building upgrades
-
-    for (int i = 1; i < 20; i++) {
-        if (data->buildings[i].owned >= 1)
-            data->upgrades_unlocked[(i * 15)] = true;
-        if (data->buildings[i].owned >= 5)
-            data->upgrades_unlocked[(i * 15) + 1] = true;
-        if (data->buildings[i].owned >= 25)
-            data->upgrades_unlocked[(i * 15) + 2] = true;
-        if (data->buildings[i].owned >= 50)
-            data->upgrades_unlocked[(i * 15) + 3] = true;
-        if (data->buildings[i].owned >= 100)
-            data->upgrades_unlocked[(i * 15) + 4] = true;
-        if (data->buildings[i].owned >= 150)
-            data->upgrades_unlocked[(i * 15) + 5] = true;
-        if (data->buildings[i].owned >= 200)
-            data->upgrades_unlocked[(i * 15) + 6] = true;
-        if (data->buildings[i].owned >= 250)
-            data->upgrades_unlocked[(i * 15) + 7] = true;
-        if (data->buildings[i].owned >= 300)
-            data->upgrades_unlocked[(i * 15) + 8] = true;
-        if (data->buildings[i].owned >= 350)
-            data->upgrades_unlocked[(i * 15) + 9] = true;
-        if (data->buildings[i].owned >= 400)
-            data->upgrades_unlocked[(i * 15) + 10] = true;
-        if (data->buildings[i].owned >= 450)
-            data->upgrades_unlocked[(i * 15) + 11] = true;
-        if (data->buildings[i].owned >= 500)
-            data->upgrades_unlocked[(i * 15) + 12] = true;
-        if (data->buildings[i].owned >= 550)
-            data->upgrades_unlocked[(i * 15) + 13] = true;
-        if (data->buildings[i].owned >= 600)
-            data->upgrades_unlocked[(i * 15) + 14] = true;
-    }
-
     // mouse upgrades
 
     if (data->handmade_cookies >= 1E3)
@@ -496,6 +605,41 @@ void unlock_upgrades(struct CookieData *data) {
     if (data->handmade_cookies >= 1E31)
         data->upgrades_unlocked[(TYPE_MOUSE * 15) + 14] = true;
 
+    // other building upgrades
+
+    for (i = 2; i < 21; i++) {
+        if (data->buildings[i - 1].owned >= 1)
+            data->upgrades_unlocked[(i * 15)] = true;
+        if (data->buildings[i - 1].owned >= 5)
+            data->upgrades_unlocked[(i * 15) + 1] = true;
+        if (data->buildings[i - 1].owned >= 25)
+            data->upgrades_unlocked[(i * 15) + 2] = true;
+        if (data->buildings[i - 1].owned >= 50)
+            data->upgrades_unlocked[(i * 15) + 3] = true;
+        if (data->buildings[i - 1].owned >= 100)
+            data->upgrades_unlocked[(i * 15) + 4] = true;
+        if (data->buildings[i - 1].owned >= 150)
+            data->upgrades_unlocked[(i * 15) + 5] = true;
+        if (data->buildings[i - 1].owned >= 200)
+            data->upgrades_unlocked[(i * 15) + 6] = true;
+        if (data->buildings[i - 1].owned >= 250)
+            data->upgrades_unlocked[(i * 15) + 7] = true;
+        if (data->buildings[i - 1].owned >= 300)
+            data->upgrades_unlocked[(i * 15) + 8] = true;
+        if (data->buildings[i - 1].owned >= 350)
+            data->upgrades_unlocked[(i * 15) + 9] = true;
+        if (data->buildings[i - 1].owned >= 400)
+            data->upgrades_unlocked[(i * 15) + 10] = true;
+        if (data->buildings[i - 1].owned >= 450)
+            data->upgrades_unlocked[(i * 15) + 11] = true;
+        if (data->buildings[i - 1].owned >= 500)
+            data->upgrades_unlocked[(i * 15) + 12] = true;
+        if (data->buildings[i - 1].owned >= 550)
+            data->upgrades_unlocked[(i * 15) + 13] = true;
+        if (data->buildings[i - 1].owned >= 600)
+            data->upgrades_unlocked[(i * 15) + 14] = true;
+    }
+
     // golden cookie upgrades
 
     if (data->gold_click_count >= 7)
@@ -504,11 +648,16 @@ void unlock_upgrades(struct CookieData *data) {
         data->upgrades_unlocked[(TYPE_GOLDEN * 15) + 1] = true;
     if (data->gold_click_count >= 77)
         data->upgrades_unlocked[(TYPE_GOLDEN * 15) + 2] = true;
+
+    // flavored cookie upgrades
+    for (i = 0; i < 142; i++)
+        if (data->cookies_all_time >= (upgrades[318 + i].price / 20.0))
+            data->upgrades_unlocked[318 + i] = true;
 }
 
 void enable_upgrade(struct CookieData *data, struct GoldenData *gold, int id) {
 
-    uint8_t building_id = id / 15;
+    uint8_t building_id = (id / 15) - 1;
 
     if (id == 3)
         // Thousand fingers
@@ -519,19 +668,37 @@ void enable_upgrade(struct CookieData *data, struct GoldenData *gold, int id) {
     else if (id == 5)
         // Billion fingers
         data->buildings[TYPE_CURSOR].modifier *= 10.0;
-    else if (id > 5 && id <= 14)
+    else if (id >= 6 && id < 15)
         // Trillion - Undecillion fingers
         data->buildings[TYPE_CURSOR].modifier *= 20.0;
-    else if (id < 3 || (id > 14 && id < 300))
-        // multiply building cps by 2
-        data->buildings[building_id].multiplier *= 2.0;
-    else if (id >= 300 && id < 315)
+    else if (id >= 15 && id < 30)
         // Clicking gains +1% of your CpS.
         data->buildings[TYPE_CURSOR].percent_cps += 0.01;
+    else if (id < 3)
+        // multiply cursor cps by 2
+        data->buildings[TYPE_CURSOR].multiplier *= 2.0;
+    else if (id >= 30 && id < 315)
+        // multiply building cps by 2
+        data->buildings[building_id].multiplier *= 2.0;
     else if (id >= 315 && id < 317)
         // Golden cookies appear twice as often and last twice as long on screen.
         gold->time_modifier *= 2;
     else if (id == 317)
         // Golden cookie effects last twice as long.
         gold->effect_modifier *= 2;
+    else if ((id >= 318 && id < 321) || id == 373)
+        // Cookie production multiplier +1%.
+        data->multiplier += 0.01;
+    else if ((id >= 321 && id < 333) || (id >= 335 && id < 347))
+        //Cookie production multiplier +2%.
+        data->multiplier += 0.02;
+    else if ((id >= 349 && id < 355))
+        // Cookie production multiplier +3%.
+        data->multiplier += 0.03;
+    else if ((id >= 355 && id < 373) || (id >= 374 && id < 392))
+        // Cookie production multiplier +4%.
+        data->multiplier += 0.04;
+    else if ((id >= 333 && id < 335) || (id >= 347 && id < 349) || (id >= 392 && id < 460))
+        // Cookie production multiplier +5%.
+        data->multiplier += 0.05;
 }

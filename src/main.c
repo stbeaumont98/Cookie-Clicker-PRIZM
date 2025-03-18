@@ -140,7 +140,7 @@ double get_cps(const struct CookieData data) {
 			* data.buildings[i].multiplier) + (data.buildings[i].modifier \
 			* data.buildings[i].owned \
 			* (i == TYPE_CURSOR ? non_cursors : 1.0));
-	return raw_cps;
+	return raw_cps * data.multiplier;
 }
 
 double get_cpc(const struct CookieData data, double cps) {
@@ -150,12 +150,19 @@ double get_cpc(const struct CookieData data, double cps) {
 		+ (data.buildings[TYPE_CURSOR].percent_cps * cps);
 }
 
-char *get_upgrade_type(const struct CookieData data, uint8_t type) {
-	if ((type < 20 && !data.buildings[type].hidden)
-		|| (type >= 20 && data.upgrades_unlocked[type * 15]))
-		return upgrade_types[type];
-	else
-		return "???";
+// TODO: Update this to support rearrangement & flavored cookies
+char *get_upgrade_type(const struct CookieData data, uint16_t id) {
+	if (id >= 318)
+		return data.upgrades_unlocked[318] ? upgrade_types[TYPE_FLAVORED_COOKIES] : "???";
+	else {
+		uint8_t type = id / 15;
+		if ((type == TYPE_CURSOR && !data.buildings[type].hidden)
+			|| (type >= 2 && type < 21 && !data.buildings[type - 1].hidden)
+			|| ((type == TYPE_MOUSE || type == TYPE_GOLDEN) && data.upgrades_unlocked[type * 15]))
+			return upgrade_types[type];
+		else
+			return "???";
+	}
 }
 
 char *get_upgrade_description(const struct CookieData data, uint16_t id) {
@@ -163,44 +170,57 @@ char *get_upgrade_description(const struct CookieData data, uint16_t id) {
 	if (!data.upgrades_unlocked[id])
 		return "???";
 	else {
-		switch (type) {
-			case TYPE_CURSOR: 
-				switch (id) {
-					case 0:
-					case 1:
-					case 2:
-						return "The mouse and cursors are twice as efficient.";
-						break;
-					case 3:
-						return "The mouse and cursors gain +0.1 cookies for each non-cursor object\nowned.";
-						break;
-					case 4:
-						return "Multiplies the gain from Thousand fingers by 5.";
-						break;
-					case 5:
-						return "Multiplies the gain from Thousand fingers by 10.";
-						break;
-					default:
-						return "Multiplies the gain from Thousand fingers by 20.";
-						break;
-				}
-				break;
-			case TYPE_MOUSE:
-				return "Clicking gains +1% of your CpS.";
-				break;
-			case TYPE_GOLDEN:
-				switch (id) {
-					case (TYPE_GOLDEN * 15) + 2:
-						return "Golden cookie effects last twice as long.";
-						break;
-					default:
-						return "Golden cookies appear twice as often and last twice as long on\nscreen.";
-						break;
-				}
-				break;
-			default:
-				return upgrade_descriptions[type];
-				break;
+		if (id >= 318) {
+			if (id < 321 || id == 373)
+				return "Cookie production multiplier +1%.";
+			else if ((id >= 321 && id < 333) || (id >= 335 && id < 347))
+				return "Cookie production multiplier +2%.";
+			else if ((id >= 349 && id < 355))
+				return "Cookie production multiplier +3%.";
+			else if ((id >= 355 && id < 373) || (id >= 374 && id < 392))
+				return "Cookie production multiplier +4%.";
+			else
+				return "Cookie production multiplier +5%.";
+		} else {
+			switch (type) {
+				case TYPE_CURSOR:
+					switch (id) {
+						case 0:
+						case 1:
+						case 2:
+							return "The mouse and cursors are twice as efficient.";
+							break;
+						case 3:
+							return "The mouse and cursors gain +0.1 cookies for each non-cursor object\nowned.";
+							break;
+						case 4:
+							return "Multiplies the gain from Thousand fingers by 5.";
+							break;
+						case 5:
+							return "Multiplies the gain from Thousand fingers by 10.";
+							break;
+						default:
+							return "Multiplies the gain from Thousand fingers by 20.";
+							break;
+					}
+					break;
+				case TYPE_MOUSE:
+					return "Clicking gains +1% of your CpS.";
+					break;
+				case TYPE_GOLDEN:
+					switch (id) {
+						case (TYPE_GOLDEN * 15) + 2:
+							return "Golden cookie effects last twice as long.";
+							break;
+						default:
+							return "Golden cookies appear twice as often and last twice as long on\nscreen.";
+							break;
+					}
+					break;
+				default:
+					return upgrade_descriptions[type];
+					break;
+			}
 		}
 	}
 }
@@ -380,9 +400,8 @@ int main() {
 				
 				disp_string(172, 10, "Store", 0xffff);
 				small_disp_string(18, 37, "UPGRADES", 0xffff, true);
-				uint8_t u_type = (u_sel + u_sel_offset) / 15;
 
-				char *b_type = get_upgrade_type(data, u_type);
+				char *b_type = get_upgrade_type(data, u_sel + u_sel_offset);
 				x = 366 - small_text_width(b_type, true);
 				small_disp_string(x, 37, b_type, 0xffff, true);
 
@@ -403,10 +422,10 @@ int main() {
 
 				strcpy(cps_buf, "CpS: ");
 
-				tmp = get_display_val(current_cps, true, false);
+				tmp = get_display_val(current_cps, (current_cps < 1E3), false);
 				if (text_width(tmp) > 126) {
 					free(tmp);
-					tmp = get_display_val(current_cps, true, true);
+					tmp = get_display_val(current_cps, (current_cps < 1E3), true);
 				}
 				strcat(cps_buf, tmp);
 				free(tmp);
@@ -417,7 +436,7 @@ int main() {
 				for (int i = 0; i < 4; i++) {
 					uint16_t u_id = i + u_sel_offset;
 
-					if (u_id > 318)
+					if (u_id > 460)
 						continue;
 
 					// copy_sprite_masked(upgrade_frame, 23, 54 + i * 42, 30, 30, COLOR_RED);
@@ -460,7 +479,7 @@ int main() {
 
 				if ((key_press(KEY_PRGM_DOWN) || key == KEY_PRGM_DOWN) && u_sel < 3)
 					u_sel++;
-				else if ((key_press(KEY_PRGM_DOWN) || key == KEY_PRGM_DOWN) && u_sel == 3 && u_sel_offset < 318 - 4)
+				else if ((key_press(KEY_PRGM_DOWN) || key == KEY_PRGM_DOWN) && u_sel == 3 && u_sel_offset < 460 - 4)
 					u_sel_offset++;
 
 				if ((key_press(KEY_PRGM_UP) || key == KEY_PRGM_UP) && u_sel > 0)
@@ -469,11 +488,11 @@ int main() {
 					u_sel_offset--;
 
 
-				if ((key_press(KEY_PRGM_RIGHT) || key == KEY_PRGM_RIGHT) && u_sel_offset <= 318 - 15)
+				if ((key_press(KEY_PRGM_RIGHT) || key == KEY_PRGM_RIGHT) && u_sel_offset <= 460 - 15)
 					u_sel_offset += 15;
-				else if ((key_press(KEY_PRGM_RIGHT) || key == KEY_PRGM_RIGHT) && u_sel_offset > 318 - 15) {
+				else if ((key_press(KEY_PRGM_RIGHT) || key == KEY_PRGM_RIGHT) && u_sel_offset > 460 - 15) {
 					u_sel = 3;
-					u_sel_offset = 318 - 4;
+					u_sel_offset = 460 - 4;
 				}
 
 				if ((key_press(KEY_PRGM_LEFT) || key == KEY_PRGM_LEFT) && u_sel_offset >= 15)
@@ -570,7 +589,7 @@ int main() {
 
 				// end store code
 
-				if (key_press(KEY_PRGM_SHIFT) || key == KEY_PRGM_SHIFT) {
+				if (key_press(KEY_PRGM_SHIFT) || true) {
 					scale_w = 112;
 					scale_h = 114;
 					data.cookies += cpc * gold.click_multiplier;
@@ -607,10 +626,10 @@ int main() {
 
 				strcpy(cps_buf, "CpS: ");
 
-				tmp = get_display_val(current_cps, true, false);
+				tmp = get_display_val(current_cps, (current_cps < 1E3), false);
 				if (text_width(tmp) > 126) {
 					free(tmp);
-					tmp = get_display_val(current_cps, true, true);
+					tmp = get_display_val(current_cps, (current_cps < 1E3), true);
 				}
 				strcat(cps_buf, tmp);
 				free(tmp);
@@ -750,7 +769,7 @@ int main() {
 					strcat(msg_buf, buildings[r_b]);
 					strcat(msg_buf, "are boosting");
 					strcat(msg_buf, strlen(buildings[r_b]) >= 15 ? "\n" : " ");
-					strcat(msg_buf, "your raw_cps!");
+					strcat(msg_buf, "your CpS!");
 					strcat(msg_buf, strlen(buildings[r_b]) >= 15 ? " " : "\n");
 					strcat(msg_buf, "Cookie production +");
 

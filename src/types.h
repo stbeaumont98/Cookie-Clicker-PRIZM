@@ -50,8 +50,9 @@ struct CookieData {
 	uint32_t click_count;
 	uint16_t gold_click_count;
 	uint16_t total_buildings;
-	bool upgrades[318];
-	bool upgrades_unlocked[318];
+	bool upgrades[460];
+	bool upgrades_unlocked[460];
+	double multiplier;
 };
 
 struct Message {

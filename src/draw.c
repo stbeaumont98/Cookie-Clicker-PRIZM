@@ -221,6 +221,7 @@ void disp_string(unsigned x, unsigned y, const char* message, int color) {
     int x_offset = 0;
     int y_offset = 0;
     char c;
+    bool quote = false;
     for (i = 0; i < l; i++) {
         c = message[i];
         int w = char_width[(int) c];
@@ -274,10 +275,12 @@ void disp_string(unsigned x, unsigned y, const char* message, int color) {
                 default:
                     y_offset = 11 - h;
                     break;
-            } 
-            copy_sprite_1bit(charmap[(int) c], x + x_offset, y + y_offset + (line * 13),
-                w, h, charmap_palette, color);
+            }
+            copy_sprite_1bit((c == '\"' && quote) ? r_quote : charmap[(int) c],
+                x + x_offset, y + y_offset + (line * 13), w, h, charmap_palette, color);
             x_offset += (c == ' ') ? 5 : (w + (c == 'Q' ? -1 : 1) + (c == '(' || c == ')' ? 1 : 0));
+            if (c == '\"')
+                quote = !quote;
         }
         if (x + x_offset >= 384) {
             x_offset = 0;

@@ -195,6 +195,10 @@ const unsigned char e[] = {
     0xc7, 0x93, 0x39, 0x01, 0x3f, 0x3f, 0x9d, 0xc3
 };
 
+const unsigned char é[12] = {
+    0xf3, 0xe7, 0xef, 0xff, 0xc7, 0x93, 0x39, 0x01, 0x3f, 0x3f, 0x9d, 0xc3
+};
+
 const unsigned char f[] = {
     0xe7, 0xc7, 0x9f, 0x9f, 0x07, 0x9f, 0x9f, 0x9f, 0x9f, 0x9f, 0x9f, 0x0f
 };
@@ -340,12 +344,16 @@ const unsigned char r_quote[7] = {
     0xbb, 0x11, 0x11, 0x99, 0xbb, 0xbb, 0x77
 };
 
+const unsigned char r_s_quote[7] = {
+    0xbf, 0x1f, 0x1f, 0x9f, 0xbf, 0xbf, 0x7f
+};
+
 static const uint8_t char_width[] = {
     ['\n'] = 0,
     // symbols
     ['!'] = 2, ['%'] = 16, ['+'] = 7, ['-'] = 7, [','] = 2, ['.'] = 2,
     [':'] = 2, [';'] = 2, ['?'] = 6, ['('] = 4, [')'] = 4, ['\"'] = 7,
-    ['\''] = 7,
+    ['\''] = 3,
     // numbers
     ['0'] = 8, ['1'] = 4, ['2'] = 7, ['3'] = 7, ['4'] = 9,
     ['5'] = 7, ['6'] = 8, ['7'] = 8, ['8'] = 8, ['9'] = 8,
@@ -360,7 +368,7 @@ static const uint8_t char_width[] = {
     ['g'] = 8, ['h'] = 9, ['i'] = 4, ['j'] = 3, ['k'] = 9, ['l'] = 4,
     ['m'] = 14, ['n'] = 9, ['o'] = 8, ['p'] = 8, ['q'] = 8, ['r'] = 7,
     ['s'] = 8, ['t'] = 5, ['u'] = 9, ['v'] = 8, ['w'] = 13, ['x'] = 8,
-    ['y'] = 8, ['z'] = 7,
+    ['y'] = 8, ['z'] = 7, ['`'] = 7
 };
 
 static const uint8_t char_height[] = {
@@ -383,7 +391,7 @@ static const uint8_t char_height[] = {
     ['g'] = 12, ['h'] = 12, ['i'] = 11, ['j'] = 14, ['k'] = 12, ['l'] = 12,
     ['m'] = 8, ['n'] = 8, ['o'] = 8, ['p'] = 11, ['q'] = 11, ['r'] = 8,
     ['s'] = 8, ['t'] = 10, ['u'] = 8, ['v'] = 8, ['w'] = 8, ['x'] = 8,
-    ['y'] = 11, ['z'] = 8,
+    ['y'] = 11, ['z'] = 8, ['`'] = 12
 };
 
 static const unsigned char *charmap[] = {
@@ -391,7 +399,7 @@ static const unsigned char *charmap[] = {
     ['!'] = exclamation, ['%'] = percent, ['+'] = plus, ['-'] = minus,
     [','] = comma, ['.'] = period, [':'] = colon, [';'] = semicolon,
     ['?'] = question, ['('] = l_parenthesis, [')'] = r_parenthesis,
-    ['\"'] = l_quote, ['\''] = r_quote,
+    ['\"'] = l_quote, ['\''] = r_s_quote,
     // numbers
     ['0'] = zero, ['1'] = one, ['2'] = two, ['3'] = three, ['4'] = four,
     ['5'] = five, ['6'] = six, ['7'] = seven, ['8'] = eight, ['9'] = nine,
@@ -406,7 +414,7 @@ static const unsigned char *charmap[] = {
     ['g'] = g, ['h'] = h, ['i'] = li, ['j'] = lj, ['k'] = lk, ['l'] = l,
     ['m'] = m, ['n'] = n, ['o'] = o, ['p'] = p, ['q'] = q, ['r'] = r,
     ['s'] = s, ['t'] = t, ['u'] = u, ['v'] = v, ['w'] = w, ['x'] = x,
-    ['y'] = y, ['z'] = z,
+    ['y'] = y, ['z'] = z, ['`'] = é
 };
 
 // small

@@ -66,7 +66,7 @@ void save_game(const struct CookieData data, const struct GoldenData gold) {
     int h_file = Bfile_OpenFile_OS(p_file, 3, 0);
 
     if (h_file < 0) {
-        size_t size = 0x200;
+        size_t size = 0x320;
         if (Bfile_CreateEntry_OS(p_file, 1, &size) >= 0) {
             h_file = Bfile_OpenFile_OS(p_file, 3, 0);
             if (h_file < 0) {
@@ -81,7 +81,7 @@ void save_game(const struct CookieData data, const struct GoldenData gold) {
 	}
 	ProgressBar2((unsigned char *) heading, 1, 21);
 
-	char save_buf[0x200];
+	char save_buf[0x320];
 
 	char *tmp = get_save_val(data.cookies_all_time);
     strcpy(save_buf, tmp);
@@ -212,7 +212,7 @@ void save_game(const struct CookieData data, const struct GoldenData gold) {
 	ProgressBar2((unsigned char *) heading, 18, 21);
 
 	tmp = malloc(2);
-	for (i = 0; i < 318; i++) {
+	for (i = 0; i < 460; i++) {
 		itoa(data.upgrades[i], tmp, 10);
 		strcat(save_buf, tmp);
 	}
@@ -263,12 +263,14 @@ void load_game(struct CookieData *data, struct GoldenData *gold) {
 
 	data->buildings_unlocked = 2;
 
-	for (i = 0; i < 318; i++) {
+	for (i = 0; i < 460; i++) {
 		data->upgrades[i] = false;
-		data->upgrades_unlocked[i] = true;
+		data->upgrades_unlocked[i] = false;
 	}
 
-	char *buf = malloc(0x400);
+	data->multiplier = 1.0;
+
+	char *buf = malloc(0x320);
 	
     unsigned short p_file[sizeof(path) * 2];
     Bfile_StrToName_ncpy(p_file, path, sizeof(path));
@@ -376,8 +378,8 @@ void load_game(struct CookieData *data, struct GoldenData *gold) {
 
 	gold->boost_multiplier = strtod(dec, NULL) * ten_pow(strtod(pow, NULL));
 
-	if (strlen(upgrades) == 318) {
-		for (i = 0; i < 318; i++) {
+	if (strlen(upgrades) == 460) {
+		for (i = 0; i < 460; i++) {
 			bool isowned = (upgrades[i] == '1');
 			data->upgrades[i] = isowned;
 			data->upgrades_unlocked[i] = isowned;
