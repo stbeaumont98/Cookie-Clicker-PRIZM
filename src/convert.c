@@ -21,8 +21,8 @@ const char *suffixes_abrev[25] = { " mil.", " bil.", " tril.", " quad.",
 
 char *get_display_val(double val, bool disp_dec, bool abrev) {
 	double disp_val = val;
-	char *val_buf = malloc(30);
-	char *suffix = malloc(20);
+	char *val_buf = malloc(0x20);
+	char *suffix = malloc(0x18);
 	int dec = 0;
 
 	if (val >= 1E6) {
