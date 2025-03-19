@@ -573,7 +573,7 @@ const struct Upgrade upgrades[] = {
 };
 
 void unlock_upgrades(struct CookieData *data) {
-    int i;
+    int i, j;
 
     // cursor upgrades
 
@@ -587,62 +587,20 @@ void unlock_upgrades(struct CookieData *data) {
         data->upgrades_unlocked[3] = true;
 
     if (data->upgrades[3]) {
-        if (data->buildings[TYPE_CURSOR].owned >= 50)
-            data->upgrades_unlocked[4] = true;
-        if (data->buildings[TYPE_CURSOR].owned >= 100)
-            data->upgrades_unlocked[5] = true;
-        if (data->buildings[TYPE_CURSOR].owned >= 150)
-            data->upgrades_unlocked[6] = true;
-        if (data->buildings[TYPE_CURSOR].owned >= 200)
-            data->upgrades_unlocked[7] = true;
-        if (data->buildings[TYPE_CURSOR].owned >= 250)
-            data->upgrades_unlocked[8] = true;
-        if (data->buildings[TYPE_CURSOR].owned >= 300)
-            data->upgrades_unlocked[9] = true;
-        if (data->buildings[TYPE_CURSOR].owned >= 350)
-            data->upgrades_unlocked[10] = true;
-        if (data->buildings[TYPE_CURSOR].owned >= 400)
-            data->upgrades_unlocked[11] = true;
-        if (data->buildings[TYPE_CURSOR].owned >= 450)
-            data->upgrades_unlocked[12] = true;
-        if (data->buildings[TYPE_CURSOR].owned >= 500)
-            data->upgrades_unlocked[13] = true;
-        if (data->buildings[TYPE_CURSOR].owned >= 550)
-            data->upgrades_unlocked[14] = true;
+        for (i = 0; i < 11; i++) {
+            if (data->buildings[TYPE_CURSOR].owned >= (i + 1) * 50)
+                data->upgrades_unlocked[i + 4] = true;
+        }
     }
 
     // mouse upgrades
 
-    if (data->handmade_cookies >= 1E3)
-        data->upgrades_unlocked[(TYPE_MOUSE * 15)] = true;
-    if (data->handmade_cookies >= 1E5)
-        data->upgrades_unlocked[(TYPE_MOUSE * 15) + 1] = true;
-    if (data->handmade_cookies >= 1E7)
-        data->upgrades_unlocked[(TYPE_MOUSE * 15) + 2] = true;
-    if (data->handmade_cookies >= 1E9)
-        data->upgrades_unlocked[(TYPE_MOUSE * 15) + 3] = true;
-    if (data->handmade_cookies >= 1E11)
-        data->upgrades_unlocked[(TYPE_MOUSE * 15) + 4] = true;
-    if (data->handmade_cookies >= 1E13)
-        data->upgrades_unlocked[(TYPE_MOUSE * 15) + 5] = true;
-    if (data->handmade_cookies >= 1E15)
-        data->upgrades_unlocked[(TYPE_MOUSE * 15) + 6] = true;
-    if (data->handmade_cookies >= 1E17)
-        data->upgrades_unlocked[(TYPE_MOUSE * 15) + 7] = true;
-    if (data->handmade_cookies >= 1E19)
-        data->upgrades_unlocked[(TYPE_MOUSE * 15) + 8] = true;
-    if (data->handmade_cookies >= 1E21)
-        data->upgrades_unlocked[(TYPE_MOUSE * 15) + 9] = true;
-    if (data->handmade_cookies >= 1E23)
-        data->upgrades_unlocked[(TYPE_MOUSE * 15) + 10] = true;
-    if (data->handmade_cookies >= 1E25)
-        data->upgrades_unlocked[(TYPE_MOUSE * 15) + 11] = true;
-    if (data->handmade_cookies >= 1E27)
-        data->upgrades_unlocked[(TYPE_MOUSE * 15) + 12] = true;
-    if (data->handmade_cookies >= 1E29)
-        data->upgrades_unlocked[(TYPE_MOUSE * 15) + 13] = true;
-    if (data->handmade_cookies >= 1E31)
-        data->upgrades_unlocked[(TYPE_MOUSE * 15) + 14] = true;
+    double cmp_val = 1E3;
+    for (i = 0; i < 15; i++) {
+        if (data->handmade_cookies >= cmp_val)
+            data->upgrades_unlocked[(TYPE_MOUSE * 15 + i)] = true;
+        cmp_val *= 1E2;
+    }
 
     // grandma upgrades
     
@@ -652,30 +610,11 @@ void unlock_upgrades(struct CookieData *data) {
         data->upgrades_unlocked[(TYPE_GRANDMA * 15) + 1] = true;
     if (data->buildings[1].owned >= 25)
         data->upgrades_unlocked[(TYPE_GRANDMA * 15) + 2] = true;
-    if (data->buildings[1].owned >= 50)
-        data->upgrades_unlocked[(TYPE_GRANDMA * 15) + 3] = true;
-    if (data->buildings[1].owned >= 100)
-        data->upgrades_unlocked[(TYPE_GRANDMA * 15) + 4] = true;
-    if (data->buildings[1].owned >= 150)
-        data->upgrades_unlocked[(TYPE_GRANDMA * 15) + 5] = true;
-    if (data->buildings[1].owned >= 200)
-        data->upgrades_unlocked[(TYPE_GRANDMA * 15) + 6] = true;
-    if (data->buildings[1].owned >= 250)
-        data->upgrades_unlocked[(TYPE_GRANDMA * 15) + 7] = true;
-    if (data->buildings[1].owned >= 300)
-        data->upgrades_unlocked[(TYPE_GRANDMA * 15) + 8] = true;
-    if (data->buildings[1].owned >= 350)
-        data->upgrades_unlocked[(TYPE_GRANDMA * 15) + 9] = true;
-    if (data->buildings[1].owned >= 400)
-        data->upgrades_unlocked[(TYPE_GRANDMA * 15) + 10] = true;
-    if (data->buildings[1].owned >= 450)
-        data->upgrades_unlocked[(TYPE_GRANDMA * 15) + 11] = true;
-    if (data->buildings[1].owned >= 500)
-        data->upgrades_unlocked[(TYPE_GRANDMA * 15) + 12] = true;
-    if (data->buildings[1].owned >= 550)
-        data->upgrades_unlocked[(TYPE_GRANDMA * 15) + 13] = true;
-    if (data->buildings[1].owned >= 600)
-        data->upgrades_unlocked[(TYPE_GRANDMA * 15) + 14] = true;
+    
+    for (i = 0; i < 12; i++) {
+        if (data->buildings[1].owned >= (i + 1) * 50)
+            data->upgrades_unlocked[(TYPE_GRANDMA * 15) + i + 3] = true;
+    }
 
     // other building upgrades
 
@@ -686,30 +625,10 @@ void unlock_upgrades(struct CookieData *data) {
             data->upgrades_unlocked[45 + ((i - 3) * 16) + 1] = true;
         if (data->buildings[i - 1].owned >= 25)
             data->upgrades_unlocked[45 + ((i - 3) * 16) + 2] = true;
-        if (data->buildings[i - 1].owned >= 50)
-            data->upgrades_unlocked[45 + ((i - 3) * 16) + 3] = true;
-        if (data->buildings[i - 1].owned >= 100)
-            data->upgrades_unlocked[45 + ((i - 3) * 16) + 4] = true;
-        if (data->buildings[i - 1].owned >= 150)
-            data->upgrades_unlocked[45 + ((i - 3) * 16) + 5] = true;
-        if (data->buildings[i - 1].owned >= 200)
-            data->upgrades_unlocked[45 + ((i - 3) * 16) + 6] = true;
-        if (data->buildings[i - 1].owned >= 250)
-            data->upgrades_unlocked[45 + ((i - 3) * 16) + 7] = true;
-        if (data->buildings[i - 1].owned >= 300)
-            data->upgrades_unlocked[45 + ((i - 3) * 16) + 8] = true;
-        if (data->buildings[i - 1].owned >= 350)
-            data->upgrades_unlocked[45 + ((i - 3) * 16) + 9] = true;
-        if (data->buildings[i - 1].owned >= 400)
-            data->upgrades_unlocked[45 + ((i - 3) * 16) + 10] = true;
-        if (data->buildings[i - 1].owned >= 450)
-            data->upgrades_unlocked[45 + ((i - 3) * 16) + 11] = true;
-        if (data->buildings[i - 1].owned >= 500)
-            data->upgrades_unlocked[45 + ((i - 3) * 16) + 12] = true;
-        if (data->buildings[i - 1].owned >= 550)
-            data->upgrades_unlocked[45 + ((i - 3) * 16) + 13] = true;
-        if (data->buildings[i - 1].owned >= 600)
-            data->upgrades_unlocked[45 + ((i - 3) * 16) + 14] = true;
+        for (j = 0; j < 12; j++) {
+            if (data->buildings[i - 1].owned >= (j + 1) * 50)
+                data->upgrades_unlocked[45 + ((i - 3) * 16) + j + 3] = true;
+        }
         if (data->buildings[i - 1].owned >= 15 && data->buildings[1].owned >= 1)
             data->upgrades_unlocked[45 + ((i - 3) * 16) + 15] = true;
     }
@@ -752,7 +671,9 @@ void enable_upgrade(struct CookieData *data, struct GoldenData *gold, uint16_t i
         data->buildings[TYPE_CURSOR].percent += 0.01;
     else if (id >= 30 && id < 333) {
         if (id >= 45 && ((id - 44) % 16) == 0) {
+            // Grandmas are twice as efficient.
             data->buildings[1].multiplier *= 2.0;
+            // Buildings gain a percentage based on the number of grandmas.
             data->buildings[building_id].gma = true;
         } else
             // multiply building cps by 2
