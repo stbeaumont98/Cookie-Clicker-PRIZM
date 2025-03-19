@@ -278,24 +278,24 @@ void load_game(struct CookieData *data, struct GoldenData *gold) {
     int h_file = Bfile_OpenFile_OS(p_file, 3, 0);
 
     if (h_file < 0) {
-		data->cookies_all_time = 0;
-		data->cookies = 0;
-		data->handmade_cookies = 0;
+		data->cookies_all_time = 0.0;
+		data->cookies = 0.0;
+		data->handmade_cookies = 0.0;
 		data->click_count = 0;
 		data->gold_click_count = 0;
 		for (i = 0; i < 20; i ++) {
-			data->buildings[i].multiplier = 1;
-			data->buildings[i].modifier = 0;
-			data->buildings[i].percent = 0;
+			data->buildings[i].multiplier = 1.0;
+			data->buildings[i].modifier = 0.0;
+			data->buildings[i].percent = 0.0;
 			data->buildings[i].gma = false;
 		}
 		data->total_buildings = 0;
 		gold->frenzy_time = 0;
-		gold->cps_multiplier = 1;
+		gold->cps_multiplier = 1.0;
 		gold->click_frenzy_time = 0;
-		gold->click_multiplier = 1;
+		gold->click_multiplier = 1.0;
 		gold->boost_time = 0;
-		gold->boost_multiplier = 0;
+		gold->boost_multiplier = 0.0;
 		return;
 	}
 	
@@ -325,9 +325,9 @@ void load_game(struct CookieData *data, struct GoldenData *gold) {
 			}
 		}
 
-		data->buildings[i].multiplier = 1;
-		data->buildings[i].modifier = 0;
-		data->buildings[i].percent = 0;
+		data->buildings[i].multiplier = 1.0;
+		data->buildings[i].modifier = 0.0;
+		data->buildings[i].percent = 0.0;
 		data->buildings[i].gma = false;
 	}
 

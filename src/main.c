@@ -133,20 +133,20 @@ void draw_store_tile(uint16_t x, uint8_t y) {
 }
 
 double get_cps(const struct CookieData data) {
-	double non_cursors = data.total_buildings - data.buildings[TYPE_CURSOR].owned;
-	double raw_cps = (base_cps[TYPE_CURSOR] * data.buildings[TYPE_CURSOR].owned \
+	uint16_t non_cursors = data.total_buildings - data.buildings[TYPE_CURSOR].owned;
+	double raw_cps = (base_cps[TYPE_CURSOR] * (double) data.buildings[TYPE_CURSOR].owned \
 		* data.buildings[TYPE_CURSOR].multiplier) + \
-		(data.buildings[TYPE_CURSOR].modifier * data.buildings[TYPE_CURSOR].owned * non_cursors);
+		(data.buildings[TYPE_CURSOR].modifier * (double) data.buildings[TYPE_CURSOR].owned * (double) non_cursors);
 	for (int i = 1; i < 20; i++)
-		raw_cps += (base_cps[i] * data.buildings[i].owned * data.buildings[i].multiplier) \
-			* (1.0 + ((data.buildings[i].gma ? 0.01 : 0) * (data.buildings[1].owned / (i - 1))));
+		raw_cps += (base_cps[i] * (double) data.buildings[i].owned * data.buildings[i].multiplier) \
+			* (1.0 + ((data.buildings[i].gma ? 0.01 : 0.0) * ((double) data.buildings[1].owned / (double) (i - 1))));
 	return raw_cps * data.multiplier;
 }
 
 double get_cpc(const struct CookieData data, double cps) {
-	int non_cursors = data.total_buildings - data.buildings[TYPE_CURSOR].owned;
+	uint16_t non_cursors = data.total_buildings - data.buildings[TYPE_CURSOR].owned;
 	return data.buildings[TYPE_CURSOR].multiplier \
-		+ (data.buildings[TYPE_CURSOR].modifier * non_cursors) \
+		+ (data.buildings[TYPE_CURSOR].modifier * (double) non_cursors) \
 		+ (data.buildings[TYPE_CURSOR].percent * cps);
 }
 
@@ -602,10 +602,7 @@ int main() {
 					data.click_count++;
 				}
 
-				double tmp_cps = 0;
 				for (int i = 0; i < 20; i++) {
-					tmp_cps += data.buildings[i].owned * base_cps[i];
-
 					if (data.cookies_all_time >= base_prices[i])
 						data.buildings[i].hidden = false;
 					if (i >= 2) {
@@ -615,8 +612,6 @@ int main() {
 						}
 					}
 				}
-
-				raw_cps = tmp_cps;
 
 				if (key == 0) {
 					scale_w = 124;
