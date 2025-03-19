@@ -212,7 +212,7 @@ void save_game(const struct CookieData data, const struct GoldenData gold) {
 	ProgressBar2((unsigned char *) heading, 18, 21);
 
 	tmp = malloc(2);
-	for (i = 0; i < 460; i++) {
+	for (i = 0; i < 478; i++) {
 		itoa(data.upgrades[i], tmp, 10);
 		strcat(save_buf, tmp);
 	}
@@ -263,7 +263,7 @@ void load_game(struct CookieData *data, struct GoldenData *gold) {
 
 	data->buildings_unlocked = 2;
 
-	for (i = 0; i < 460; i++) {
+	for (i = 0; i < 478; i++) {
 		data->upgrades[i] = false;
 		data->upgrades_unlocked[i] = false;
 	}
@@ -286,7 +286,8 @@ void load_game(struct CookieData *data, struct GoldenData *gold) {
 		for (i = 0; i < 20; i ++) {
 			data->buildings[i].multiplier = 1;
 			data->buildings[i].modifier = 0;
-			data->buildings[i].percent_cps = 0;
+			data->buildings[i].percent = 0;
+			data->buildings[i].gma = false;
 		}
 		data->total_buildings = 0;
 		gold->frenzy_time = 0;
@@ -326,7 +327,8 @@ void load_game(struct CookieData *data, struct GoldenData *gold) {
 
 		data->buildings[i].multiplier = 1;
 		data->buildings[i].modifier = 0;
-		data->buildings[i].percent_cps = 0;
+		data->buildings[i].percent = 0;
+		data->buildings[i].gma = false;
 	}
 
 	char *clicked = strtok(NULL, "\n");
@@ -378,8 +380,8 @@ void load_game(struct CookieData *data, struct GoldenData *gold) {
 
 	gold->boost_multiplier = strtod(dec, NULL) * ten_pow(strtod(pow, NULL));
 
-	if (strlen(upgrades) == 460) {
-		for (i = 0; i < 460; i++) {
+	if (strlen(upgrades) == 478) {
+		for (i = 0; i < 478; i++) {
 			bool isowned = (upgrades[i] == '1');
 			data->upgrades[i] = isowned;
 			data->upgrades_unlocked[i] = isowned;

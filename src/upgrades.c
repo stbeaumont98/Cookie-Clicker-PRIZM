@@ -25,6 +25,27 @@ char *upgrade_descriptions[21] = {
     "Cortex bakers are twice as efficient.", "You are twice as efficient."
 };
 
+char *grandma_descriptions[21] = {
+    "", "", "", "Grandmas are twice as efficient.\nFarms gain +1% CpS per grandma.",
+    "Grandmas are twice as efficient.\nMines gain +1% CpS per 2 grandmas.",
+    "Grandmas are twice as efficient.\nFactories gain +1% CpS per 3 grandmas.",
+    "Grandmas are twice as efficient.\nBanks gain +1% CpS per 4 grandmas.",
+    "Grandmas are twice as efficient.\nTemples gain +1% CpS per 5 grandmas.",
+    "Grandmas are twice as efficient.\nWizard towers gain +1% CpS per 6 grandmas.",
+    "Grandmas are twice as efficient.\nShipments gain +1% CpS per 7 grandmas.",
+    "Grandmas are twice as efficient.\nAlchemy labs gain +1% CpS per 8 grandmas.",
+    "Grandmas are twice as efficient.\nPortals gain +1% CpS per 9 grandmas.",
+    "Grandmas are twice as efficient.\nTime machines gain +1% CpS per 10 grandmas.",
+    "Grandmas are twice as efficient.\nAntimatter condensers gain +1% CpS per 11 grandmas.",
+    "Grandmas are twice as efficient.\nPrisms gain +1% CpS per 12 grandmas.",
+    "Grandmas are twice as efficient.\nChancemakers gain +1% CpS per 13 grandmas.",
+    "Grandmas are twice as efficient.\nFractal engines gain +1% CpS per 14 grandmas.",
+    "Grandmas are twice as efficient.\nJavascript consoles gain +1% CpS per 15 grandmas.",
+    "Grandmas are twice as efficient.\nIdleverses gain +1% CpS per 16 grandmas.",
+    "Grandmas are twice as efficient.\nCortex bakers gain +1% CpS per 17 grandmas.",
+    "Grandmas are twice as efficient.\nYou gain +1% CpS per 18 grandmas."
+};
+
 const struct Upgrade upgrades[] = {
     // cursors
     {1.0E2,   "Reinforced index finger"},
@@ -41,7 +62,7 @@ const struct Upgrade upgrades[] = {
     {1.0E22,  "Octillion fingers"},
     {1.0E25,  "Nonillion fingers"},
     {1.0E28,  "Decillion fingers"},
-    {1.0E31,  "Undecillion fingers"},
+    {1.0E31,  "Undecillion fingers"},   // 14
     
     // mouse
     {5.0E4, "Plastic mouse"},
@@ -58,7 +79,7 @@ const struct Upgrade upgrades[] = {
     {5.0E26, "Plasmarble mouse"},
     {5.0E28, "Miraculite mouse"},
     {5.0E30, "Aetherice mouse"},
-    {5.0E32, "Omniplast mouse"},
+    {5.0E32, "Omniplast mouse"},        // 29
 
     // grandmas
     {1.0E3,   "Forwards from grandma"},
@@ -75,7 +96,7 @@ const struct Upgrade upgrades[] = {
     {5.0E30,  "Generation degeneration"},
     {5.0E34,  "Visits"},
     {5.0E38,  "Kitchen cabinets"},
-    {5.0E42,  "Foam-tipped canes"},
+    {5.0E42,  "Foam-tipped canes"},     // 44
 
     // farms
     {1.1E4,   "Cheap hoes"},
@@ -93,6 +114,7 @@ const struct Upgrade upgrades[] = {
     {5.5E35,  "Reverse-veganism"},
     {5.5E39,  "Cookie mulch"},
     {5.5E43,  "Self-driving tractors"},
+    {5.5E4,   "Farmer grandmas"},       // 60
 
     //mines
     {1.2E5,   "Sugar gas"},
@@ -110,6 +132,7 @@ const struct Upgrade upgrades[] = {
     {6.0E36,  "Caramel alloys"},
     {6.0E40,  "Delicious mineralogy"},
     {6.0E44,  "Mineshaft supports"},
+    {6.0E5,   "Miner grandmas"},        // 76
 
     // factories
     {1.3E6,   "Sturdier conveyor belts"},
@@ -127,6 +150,7 @@ const struct Upgrade upgrades[] = {
     {6.5E37,  "The infinity engine"},
     {6.5E41,  "N-dimensional assembly lines"},
     {6.5E45,  "Universal automation"},
+    {6.5E6,   "Worker grandmas"},       // 92
 
     // banks
     {1.4E7,   "Taller tellers"},
@@ -144,6 +168,7 @@ const struct Upgrade upgrades[] = {
     {7.0E38,  "Diminishing tax returns"},
     {7.0E42,  "Cookie Points"},
     {7.0E46,  "The big shortcake"},
+    {7.0E7,   "Banker grandmas"},       // 108
 
     // temples
     {2.0E8,   "Golden idols"},
@@ -161,6 +186,7 @@ const struct Upgrade upgrades[] = {
     {1.0E40,  "Apparitions"},
     {1.0E44,  "Negatheism"},
     {1.0E48,  "Temple traps"},
+    {1.0E9,   "Priestess grandmas"},    // 124
 
     // wizard towers
     {3.3E9,   "Pointier hats"},
@@ -178,6 +204,7 @@ const struct Upgrade upgrades[] = {
     {1.65E41, "Wizard basements"},
     {1.65E45, "Magical realism"},
     {1.65E49, "Polymorphism"},
+    {1.65E10, "Witch grandmas"},        // 140
 
     // shipments
     {5.1E10,  "Vanilla nebulae"},
@@ -195,6 +222,7 @@ const struct Upgrade upgrades[] = {
     {2.55E42, "Prime directive"},
     {2.55E46, "Cosmic foreground radiation"},
     {2.55E50, "At your doorstep in 30 minutes\nor your money back"},
+    {2.55E11, "Cosmic grandmas"},       // 156
 
     // alchemy labs
     {7.5E11,  "Antimony"},
@@ -212,6 +240,7 @@ const struct Upgrade upgrades[] = {
     {3.75E43, "Chromatic cycling"},
     {3.75E47, "Arcanized glassware"},
     {3.75E51, "The dose makes the poison"},
+    {3.75E12, "Transmuted grandmas"},   // 172
 
     // portals
     {1.0E13,  "Ancient tablet"},
@@ -229,6 +258,7 @@ const struct Upgrade upgrades[] = {
     {5.0E44,  "Domestic rifts"},
     {5.0E48,  "Portal guns"},
     {5.0E52,  "A way home"},
+    {5.0E13,  "Altered grandmas"},      // 188
 
     // time machines
     {1.4E14,  "Flux capacitors"},
@@ -246,6 +276,7 @@ const struct Upgrade upgrades[] = {
     {7.0E45,  "Patience abolished"},
     {7.0E49,  "Timeproof upholstery"},
     {7.0E53,  "Rectifying a mistake"},
+    {7.0E14,  "Grandmas\' grandmas"},   // 204
 
     // antimatter condensers
     {1.7E15,  "Sugar bosons"},
@@ -263,6 +294,7 @@ const struct Upgrade upgrades[] = {
     {8.5E46,  "Delicious pull"},
     {8.5E50,  "Employee minification"},
     {8.5E54,  "Candied atoms"},
+    {8.5E15,  "Antigrandmas"},          // 220
 
     // prisms
     {2.1E16,  "Gem polish"},
@@ -280,6 +312,7 @@ const struct Upgrade upgrades[] = {
     {1.05E48, "Occam's laser"},
     {1.05E52, "Hyperblack paint"},
     {1.05E56, "Lab goggles but like cool shades"},
+    {1.05E17, "Rainbow grandmas"},      // 236
 
     // chancemakers
     {2.6E17,  "Your lucky cookie"},
@@ -297,6 +330,7 @@ const struct Upgrade upgrades[] = {
     {1.3E49,  "On a streak"},
     {1.3E53,  "Silver lining maximization"},
     {1.3E57,  "Gambler's fallacy fallacy"},
+    {1.3E18,  "Lucky grandmas"},        // 252
 
     // fractal engines
     {3.1E18,  "Metabakeries"},
@@ -314,6 +348,7 @@ const struct Upgrade upgrades[] = {
     {1.55E50, "A box"},
     {1.55E54, "Multiscale profiling"},
     {1.55E58, "The more they stay the same"},
+    {1.55E19, "Metagrandmas"},          // 268
 
     // javascript consoles
     {7.1E20,  "The JavaScript console for\ndummies"},
@@ -331,6 +366,7 @@ const struct Upgrade upgrades[] = {
     {3.55E52, "Hacker shades"},
     {3.55E56, "PHP containment vats"},
     {3.55E60, "Simulation failsafes"},
+    {3.55E21, "Binary grandmas"},       // 284
 
     // idleverses
     {1.2E23,  "Manifest destiny"},
@@ -348,6 +384,7 @@ const struct Upgrade upgrades[] = {
     {6.0E54,  "Break the fifth wall"},
     {6.0E58,  "Opposite universe"},
     {6.0E62,  "The other routes to Rome"},
+    {6.0E23,  "Alternate grandmas"},    // 300
 
     // cortex bakers
     {1.9E25,  "Principled neural shackles"},
@@ -365,6 +402,7 @@ const struct Upgrade upgrades[] = {
     {9.5E56,  "Every possible idea"},
     {9.5E60,  "The land of dreams"},
     {9.5E64,  "Intellectual property theft"},
+    {9.5E25,  "Brainy grandmas"},       // 316
 
     // you
     {5.4E27,  "Cloning vats"},
@@ -382,11 +420,12 @@ const struct Upgrade upgrades[] = {
     {2.7E59,  "One big family"},
     {2.7E63,  "Fine-tuned body plans"},
     {2.7E67,  "Reading your clones bedtime\nstories"},
+    {2.7E28,  "Clone grandmas"},        // 332
 
     // golden cookies
     {7.77778E8, "Lucky day"},
     {7.77778E10, "Serendipity"},
-    {7.77778E13, "Get lucky"},
+    {7.77778E13, "Get lucky"},          // 335
 
     // flavored cookies
     {9.99999E5, "Plain cookies"},
@@ -605,63 +644,100 @@ void unlock_upgrades(struct CookieData *data) {
     if (data->handmade_cookies >= 1E31)
         data->upgrades_unlocked[(TYPE_MOUSE * 15) + 14] = true;
 
+    // grandma upgrades
+    
+    if (data->buildings[1].owned >= 1)
+        data->upgrades_unlocked[(TYPE_GRANDMA * 15)] = true;
+    if (data->buildings[1].owned >= 5)
+        data->upgrades_unlocked[(TYPE_GRANDMA * 15) + 1] = true;
+    if (data->buildings[1].owned >= 25)
+        data->upgrades_unlocked[(TYPE_GRANDMA * 15) + 2] = true;
+    if (data->buildings[1].owned >= 50)
+        data->upgrades_unlocked[(TYPE_GRANDMA * 15) + 3] = true;
+    if (data->buildings[1].owned >= 100)
+        data->upgrades_unlocked[(TYPE_GRANDMA * 15) + 4] = true;
+    if (data->buildings[1].owned >= 150)
+        data->upgrades_unlocked[(TYPE_GRANDMA * 15) + 5] = true;
+    if (data->buildings[1].owned >= 200)
+        data->upgrades_unlocked[(TYPE_GRANDMA * 15) + 6] = true;
+    if (data->buildings[1].owned >= 250)
+        data->upgrades_unlocked[(TYPE_GRANDMA * 15) + 7] = true;
+    if (data->buildings[1].owned >= 300)
+        data->upgrades_unlocked[(TYPE_GRANDMA * 15) + 8] = true;
+    if (data->buildings[1].owned >= 350)
+        data->upgrades_unlocked[(TYPE_GRANDMA * 15) + 9] = true;
+    if (data->buildings[1].owned >= 400)
+        data->upgrades_unlocked[(TYPE_GRANDMA * 15) + 10] = true;
+    if (data->buildings[1].owned >= 450)
+        data->upgrades_unlocked[(TYPE_GRANDMA * 15) + 11] = true;
+    if (data->buildings[1].owned >= 500)
+        data->upgrades_unlocked[(TYPE_GRANDMA * 15) + 12] = true;
+    if (data->buildings[1].owned >= 550)
+        data->upgrades_unlocked[(TYPE_GRANDMA * 15) + 13] = true;
+    if (data->buildings[1].owned >= 600)
+        data->upgrades_unlocked[(TYPE_GRANDMA * 15) + 14] = true;
+
     // other building upgrades
 
-    for (i = 2; i < 21; i++) {
+    for (i = 3; i < 21; i++) {
         if (data->buildings[i - 1].owned >= 1)
-            data->upgrades_unlocked[(i * 15)] = true;
+            data->upgrades_unlocked[45 + ((i - 3) * 16)] = true;
         if (data->buildings[i - 1].owned >= 5)
-            data->upgrades_unlocked[(i * 15) + 1] = true;
+            data->upgrades_unlocked[45 + ((i - 3) * 16) + 1] = true;
         if (data->buildings[i - 1].owned >= 25)
-            data->upgrades_unlocked[(i * 15) + 2] = true;
+            data->upgrades_unlocked[45 + ((i - 3) * 16) + 2] = true;
         if (data->buildings[i - 1].owned >= 50)
-            data->upgrades_unlocked[(i * 15) + 3] = true;
+            data->upgrades_unlocked[45 + ((i - 3) * 16) + 3] = true;
         if (data->buildings[i - 1].owned >= 100)
-            data->upgrades_unlocked[(i * 15) + 4] = true;
+            data->upgrades_unlocked[45 + ((i - 3) * 16) + 4] = true;
         if (data->buildings[i - 1].owned >= 150)
-            data->upgrades_unlocked[(i * 15) + 5] = true;
+            data->upgrades_unlocked[45 + ((i - 3) * 16) + 5] = true;
         if (data->buildings[i - 1].owned >= 200)
-            data->upgrades_unlocked[(i * 15) + 6] = true;
+            data->upgrades_unlocked[45 + ((i - 3) * 16) + 6] = true;
         if (data->buildings[i - 1].owned >= 250)
-            data->upgrades_unlocked[(i * 15) + 7] = true;
+            data->upgrades_unlocked[45 + ((i - 3) * 16) + 7] = true;
         if (data->buildings[i - 1].owned >= 300)
-            data->upgrades_unlocked[(i * 15) + 8] = true;
+            data->upgrades_unlocked[45 + ((i - 3) * 16) + 8] = true;
         if (data->buildings[i - 1].owned >= 350)
-            data->upgrades_unlocked[(i * 15) + 9] = true;
+            data->upgrades_unlocked[45 + ((i - 3) * 16) + 9] = true;
         if (data->buildings[i - 1].owned >= 400)
-            data->upgrades_unlocked[(i * 15) + 10] = true;
+            data->upgrades_unlocked[45 + ((i - 3) * 16) + 10] = true;
         if (data->buildings[i - 1].owned >= 450)
-            data->upgrades_unlocked[(i * 15) + 11] = true;
+            data->upgrades_unlocked[45 + ((i - 3) * 16) + 11] = true;
         if (data->buildings[i - 1].owned >= 500)
-            data->upgrades_unlocked[(i * 15) + 12] = true;
+            data->upgrades_unlocked[45 + ((i - 3) * 16) + 12] = true;
         if (data->buildings[i - 1].owned >= 550)
-            data->upgrades_unlocked[(i * 15) + 13] = true;
+            data->upgrades_unlocked[45 + ((i - 3) * 16) + 13] = true;
         if (data->buildings[i - 1].owned >= 600)
-            data->upgrades_unlocked[(i * 15) + 14] = true;
+            data->upgrades_unlocked[45 + ((i - 3) * 16) + 14] = true;
+        if (data->buildings[i - 1].owned >= 15 && data->buildings[1].owned >= 1)
+            data->upgrades_unlocked[45 + ((i - 3) * 16) + 15] = true;
     }
 
     // golden cookie upgrades
 
     if (data->gold_click_count >= 7)
-        data->upgrades_unlocked[(TYPE_GOLDEN * 15)] = true;
+        data->upgrades_unlocked[333] = true;
     if (data->gold_click_count >= 27)
-        data->upgrades_unlocked[(TYPE_GOLDEN * 15) + 1] = true;
+        data->upgrades_unlocked[334] = true;
     if (data->gold_click_count >= 77)
-        data->upgrades_unlocked[(TYPE_GOLDEN * 15) + 2] = true;
+        data->upgrades_unlocked[335] = true;
 
     // flavored cookie upgrades
     for (i = 0; i < 142; i++)
-        if (data->cookies_all_time >= (upgrades[318 + i].price / 20.0))
-            data->upgrades_unlocked[318 + i] = true;
+        if (data->cookies_all_time >= (upgrades[336 + i].price / 20.0))
+            data->upgrades_unlocked[336 + i] = true;
 }
 
-void enable_upgrade(struct CookieData *data, struct GoldenData *gold, int id) {
+void enable_upgrade(struct CookieData *data, struct GoldenData *gold, uint16_t id) {
+    uint8_t building_id = (id >= 45 ? ((id - 45) / 16) + 2 : (id / 15) - 1);
 
-    uint8_t building_id = (id / 15) - 1;
-
-    if (id == 3)
+    if (id < 3)
+        // multiply cursor cps by 2
+        data->buildings[TYPE_CURSOR].multiplier *= 2.0;
+    else if (id == 3)
         // Thousand fingers
-        data->buildings[TYPE_CURSOR].modifier += 0.1;
+        data->buildings[TYPE_CURSOR].modifier = 0.1;
     else if (id == 4)
         // Million fingers
         data->buildings[TYPE_CURSOR].modifier *= 5.0;
@@ -673,32 +749,34 @@ void enable_upgrade(struct CookieData *data, struct GoldenData *gold, int id) {
         data->buildings[TYPE_CURSOR].modifier *= 20.0;
     else if (id >= 15 && id < 30)
         // Clicking gains +1% of your CpS.
-        data->buildings[TYPE_CURSOR].percent_cps += 0.01;
-    else if (id < 3)
-        // multiply cursor cps by 2
-        data->buildings[TYPE_CURSOR].multiplier *= 2.0;
-    else if (id >= 30 && id < 315)
-        // multiply building cps by 2
-        data->buildings[building_id].multiplier *= 2.0;
-    else if (id >= 315 && id < 317)
+        data->buildings[TYPE_CURSOR].percent += 0.01;
+    else if (id >= 30 && id < 333) {
+        if (id >= 45 && ((id - 44) % 16) == 0) {
+            data->buildings[1].multiplier *= 2.0;
+            data->buildings[building_id].gma = true;
+        } else
+            // multiply building cps by 2
+            data->buildings[building_id].multiplier *= 2.0;
+    }
+    else if (id >= 333 && id < 335)
         // Golden cookies appear twice as often and last twice as long on screen.
         gold->time_modifier *= 2;
-    else if (id == 317)
+    else if (id == 335)
         // Golden cookie effects last twice as long.
         gold->effect_modifier *= 2;
-    else if ((id >= 318 && id < 321) || id == 373)
+    else if ((id >= 336 && id < 339) || id == 391)
         // Cookie production multiplier +1%.
         data->multiplier += 0.01;
-    else if ((id >= 321 && id < 333) || (id >= 335 && id < 347))
+    else if ((id >= 339 && id < 351) || (id >= 353 && id < 365))
         //Cookie production multiplier +2%.
         data->multiplier += 0.02;
-    else if ((id >= 349 && id < 355))
+    else if ((id >= 367 && id < 373))
         // Cookie production multiplier +3%.
         data->multiplier += 0.03;
-    else if ((id >= 355 && id < 373) || (id >= 374 && id < 392))
+    else if ((id >= 373 && id < 391) || (id >= 392 && id < 410))
         // Cookie production multiplier +4%.
         data->multiplier += 0.04;
-    else if ((id >= 333 && id < 335) || (id >= 347 && id < 349) || (id >= 392 && id < 460))
+    else if ((id >= 351 && id < 353) || (id >= 365 && id < 367) || (id >= 410 && id < 478))
         // Cookie production multiplier +5%.
         data->multiplier += 0.05;
 }

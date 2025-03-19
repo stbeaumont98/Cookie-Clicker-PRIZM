@@ -133,13 +133,12 @@ void draw_store_tile(uint16_t x, uint8_t y) {
 }
 
 double get_cps(const struct CookieData data) {
-	double raw_cps = 0;
 	double non_cursors = data.total_buildings - data.buildings[TYPE_CURSOR].owned;
-	for (int i = 0; i < 20; i++)
-		raw_cps += (base_cps[i] * data.buildings[i].owned \
-			* data.buildings[i].multiplier) + (data.buildings[i].modifier \
-			* data.buildings[i].owned \
-			* (i == TYPE_CURSOR ? non_cursors : 1.0));
+	double raw_cps = (base_cps[TYPE_CURSOR] * data.buildings[TYPE_CURSOR].owned * data.buildings[TYPE_CURSOR].multiplier) + \
+	(data.buildings[TYPE_CURSOR].modifier * data.buildings[TYPE_CURSOR].owned * non_cursors);
+	for (int i = 1; i < 20; i++)
+		raw_cps += (base_cps[i] * data.buildings[i].owned * data.buildings[i].multiplier) \
+			* (1.0 + ((data.buildings[i].gma ? 0.01 : 0) * (data.buildings[1].owned / (i - 1))));
 	return raw_cps * data.multiplier;
 }
 
@@ -147,18 +146,19 @@ double get_cpc(const struct CookieData data, double cps) {
 	int non_cursors = data.total_buildings - data.buildings[TYPE_CURSOR].owned;
 	return data.buildings[TYPE_CURSOR].multiplier \
 		+ (data.buildings[TYPE_CURSOR].modifier * non_cursors) \
-		+ (data.buildings[TYPE_CURSOR].percent_cps * cps);
+		+ (data.buildings[TYPE_CURSOR].percent * cps);
 }
 
 // TODO: Update this to support rearrangement & flavored cookies
 char *get_upgrade_type(const struct CookieData data, uint16_t id) {
-	if (id >= 318)
-		return data.upgrades_unlocked[318] ? upgrade_types[TYPE_FLAVORED_COOKIES] : "???";
+	if (id >= 336)
+		return data.upgrades_unlocked[336] ? upgrade_types[TYPE_FLAVORED_COOKIES] : "???";
 	else {
-		uint8_t type = id / 15;
+		uint8_t type = (id - (45 * (id >= 45))) / (15 + (id >= 45)) + 3 * (id >= 45);
 		if ((type == TYPE_CURSOR && !data.buildings[type].hidden)
 			|| (type >= 2 && type < 21 && !data.buildings[type - 1].hidden)
-			|| ((type == TYPE_MOUSE || type == TYPE_GOLDEN) && data.upgrades_unlocked[type * 15]))
+			|| (type == TYPE_MOUSE && data.upgrades_unlocked[type * 15])
+			|| (id >= 333 && id < 336 && data.upgrades_unlocked[333]))
 			return upgrade_types[type];
 		else
 			return "???";
@@ -166,18 +166,22 @@ char *get_upgrade_type(const struct CookieData data, uint16_t id) {
 }
 
 char *get_upgrade_description(const struct CookieData data, uint16_t id) {
-	uint8_t type = id / 15;
+	uint8_t type = (id - (45 * (id >= 45))) / (15 + (id >= 45)) + 3 * (id >= 45);
 	if (!data.upgrades_unlocked[id])
 		return "???";
 	else {
-		if (id >= 318) {
-			if (id < 321 || id == 373)
+		if (id == 333 || id == 334)
+			return "Golden cookies appear twice as often and last twice as long on\nscreen.";
+		else if (id == 335)
+			return "Golden cookie effects last twice as long.";
+		else if (id >= 336) {
+			if (id < 339 || id == 391)
 				return "Cookie production multiplier +1%.";
-			else if ((id >= 321 && id < 333) || (id >= 335 && id < 347))
+			else if ((id >= 339 && id < 351) || (id >= 353 && id < 365))
 				return "Cookie production multiplier +2%.";
-			else if ((id >= 349 && id < 355))
+			else if ((id >= 367 && id < 373))
 				return "Cookie production multiplier +3%.";
-			else if ((id >= 355 && id < 373) || (id >= 374 && id < 392))
+			else if ((id >= 373 && id < 391) || (id >= 392 && id < 410))
 				return "Cookie production multiplier +4%.";
 			else
 				return "Cookie production multiplier +5%.";
@@ -207,18 +211,8 @@ char *get_upgrade_description(const struct CookieData data, uint16_t id) {
 				case TYPE_MOUSE:
 					return "Clicking gains +1% of your CpS.";
 					break;
-				case TYPE_GOLDEN:
-					switch (id) {
-						case (TYPE_GOLDEN * 15) + 2:
-							return "Golden cookie effects last twice as long.";
-							break;
-						default:
-							return "Golden cookies appear twice as often and last twice as long on\nscreen.";
-							break;
-					}
-					break;
 				default:
-					return upgrade_descriptions[type];
+					return (id >= 45 && (id - 44) % 16 == 0) ? grandma_descriptions[type] : upgrade_descriptions[type];
 					break;
 			}
 		}
@@ -342,12 +336,21 @@ int main() {
 			free(tmp);
 
 			tmp = get_display_val(current_cps, true, false);
-			if (text_width(tmp) > 190) {
+			if (text_width(tmp) > 152) {
 				free(tmp);
 				tmp = get_display_val(current_cps, true, true);
 			}
+			int cps_w = text_width(tmp);
 			disp_string(177, 108, tmp, 0xFFFF);
 			free(tmp);
+
+			char mult[10];
+			tmp = get_display_val(data.multiplier * 100, false, false);
+			strcpy(mult, "(");
+			strcat(mult, tmp);
+			free(tmp);
+			strcat(mult, "%)");
+			small_disp_string(180 + cps_w, 113, mult, 0xFFFF, false);
 			
 			tmp = get_display_val(raw_cps, true, false);
 			if (text_width(tmp) > 154) {
@@ -436,7 +439,7 @@ int main() {
 				for (int i = 0; i < 4; i++) {
 					uint16_t u_id = i + u_sel_offset;
 
-					if (u_id > 460)
+					if (u_id > 478)
 						continue;
 
 					// copy_sprite_masked(upgrade_frame, 23, 54 + i * 42, 30, 30, COLOR_RED);
@@ -479,7 +482,7 @@ int main() {
 
 				if ((key_press(KEY_PRGM_DOWN) || key == KEY_PRGM_DOWN) && u_sel < 3)
 					u_sel++;
-				else if ((key_press(KEY_PRGM_DOWN) || key == KEY_PRGM_DOWN) && u_sel == 3 && u_sel_offset < 460 - 4)
+				else if ((key_press(KEY_PRGM_DOWN) || key == KEY_PRGM_DOWN) && u_sel == 3 && u_sel_offset < 478 - 4)
 					u_sel_offset++;
 
 				if ((key_press(KEY_PRGM_UP) || key == KEY_PRGM_UP) && u_sel > 0)
@@ -488,18 +491,18 @@ int main() {
 					u_sel_offset--;
 
 
-				if ((key_press(KEY_PRGM_RIGHT) || key == KEY_PRGM_RIGHT) && u_sel_offset <= 460 - 15)
-					u_sel_offset += 15;
-				else if ((key_press(KEY_PRGM_RIGHT) || key == KEY_PRGM_RIGHT) && u_sel_offset > 460 - 15) {
-					u_sel = 3;
-					u_sel_offset = 460 - 4;
-				}
-
 				if ((key_press(KEY_PRGM_LEFT) || key == KEY_PRGM_LEFT) && u_sel_offset >= 15)
-					u_sel_offset -= 15;
+					u_sel_offset -= (15 + ((u_sel + u_sel_offset) > 60));
 				else if ((key_press(KEY_PRGM_LEFT) || key == KEY_PRGM_LEFT) && u_sel_offset < 15) {
 					u_sel = 0;
 					u_sel_offset = 0;
+				}
+
+				if ((key_press(KEY_PRGM_RIGHT) || key == KEY_PRGM_RIGHT) && u_sel_offset < 478 - 19)
+					u_sel_offset += (15 + ((u_sel + u_sel_offset) >= 45));
+				else if ((key_press(KEY_PRGM_RIGHT) || key == KEY_PRGM_RIGHT) && u_sel_offset >= 478 - 19) {
+					u_sel = 3;
+					u_sel_offset = 478 - 4;
 				}
 
 				uint16_t u_id = u_sel + u_sel_offset;

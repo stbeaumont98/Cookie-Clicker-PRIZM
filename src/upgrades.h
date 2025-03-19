@@ -35,9 +35,10 @@
 
 extern char *upgrade_types[23];
 extern char *upgrade_descriptions[21];
+extern char *grandma_descriptions[21];
 extern const struct Upgrade upgrades[];
 
 void unlock_upgrades(struct CookieData *data);
-void enable_upgrade(struct CookieData *data, struct GoldenData *gold, int id);
+void enable_upgrade(struct CookieData *data, struct GoldenData *gold, uint16_t id);
 
 #endif

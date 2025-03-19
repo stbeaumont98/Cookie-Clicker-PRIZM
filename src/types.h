@@ -13,11 +13,12 @@ struct Building {
 	double price;
 	double multiplier;
 	double modifier;
-	double percent_cps;
+	double percent;
 	int16_t owned;
 	bool hidden;
 	bool locked;
 	double cps;
+	bool gma;
 };
 
 struct Upgrade {
@@ -50,8 +51,8 @@ struct CookieData {
 	uint32_t click_count;
 	uint16_t gold_click_count;
 	uint16_t total_buildings;
-	bool upgrades[460];
-	bool upgrades_unlocked[460];
+	bool upgrades[478];
+	bool upgrades_unlocked[478];
 	double multiplier;
 };
 
