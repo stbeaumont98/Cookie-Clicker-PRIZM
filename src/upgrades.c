@@ -687,17 +687,17 @@ void enable_upgrade(struct CookieData *data, struct GoldenData *gold, uint16_t i
         gold->effect_modifier *= 2;
     else if ((id >= 336 && id < 339) || id == 391)
         // Cookie production multiplier +1%.
-        data->multiplier += 0.01;
+        data->multiplier += (0.01 * data->multiplier);
     else if ((id >= 339 && id < 351) || (id >= 353 && id < 365))
         //Cookie production multiplier +2%.
-        data->multiplier += 0.02;
+        data->multiplier += (0.02 * data->multiplier);
     else if ((id >= 367 && id < 373))
         // Cookie production multiplier +3%.
-        data->multiplier += 0.03;
+        data->multiplier += (0.03 * data->multiplier);
     else if ((id >= 373 && id < 391) || (id >= 392 && id < 410))
         // Cookie production multiplier +4%.
-        data->multiplier += 0.04;
+        data->multiplier += (0.04 * data->multiplier);
     else if ((id >= 351 && id < 353) || (id >= 365 && id < 367) || (id >= 410 && id < 478))
         // Cookie production multiplier +5%.
-        data->multiplier += 0.05;
+        data->multiplier += (0.05 * data->multiplier);
 }
