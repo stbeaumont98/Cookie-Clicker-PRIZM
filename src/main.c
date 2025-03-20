@@ -137,7 +137,8 @@ double get_cps(const struct CookieData data) {
 	double raw_cps = (base_cps[TYPE_CURSOR] * (double) data.buildings[TYPE_CURSOR].owned \
 		* data.buildings[TYPE_CURSOR].multiplier) + \
 		(data.buildings[TYPE_CURSOR].modifier * (double) data.buildings[TYPE_CURSOR].owned * (double) non_cursors);
-	for (int i = 1; i < 20; i++)
+	raw_cps += base_cps[1] * (double) data.buildings[1].owned * data.buildings[1].multiplier;
+	for (int i = 2; i < 20; i++)
 		raw_cps += (base_cps[i] * (double) data.buildings[i].owned * data.buildings[i].multiplier) \
 			* (1.0 + ((data.buildings[i].gma ? 0.01 : 0.0) * ((double) data.buildings[1].owned / (double) (i - 1))));
 	return raw_cps * data.multiplier;
@@ -150,7 +151,6 @@ double get_cpc(const struct CookieData data, double cps) {
 		+ (data.buildings[TYPE_CURSOR].percent * cps);
 }
 
-// TODO: Update this to support rearrangement & flavored cookies
 char *get_upgrade_type(const struct CookieData data, uint16_t id) {
 	if (id >= 336)
 		return data.upgrades_unlocked[336] ? upgrade_types[TYPE_FLAVORED_COOKIES] : "???";
@@ -336,27 +336,27 @@ int main() {
 			disp_string(156, 90, tmp, 0xFFFF);
 			free(tmp);
 
-			tmp = get_display_val(current_cps, true, false);
+			tmp = get_display_val(current_cps, (current_cps < 1E3), false);
 			if (text_width(tmp) > 152) {
 				free(tmp);
-				tmp = get_display_val(current_cps, true, true);
+				tmp = get_display_val(current_cps, (current_cps < 1E3), true);
 			}
 			int cps_w = text_width(tmp);
 			disp_string(177, 108, tmp, 0xFFFF);
 			free(tmp);
 
 			char mult[10];
-			tmp = get_display_val(data.multiplier * 100, false, false);
+			tmp = get_display_val(data.multiplier * 100 * gold.cps_multiplier, false, false);
 			strcpy(mult, "(");
 			strcat(mult, tmp);
 			free(tmp);
 			strcat(mult, "%)");
 			small_disp_string(180 + cps_w, 113, mult, 0xFFFF, false);
 			
-			tmp = get_display_val(raw_cps, true, false);
+			tmp = get_display_val(raw_cps, (raw_cps < 1E3), false);
 			if (text_width(tmp) > 154) {
 				free(tmp);
-				tmp = get_display_val(raw_cps, true, true);
+				tmp = get_display_val(raw_cps, (raw_cps < 1E3), true);
 			}
 			disp_string(213, 126, tmp, 0xFFFF);
 			free(tmp);
@@ -491,22 +491,22 @@ int main() {
 				else if ((key_press(KEY_PRGM_UP) || key == KEY_PRGM_UP) && u_sel == 0 && u_sel_offset > 0)
 					u_sel_offset--;
 
+				uint16_t u_id = u_sel + u_sel_offset;
 
 				if ((key_press(KEY_PRGM_LEFT) || key == KEY_PRGM_LEFT) && u_sel_offset >= 15)
-					u_sel_offset -= (15 + ((u_sel + u_sel_offset) > 60));
+					u_sel_offset -= (15 + (u_id > 60));
 				else if ((key_press(KEY_PRGM_LEFT) || key == KEY_PRGM_LEFT) && u_sel_offset < 15) {
 					u_sel = 0;
 					u_sel_offset = 0;
 				}
 
 				if ((key_press(KEY_PRGM_RIGHT) || key == KEY_PRGM_RIGHT) && u_sel_offset < 478 - 19)
-					u_sel_offset += (15 + ((u_sel + u_sel_offset) >= 45));
+					u_sel_offset += (15 + (u_id >= 45));
 				else if ((key_press(KEY_PRGM_RIGHT) || key == KEY_PRGM_RIGHT) && u_sel_offset >= 478 - 19) {
 					u_sel = 3;
 					u_sel_offset = 478 - 4;
 				}
 
-				uint16_t u_id = u_sel + u_sel_offset;
 				if ((key_press(KEY_PRGM_ALPHA) || key == KEY_PRGM_ALPHA)
 					&& data.cookies >= upgrades[u_id].price
 					&& !data.upgrades[u_id] && data.upgrades_unlocked[u_id]) {
@@ -519,7 +519,7 @@ int main() {
 			} else {
 				draw_background();
 
-				// start store code
+				// buildings store
 
 				fill_area(180, 0, 204, 32, 0x0000);
 
@@ -557,10 +557,12 @@ int main() {
 					disp_string(x, y, price_buf, color);
 					free(price_buf);
 
-					char owned_buf[5];
-					itoa(data.buildings[b_id].owned, owned_buf, 10);
-					disp_string(380 - text_width(owned_buf), 62 + i * 42,
-						owned_buf, 0x0000);
+					if (data.buildings[b_id].owned > 0) {
+						char owned_buf[5];
+						itoa(data.buildings[b_id].owned, owned_buf, 10);
+						disp_string(380 - text_width(owned_buf), 62 + i * 42,
+							owned_buf, 0x0000);
+					}
 
 					char type[18];
 					if (!data.buildings[b_id].hidden)
@@ -593,7 +595,7 @@ int main() {
 
 				// end store code
 
-				if (key_press(KEY_PRGM_SHIFT) || true) {
+				if (key_press(KEY_PRGM_SHIFT) || key == KEY_PRGM_SHIFT) {
 					scale_w = 112;
 					scale_h = 114;
 					data.cookies += cpc * gold.click_multiplier;
@@ -652,23 +654,17 @@ int main() {
 				double cf = (double) gold.click_frenzy_time / (MAX_CLICK_FRENZY * gold.effect_modifier);
 				double b = (double) gold.boost_time / (MAX_BOOST * gold.effect_modifier);
 
-				if (gold.frenzy_time <= 0)
-					gold.cps_multiplier = 1;
-				else {
+				if (gold.frenzy_time > 0) {
 					y = (f < cf && f > b) || (f < b && f > cf) ? 3 : (f < cf && f < b) ? 6 : 0;
 					fill_area(0, y, round2(164. * f), 3, 0xddeb);
 				}
 
-				if (gold.click_frenzy_time <= 0)
-					gold.click_multiplier = 1;
-				else {
+				if (gold.click_frenzy_time > 0) {
 					y = (cf < f && cf > b) || (cf < b && cf > f) ? 3 : (cf < f && cf < b) ? 6 : 0;
 					fill_area(0, y, round2(164. * cf), 3, 0xddeb);
 				}
 
-				if (gold.boost_time <= 0) 
-					gold.boost_multiplier = 0;
-				else {
+				if (gold.boost_time > 0) {
 					y = (b < f && b > cf) || (b < cf && b > f) ? 3 : (b < f && b < cf) ? 6 : 0;
 					fill_area(0, y, round2(164. * b), 3, 0xddeb);
 				}
@@ -680,6 +676,15 @@ int main() {
 				upgrades_toggle = !upgrades_toggle;
 			}
 		}
+
+		if (gold.frenzy_time <= 0)
+			gold.cps_multiplier = 1;
+			
+		if (gold.click_frenzy_time <= 0)
+			gold.click_multiplier = 1;
+
+		if (gold.boost_time <= 0) 
+			gold.boost_multiplier = 0;
 		
 		if (key_press(KEY_PRGM_VARS) || key == KEY_PRGM_VARS)
 			stats_toggle = !stats_toggle;
