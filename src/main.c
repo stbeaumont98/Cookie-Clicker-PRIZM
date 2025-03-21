@@ -444,8 +444,11 @@ int main() {
 						continue;
 
 					copy_sprite_masked(upgrade_frame, 23, 54 + i * 42, 30, 30, COLOR_RED);
-					if (upgrades[u_id].sprite != NULL)
+					if (upgrades[u_id].sprite != NULL) {
 						copy_sprite_4bit(upgrades[u_id].sprite, 26, 57 + i * 42, 24, 24, upgrades[u_id].palette, !data.upgrades_unlocked[u_id], 0x4208);
+						if (u_id >= 222 && u_id < 236)
+							copy_sprite_4bit(rainbow, 26, 57 + i * 42, 24, 24, rainbow_pal, !data.upgrades_unlocked[u_id], 0x4208);
+					}
 					
 					char *name = get_upgrade_name(data, u_id);
 					y = (data.upgrades_unlocked[u_id] ? (text_height(name) > 1 ? 53 : 55) : 56) + i * 42;
