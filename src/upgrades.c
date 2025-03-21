@@ -115,7 +115,7 @@ const struct Upgrade upgrades[] = {
     {5.5E35,  "Reverse-veganism", farm[6], tier[12]},
     {5.5E39,  "Cookie mulch", farm[7], tier[13]},
     {5.5E43,  "Self-driving tractors", farm[7], tier[14]},
-    {5.5E4,   "Farmer grandmas", NULL, NULL},       // 60
+    {5.5E4,   "Farmer grandmas", gma, gma_pal},       // 60
 
     //mines
     {1.2E5,   "Sugar gas", mine[0], mine_pal},
@@ -352,7 +352,7 @@ const struct Upgrade upgrades[] = {
     {1.55E19, "Metagrandmas", gma, gma_pal},          // 268
 
     // javascript consoles
-    {7.1E20,  "The JavaScript console for\ndummies", idleverse[0], javascript_pal},
+    {7.1E20,  "The JavaScript console for\ndummies", javascript[0], javascript_pal},
     {3.55E21, "64bit arrays", javascript[1], tier[1]},
     {3.55E22, "Stack overflow", javascript[1], tier[2]},
     {3.55E24, "Enterprise compiler", javascript[2], tier[3]},
