@@ -24,6 +24,8 @@ struct Building {
 struct Upgrade {
 	double price;
 	char *name;
+	const unsigned char *sprite;
+	const color_t *palette;
 };
 
 struct GoldenData {

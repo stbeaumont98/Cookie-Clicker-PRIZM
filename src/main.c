@@ -172,7 +172,7 @@ char *get_upgrade_description(const struct CookieData data, uint16_t id) {
 		return "???";
 	else {
 		if (id == 333 || id == 334)
-			return "Golden cookies appear twice as often and last twice as long on\nscreen.";
+			return "Golden cookies appear twice as often and last twice as long\non screen.";
 		else if (id == 335)
 			return "Golden cookie effects last twice as long.";
 		else if (id >= 336) {
@@ -196,7 +196,7 @@ char *get_upgrade_description(const struct CookieData data, uint16_t id) {
 							return "The mouse and cursors are twice as efficient.";
 							break;
 						case 3:
-							return "The mouse and cursors gain +0.1 cookies for each non-cursor object\nowned.";
+							return "The mouse and cursors gain +0.1 cookies for each non-cursor\nobject owned.";
 							break;
 						case 4:
 							return "Multiplies the gain from Thousand fingers by 5.";
@@ -443,26 +443,29 @@ int main() {
 					if (u_id > 478)
 						continue;
 
-					// copy_sprite_masked(upgrade_frame, 23, 54 + i * 42, 30, 30, COLOR_RED);
-					// if (upgrades[u_id].sprite != NULL)
-					// 	copy_sprite_4bit(upgrades[u_id].sprite, 26, 57 + i * 42, 24, 24, upgrades[u_id].palette);
+					copy_sprite_masked(upgrade_frame, 23, 54 + i * 42, 30, 30, COLOR_RED);
+					if (upgrades[u_id].sprite != NULL) {
+						copy_sprite_4bit(upgrades[u_id].sprite, 26, 57 + i * 42, 24, 24, upgrades[u_id].palette, !data.upgrades_unlocked[u_id], 0x4208);
+						if (u_id >= 222 && u_id < 236)
+							copy_sprite_4bit(rainbow, 26, 57 + i * 42, 24, 24, rainbow_pal, !data.upgrades_unlocked[u_id], 0x4208);
+					}
 					
 					char *name = get_upgrade_name(data, u_id);
 					y = (data.upgrades_unlocked[u_id] ? (text_height(name) > 1 ? 53 : 55) : 56) + i * 42;
 					color = data.upgrades_unlocked[u_id] ? (data.upgrades[u_id] ? 0x4208 : 0xffff) : 0x4208;
 					
-					disp_string(23, y, name, color);
+					disp_string(57, y, name, color);
 
 					char *desc = get_upgrade_description(data, u_id);
 					y = (data.upgrades_unlocked[u_id] ? (text_height(name) > 1 ? 79 : 70) : 71) + i * 42;
 					color = data.upgrades_unlocked[u_id] ? (data.upgrades[u_id] ? 0x4208 : 0x8410) : 0x4208;
 
-					small_disp_string(23, y, desc, color, false);
+					small_disp_string(57, y, desc, color, false);
 					
 					if (data.upgrades_unlocked[u_id]) {
 						if (!data.upgrades[u_id]) {
 							double p = upgrades[u_id].price;
-							price_buf = get_display_val(p, false, p >= 1e36);
+							price_buf = get_display_val(p, false, p >= 1e12);
 							x = 348 - text_width(price_buf), y =  53 + i * 42;
 							copy_sprite_masked(money, x, y, 14, 14, COLOR_RED);
 							x = 364 - text_width(price_buf), y = 54 + i * 42;
