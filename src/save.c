@@ -57,7 +57,7 @@ void save_game(const struct CookieData data, const struct GoldenData gold) {
 	char *heading = "Saving...";
 	int i;
 
-	ProgressBar2((unsigned char *) heading, 0, 21);
+	ProgressBar2((unsigned char *) heading, 0, 22);
 
     unsigned short p_file[sizeof(path) * 2];
 
@@ -79,7 +79,7 @@ void save_game(const struct CookieData data, const struct GoldenData gold) {
 			DisplayMessageBox((unsigned char *) "FAILED TO CREATE FILE");
         }
 	}
-	ProgressBar2((unsigned char *) heading, 1, 21);
+	ProgressBar2((unsigned char *) heading, 1, 22);
 
 	char save_buf[0x320];
 
@@ -87,19 +87,19 @@ void save_game(const struct CookieData data, const struct GoldenData gold) {
     strcpy(save_buf, tmp);
 	free(tmp);
 	
-	ProgressBar2((unsigned char *) heading, 2, 21);
+	ProgressBar2((unsigned char *) heading, 2, 22);
 
 	tmp = get_save_val(data.cookies);
     strcat(save_buf, tmp);
 	free(tmp);
 	
-	ProgressBar2((unsigned char *) heading, 3, 21);
+	ProgressBar2((unsigned char *) heading, 3, 22);
 
 	tmp = get_save_val(data.handmade_cookies);
     strcat(save_buf, tmp);
 	free(tmp);
 	
-	ProgressBar2((unsigned char *) heading, 4, 21);
+	ProgressBar2((unsigned char *) heading, 4, 22);
 
     tmp = malloc(4);
     for (i = 0; i < 20; i++) {
@@ -109,7 +109,7 @@ void save_game(const struct CookieData data, const struct GoldenData gold) {
     }
     free(tmp);
 
-	ProgressBar2((unsigned char *) heading, 5, 21);
+	ProgressBar2((unsigned char *) heading, 5, 22);
 
 	tmp = malloc(12);
 	itoa(data.click_count, tmp, 10);
@@ -117,7 +117,7 @@ void save_game(const struct CookieData data, const struct GoldenData gold) {
 	strcat(save_buf, "\n");
 	free(tmp);
 
-	ProgressBar2((unsigned char *) heading, 6, 21);
+	ProgressBar2((unsigned char *) heading, 6, 22);
 
 	tmp = malloc(6);
 	itoa(data.gold_click_count, tmp, 10);
@@ -125,7 +125,7 @@ void save_game(const struct CookieData data, const struct GoldenData gold) {
 	strcat(save_buf, "\n");
 	free(tmp);
 
-	ProgressBar2((unsigned char *) heading, 7, 21);
+	ProgressBar2((unsigned char *) heading, 7, 22);
 
 	// save GoldenData
 
@@ -135,7 +135,7 @@ void save_game(const struct CookieData data, const struct GoldenData gold) {
 	strcat(save_buf, "\n");
 	free(tmp);
 
-	ProgressBar2((unsigned char *) heading, 8, 21);
+	ProgressBar2((unsigned char *) heading, 8, 22);
 
 	tmp = malloc(4);
 	itoa(gold.y, tmp, 10);
@@ -143,7 +143,7 @@ void save_game(const struct CookieData data, const struct GoldenData gold) {
 	strcat(save_buf, "\n");
 	free(tmp);
 
-	ProgressBar2((unsigned char *) heading, 9, 21);
+	ProgressBar2((unsigned char *) heading, 9, 22);
 
 	tmp = malloc(4);
 	itoa(gold.scale, tmp, 10);
@@ -151,7 +151,7 @@ void save_game(const struct CookieData data, const struct GoldenData gold) {
 	strcat(save_buf, "\n");
 	free(tmp);
 
-	ProgressBar2((unsigned char *) heading, 10, 21);
+	ProgressBar2((unsigned char *) heading, 10, 22);
 
 	tmp = malloc(5);
 	itoa(gold.effect, tmp, 10);
@@ -159,7 +159,7 @@ void save_game(const struct CookieData data, const struct GoldenData gold) {
 	strcat(save_buf, "\n");
 	free(tmp);
 
-	ProgressBar2((unsigned char *) heading, 11, 21);
+	ProgressBar2((unsigned char *) heading, 11, 22);
 
 	tmp = malloc(5);
 	itoa(gold.time, tmp, 10);
@@ -167,7 +167,7 @@ void save_game(const struct CookieData data, const struct GoldenData gold) {
 	strcat(save_buf, "\n");
 	free(tmp);
 
-	ProgressBar2((unsigned char *) heading, 12, 21);
+	ProgressBar2((unsigned char *) heading, 12, 22);
 
 	tmp = malloc(4);
 	itoa(gold.frenzy_time, tmp, 10);
@@ -175,13 +175,13 @@ void save_game(const struct CookieData data, const struct GoldenData gold) {
 	strcat(save_buf, "\n");
 	free(tmp);
 
-	ProgressBar2((unsigned char *) heading, 13, 21);
+	ProgressBar2((unsigned char *) heading, 13, 22);
 
 	tmp = get_save_val(gold.cps_multiplier);
 	strcat(save_buf, tmp);
 	free(tmp);
 
-	ProgressBar2((unsigned char *) heading, 14, 21);
+	ProgressBar2((unsigned char *) heading, 14, 22);
 
 	tmp = malloc(4);
 	itoa(gold.click_frenzy_time, tmp, 10);
@@ -189,13 +189,13 @@ void save_game(const struct CookieData data, const struct GoldenData gold) {
 	strcat(save_buf, "\n");
 	free(tmp);
 
-	ProgressBar2((unsigned char *) heading, 15, 21);
+	ProgressBar2((unsigned char *) heading, 15, 22);
 
 	tmp = get_save_val(gold.click_multiplier);
 	strcat(save_buf, tmp);
 	free(tmp);
 
-	ProgressBar2((unsigned char *) heading, 16, 21);
+	ProgressBar2((unsigned char *) heading, 16, 22);
 
 	tmp = malloc(4);
 	itoa(gold.boost_time, tmp, 10);
@@ -203,13 +203,19 @@ void save_game(const struct CookieData data, const struct GoldenData gold) {
 	strcat(save_buf, "\n");
 	free(tmp);
 
-	ProgressBar2((unsigned char *) heading, 17, 21);
+	ProgressBar2((unsigned char *) heading, 17, 22);
 
 	tmp = get_save_val(gold.boost_multiplier);
 	strcat(save_buf, tmp);
 	free(tmp);
 
-	ProgressBar2((unsigned char *) heading, 18, 21);
+	ProgressBar2((unsigned char *) heading, 18, 22);
+
+	tmp = get_save_val(data.multiplier);
+	strcat(save_buf, tmp);
+	free(tmp);
+
+	ProgressBar2((unsigned char *) heading, 19, 22);
 
 	tmp = malloc(2);
 	for (i = 0; i < 478; i++) {
@@ -219,15 +225,15 @@ void save_game(const struct CookieData data, const struct GoldenData gold) {
 	strcat(save_buf, "\n");
 	free(tmp);
 
-	ProgressBar2((unsigned char *) heading, 19, 21);
+	ProgressBar2((unsigned char *) heading, 20, 22);
 
     Bfile_WriteFile_OS(h_file, save_buf, strlen(save_buf));
 	
-	ProgressBar2((unsigned char *) heading, 20, 21);
+	ProgressBar2((unsigned char *) heading, 21, 22);
 
     Bfile_CloseFile_OS(h_file);
 
-	ProgressBar2((unsigned char *) heading, 21, 21);
+	ProgressBar2((unsigned char *) heading, 22, 22);
 
 	MsgBoxPop();
 
@@ -348,6 +354,7 @@ void load_game(struct CookieData *data, struct GoldenData *gold) {
 	char *click_multiplier = strtok(NULL, "\n");
 	gold->boost_time = (uint8_t) strtod(strtok(NULL, "\n"), NULL);
 	char *boost_multiplier = strtok(NULL, "\n");
+	char *multiplier = strtok(NULL, "\n");
 	char *upgrades = strtok(NULL, "\n");
 	
 	char *dec = strtok(all_time, "E");
@@ -380,12 +387,16 @@ void load_game(struct CookieData *data, struct GoldenData *gold) {
 
 	gold->boost_multiplier = strtod(dec, NULL) * ten_pow(strtod(pow, NULL));
 
+	double tmp = strtod(multiplier, NULL); 
+	if (tmp >= 1.0)
+		data->multiplier = tmp;
+
 	if (strlen(upgrades) == 478) {
 		for (i = 0; i < 478; i++) {
 			bool isowned = (upgrades[i] == '1');
 			data->upgrades[i] = isowned;
 			data->upgrades_unlocked[i] = isowned;
-			if (isowned)
+			if (isowned && i < 336)
 				enable_upgrade(data, gold, i);
 		}
 	}
