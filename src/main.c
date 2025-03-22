@@ -563,7 +563,7 @@ int main() {
 						char owned_buf[5];
 						itoa(data.buildings[b_id].owned, owned_buf, 10);
 						disp_string(380 - text_width(owned_buf), 62 + i * 42,
-							owned_buf, 0x0000);
+							owned_buf, 0x2924);
 					}
 
 					char type[18];
