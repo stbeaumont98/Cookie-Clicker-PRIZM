@@ -91,8 +91,8 @@ void set_message(struct Message *msg, const char *header,
 
 void display_msg(const struct Message msg) {
 	bool has_header = strlen(msg.header) != 0;
-	int width = max(text_width(msg.header), text_width(msg.body));
-	int height = text_height(msg.body) * 19;
+	int width = max(text_width(msg.header), small_text_width(msg.body, false));
+	int height = small_text_height(msg.body) * 12;
 	int box_width = width + 11;
 	int box_height = height + (has_header ? 23 : 0);
 	int box_x = (384 - box_width) / 2;
@@ -104,11 +104,11 @@ void display_msg(const struct Message msg) {
 	
 	if (has_header) {
 		disp_string(box_x + 5, box_y + 4, msg.header, 0xad55);
-		draw_line(box_x + 5, box_y + 22,
-			box_x + width + 3, box_y + 22, 0x632c, 0);
-		disp_string(box_x + 5, box_y + 26, msg.body, 0xad55);
+		draw_line(box_x + 5, box_y + 21,
+			box_x + width + 3, box_y + 21, 0x632c, 0);
+		small_disp_string(box_x + 5, box_y + 26, msg.body, 0xad55, false);
 	} else
-		disp_string(box_x + 5, box_y + 4, msg.body, 0xad55);
+		small_disp_string(box_x + 5, box_y + 4, msg.body, 0xad55, false);
 }
 
 void draw_background() {
@@ -361,10 +361,10 @@ int main() {
 			disp_string(213, 126, tmp, 0xFFFF);
 			free(tmp);
 
-			tmp = get_display_val(cpc * gold.click_multiplier, true, false);
+			tmp = get_display_val(cpc * gold.click_multiplier, (cpc * gold.click_multiplier < 1E3), false);
 			if (text_width(tmp) > 207) {
 				free(tmp);
-				tmp = get_display_val(cpc * gold.click_multiplier, true, true);
+				tmp = get_display_val(cpc * gold.click_multiplier, (cpc * gold.click_multiplier < 1E3), true);
 			}
 			disp_string(160, 144, tmp, 0xFFFF);
 			free(tmp);
@@ -551,8 +551,7 @@ int main() {
 						|| (text_width(price_buf) > 121 && data.buildings[b_id].owned >= 10)
 						|| (text_width(price_buf) > 130)) {
 						free(price_buf);
-						price_buf = get_display_val(data.buildings[b_id].price,
-							false, true);
+						price_buf = get_display_val(data.buildings[b_id].price, false, true);
 					}
 
 					x = 240;
@@ -623,12 +622,12 @@ int main() {
 					scale_h = 126;
 				}
 				
-				x = (scale_w < 124) ? 26 : 20, y = (scale_h < 126) ? 86 : 80;
+				x = (scale_w < 124) ? 26 : 20, y = (scale_h < 126) ? 84 : 78;
 				copy_sprite_scaled(perfect_cookie, x, y, 62, 63, scale_w, scale_h, false, 0);
 
-				fill_area(0, 10, 164, 60, 0x0000);
+				fill_area(0, 13, 164, 53, 0x0000);
 
-				strcpy(cps_buf, "CpS: ");
+				strcpy(cps_buf, "per sec: ");
 
 				tmp = get_display_val(current_cps, (current_cps < 1E3), false);
 				if (text_width(tmp) > 126) {
@@ -645,13 +644,13 @@ int main() {
 				}
 
 				x = ((164 - text_width(cookie_buf)) / 2) + 1;
-				disp_string(x, 17, cookie_buf, 0xffff);
+				disp_string(x, 19, cookie_buf, 0xffff);
 				free(cookie_buf);
 
-				disp_string(53, 34, "cookies", 0xffff);
+				disp_string(53, 36, "cookies", 0xffff);
 
-				x = ((164 - text_width(cps_buf)) / 2) + 1;
-				disp_string(x, 51, cps_buf, 0xffff);
+				x = ((164 - small_text_width(cps_buf, false)) / 2) + 1;
+				small_disp_string(x, 53, cps_buf, 0xffff, false);
 
 				double f = (double) gold.frenzy_time / (MAX_FRENZY * gold.effect_modifier);
 				double cf = (double) gold.click_frenzy_time / (MAX_CLICK_FRENZY * gold.effect_modifier);
@@ -834,6 +833,10 @@ int main() {
 			
 			if (gold.time <= 0 && gold.scale <= 2)
 				reset_gold(&gold);
+		}
+
+		if (key == KEY_PRGM_7) {
+			set_message(&msg, "TEST", "This is a test message.\nI hope it's displaying okay.", 6);
 		}
 
 		if (one_second) {
