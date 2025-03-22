@@ -188,7 +188,7 @@ void copy_sprite_1bit(const unsigned char* data, int x, int y, int width, int he
     }
 }
 
-void copy_sprite_4bit(const unsigned char* data, unsigned x, unsigned y, unsigned w, unsigned h, color_t* palette, bool overlay, color_t c) {
+void copy_sprite_4bit(const unsigned char* data, unsigned x, unsigned y, unsigned w, unsigned h, const color_t* palette, bool overlay, color_t c) {
     color_t* VRAM = (color_t*) GetVRAMAddress();
     VRAM += (LCD_WIDTH_PX * y + x);
     int offset = 0;

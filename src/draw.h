@@ -14,7 +14,7 @@ void draw_circle(int xs, int ys, int radius, int color);
 void draw_line(int x1, int y1, int x2, int y2, int color, int thickness);
 void draw_rect(int x, int y, int width, int height, int color, int thickness);
 void copy_sprite_1bit(const unsigned char* data, int x, int y, int width, int height, const color_t* palette, color_t c);
-void copy_sprite_4bit(const unsigned char* data, unsigned x, unsigned y, unsigned w, unsigned h, color_t* palette, bool overlay, color_t c);
+void copy_sprite_4bit(const unsigned char* data, unsigned x, unsigned y, unsigned w, unsigned h, const color_t* palette, bool overlay, color_t c);
 void disp_string(unsigned x, unsigned y, const char* message, int color);
 int text_width(const char *msg);
 int text_height(const char *msg);
