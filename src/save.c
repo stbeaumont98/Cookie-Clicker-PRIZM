@@ -305,7 +305,7 @@ void load_game(struct CookieData *data, struct GoldenData *gold) {
 		return;
 	}
 	
-	Bfile_ReadFile_OS(h_file, buf, 0x400, 0);
+	Bfile_ReadFile_OS(h_file, buf, 0x320, 0);
 
 	char *all_time = strtok(buf, "\n");
 	char *cookies = strtok(NULL, "\n");
@@ -388,7 +388,7 @@ void load_game(struct CookieData *data, struct GoldenData *gold) {
 	gold->boost_multiplier = strtod(dec, NULL) * ten_pow(strtod(pow, NULL));
 
 	double tmp = strtod(multiplier, NULL); 
-	if (tmp >= 1.0)
+	if (tmp > 1.0)
 		data->multiplier = tmp;
 
 	if (strlen(upgrades) == 478) {
