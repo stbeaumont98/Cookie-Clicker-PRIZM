@@ -310,6 +310,21 @@ void load_game(struct CookieData *data, struct GoldenData *gold) {
 	char *all_time = strtok(buf, "\n");
 	char *cookies = strtok(NULL, "\n");
 	char *handmade = strtok(NULL, "\n");
+	
+	char *dec = strtok(all_time, "E");
+	char *pow = strtok(NULL, "E");
+
+	data->cookies_all_time = strtod(dec, NULL) * ten_pow(strtod(pow, NULL));
+
+	dec = strtok(cookies, "E");
+	pow = strtok(NULL, "E");
+
+	data->cookies = strtod(dec, NULL) * ten_pow(strtod(pow, NULL));
+
+	dec = strtok(handmade, "E");
+	pow = strtok(NULL, "E");
+
+	data->handmade_cookies = strtod(dec, NULL) * ten_pow(strtod(pow, NULL));
 
 	for (i = 0; i < 20; i++) {
 		uint16_t count = (int16_t) strtod(strtok(NULL, "\n"), NULL);
@@ -356,21 +371,6 @@ void load_game(struct CookieData *data, struct GoldenData *gold) {
 	char *boost_multiplier = strtok(NULL, "\n");
 	char *multiplier = strtok(NULL, "\n");
 	char *upgrades = strtok(NULL, "\n");
-	
-	char *dec = strtok(all_time, "E");
-	char *pow = strtok(NULL, "E");
-
-	data->cookies_all_time = strtod(dec, NULL) * ten_pow(strtod(pow, NULL));
-
-	dec = strtok(cookies, "E");
-	pow = strtok(NULL, "E");
-
-	data->cookies = strtod(dec, NULL) * ten_pow(strtod(pow, NULL));
-
-	dec = strtok(handmade, "E");
-	pow = strtok(NULL, "E");
-
-	data->handmade_cookies = strtod(dec, NULL) * ten_pow(strtod(pow, NULL));
 
 	dec = strtok(cps_multiplier, "E");
 	pow = strtok(NULL, "E");
