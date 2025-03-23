@@ -92,9 +92,9 @@ void set_message(struct Message *msg, const char *header,
 void display_msg(const struct Message msg) {
 	bool has_header = strlen(msg.header) != 0;
 	int width = max(text_width(msg.header), small_text_width(msg.body, false));
-	int height = small_text_height(msg.body) * 12;
-	int box_width = width + 11;
-	int box_height = height + (has_header ? 23 : 0);
+	int height = (small_text_height(msg.body) * 9) + 5;
+	int box_width = width + 10;
+	int box_height = height + (has_header ? 20 : 0);
 	int box_x = (384 - box_width) / 2;
 	int box_y =  213 - box_height;
 
@@ -104,9 +104,9 @@ void display_msg(const struct Message msg) {
 	
 	if (has_header) {
 		disp_string(box_x + 5, box_y + 4, msg.header, 0xad55);
-		draw_line(box_x + 5, box_y + 21,
-			box_x + width + 3, box_y + 21, 0x632c, 0);
-		small_disp_string(box_x + 5, box_y + 26, msg.body, 0xad55, false);
+		draw_line(box_x + 5, box_y + 19,
+			box_x + width + 3, box_y + 19, 0x632c, 0);
+		small_disp_string(box_x + 5, box_y + 24, msg.body, 0xad55, false);
 	} else
 		small_disp_string(box_x + 5, box_y + 4, msg.body, 0xad55, false);
 }
@@ -346,7 +346,7 @@ int main() {
 			free(tmp);
 
 			char mult[10];
-			tmp = get_display_val(data.multiplier * 100 * gold.cps_multiplier, false, false);
+			tmp = get_display_val((data.multiplier * 100.0 * gold.cps_multiplier) + (gold.boost_multiplier * 100.0), false, false);
 			strcpy(mult, "(");
 			strcat(mult, tmp);
 			free(tmp);
@@ -773,19 +773,14 @@ int main() {
 					free(tmp);
 
 					strcat(msg_buf, buildings[r_b]);
-					strcat(msg_buf, "are boosting");
-					strcat(msg_buf, strlen(buildings[r_b]) >= 15 ? "\n" : " ");
-					strcat(msg_buf, "your CpS!");
-					strcat(msg_buf, strlen(buildings[r_b]) >= 15 ? " " : "\n");
-					strcat(msg_buf, "Cookie production +");
+					strcat(msg_buf, "are boosting your CpS!\nCookie production +");
 
 					tmp = malloc(6);
 					itoa((data.buildings[r_b].owned * 10), tmp, 10);
 					strcat(msg_buf, tmp);
 					free(tmp);
 
-					strcat(msg_buf, "% for");
-					strcat(msg_buf, strlen(buildings[r_b]) >= 15 ? "\n" : " ");
+					strcat(msg_buf, "% for ");
 
 					tmp = malloc(3);
 					itoa(gold.boost_time, tmp, 10);
@@ -833,10 +828,6 @@ int main() {
 			
 			if (gold.time <= 0 && gold.scale <= 2)
 				reset_gold(&gold);
-		}
-
-		if (key == KEY_PRGM_7) {
-			set_message(&msg, "TEST", "This is a test message.\nI hope it's displaying okay.", 6);
 		}
 
 		if (one_second) {
