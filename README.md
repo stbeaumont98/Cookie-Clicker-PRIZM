@@ -1,7 +1,7 @@
 # Cookie-Clicker-PRIZM
-A port of [Ortiel's Cookie Clicker](https://orteil.dashnet.org/cookieclicker/) for the Casio PRIZM line of calculators, originally developed over 10 years ago. Now updated to include all the buildings of the official version of the game, with simplified graphics to save space, and a new stats screen to view the progress you've made! Buildings also now unlock incrementally, as they do in the official version.
+A port of [Ortiel's Cookie Clicker](https://orteil.dashnet.org/cookieclicker/) for the Casio PRIZM line of calculators, originally developed over 10 years ago. Now updated to include all the buildings of the official version of the game, with simplified graphics to save space, and a new stats screen to view the progress you've made! Buildings also now unlock incrementally, as they do in the official version. The latest update includes the addition of an upgrades store with 478 upgrades that can increase cookie production exponentially! This update also includes UI improvements and bug fixes.
 
-In case it wasn't clear, the concept and modified sprites were created by [Ortiel](https://orteil.dashnet.org/). I'm just a fan of the game and wanted to create a version for my calculator!
+In case it wasn't clear, the concept and sprites were created by [Ortiel](https://orteil.dashnet.org/). I'm just a fan of the game and wanted to create a version for my calculator!
 
 ![menu icon screenshot](/screenshots/menu_icon.png)
 
