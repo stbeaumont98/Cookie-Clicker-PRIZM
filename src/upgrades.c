@@ -595,12 +595,10 @@ void unlock_upgrades(struct CookieData *data) {
     }
 
     // mouse upgrades
-
-    double cmp_val = 1E3;
     for (i = 0; i < 15; i++) {
-        if (data->handmade_cookies >= cmp_val)
-            data->upgrades_unlocked[(TYPE_MOUSE * 15 + i)] = true;
-        cmp_val *= 1E2;
+        int u_id = (TYPE_MOUSE * 15) + i;
+        if (data->handmade_cookies >= (upgrades[u_id].price / 50.0))
+            data->upgrades_unlocked[u_id] = true;
     }
 
     // grandma upgrades
