@@ -497,14 +497,14 @@ int main() {
 				uint16_t u_id = u_sel + u_sel_offset;
 
 				if ((key_press(KEY_PRGM_LEFT) || key == KEY_PRGM_LEFT) && u_sel_offset >= 15)
-					u_sel_offset -= (15 + (u_id > 60));
+					u_sel_offset -= (15 + (u_id > 59));
 				else if ((key_press(KEY_PRGM_LEFT) || key == KEY_PRGM_LEFT) && u_sel_offset < 15) {
 					u_sel = 0;
 					u_sel_offset = 0;
 				}
 
 				if ((key_press(KEY_PRGM_RIGHT) || key == KEY_PRGM_RIGHT) && u_sel_offset < 478 - 19)
-					u_sel_offset += (15 + (u_id >= 45));
+					u_sel_offset += (15 + (u_id >= 44));
 				else if ((key_press(KEY_PRGM_RIGHT) || key == KEY_PRGM_RIGHT) && u_sel_offset >= 478 - 19) {
 					u_sel = 3;
 					u_sel_offset = 478 - 4;
