@@ -335,22 +335,22 @@ int main() {
 			tmp = disp_comma(num_buildings);
 			disp_string(156, 90, tmp, 0xFFFF);
 			free(tmp);
-
-			tmp = get_display_val(current_cps, (current_cps < 1E3), false);
-			if (text_width(tmp) > 152) {
-				free(tmp);
-				tmp = get_display_val(current_cps, (current_cps < 1E3), true);
-			}
-			int cps_w = text_width(tmp);
-			disp_string(177, 108, tmp, 0xFFFF);
-			free(tmp);
-
+			
 			char mult[10];
 			tmp = get_display_val((data.multiplier * 100.0 * gold.cps_multiplier) + (gold.boost_multiplier * 100.0), false, false);
 			strcpy(mult, "(");
 			strcat(mult, tmp);
 			free(tmp);
 			strcat(mult, "%)");
+
+			tmp = get_display_val(current_cps, (current_cps < 1E3), false);
+			if (text_width(tmp) + small_text_width(mult, false) > 190) {
+				free(tmp);
+				tmp = get_display_val(current_cps, (current_cps < 1E3), true);
+			}
+			int cps_w = text_width(tmp);
+			disp_string(177, 108, tmp, 0xFFFF);
+			free(tmp);
 			small_disp_string(180 + cps_w, 113, mult, 0xFFFF, false);
 			
 			tmp = get_display_val(raw_cps, (raw_cps < 1E3), false);

@@ -446,7 +446,7 @@ const unsigned char small_six[] = {
 };
 
 const unsigned char small_seven[] = {
-    0x00, 0x60, 0xe8, 0xc8, 0xd8, 0xb8
+    0x00, 0x60, 0xe0, 0xc8, 0xc8, 0x98
 };
 
 const unsigned char small_eight[] = {
@@ -532,7 +532,7 @@ const unsigned char small_R[] = {
 };
 
 const unsigned char small_S[] = {
-    0x8f, 0x37, 0x9f, 0xcf, 0x67, 0x8f
+    0x8f, 0x37, 0x0f, 0xc7, 0x67, 0x8f
 };
 
 const unsigned char small_T[] = {
@@ -552,33 +552,33 @@ const unsigned char small_W[] = {
 };
 
 const unsigned char small_X[] = {
-    0x30, 0xb0, 0xa8, 0xd8, 0xa8, 0x60
+    0x30, 0x84, 0xcc, 0xcc, 0x84, 0x30
 };
 
 const unsigned char small_Y[] = {
-    0x70, 0x20, 0x88, 0xd8, 0xd8, 0xc8
+    0x30, 0x30, 0x84, 0xcc, 0xcc, 0xcc
 };
 
 const unsigned char small_Z[] = {
-    0x00, 0x60, 0xe8, 0xd8, 0xb0, 0x00
+    0x00, 0x60, 0xc8, 0x98, 0x30, 0x00
 };
 
 // lower case
 
 const unsigned char small_a[] = {
-    0x18, 0xc8, 0x08, 0x48, 0xa0
+    0x8f, 0xe7, 0x87, 0x27, 0x93
 };
 
 const unsigned char small_b[] = {
-    0x38, 0x38, 0x08, 0x20, 0x20, 0x08
+    0x38, 0x08, 0x20, 0x20, 0x20, 0x08
 };
 
 const unsigned char small_c[] = {
-    0x8f, 0x2f, 0x3f, 0x8f
+    0x8f, 0x2f, 0x3f, 0x3f, 0x8f
 };
 
 const unsigned char small_d[] = {
-    0xe7, 0xe7, 0x87, 0x27, 0x27, 0x87
+    0xe7, 0x87, 0x27, 0x27, 0x27, 0x87
 };
 
 const unsigned char small_e[] = {
@@ -586,15 +586,15 @@ const unsigned char small_e[] = {
 };
 
 const unsigned char small_f[] = {
-    0xcf, 0x9f, 0x0f, 0x9f, 0x9f, 0x9f
+    0xcf, 0x9f, 0x0f, 0x9f, 0x9f, 0x9f, 0x9f
 };
 
 const unsigned char small_g[] = {
-    0x97, 0x6f, 0x1f, 0x7f, 0x0f, 0x6f, 0x1f
+    0x8b, 0x03, 0x37, 0x0f, 0x3f, 0x07, 0x37, 0x8f
 };
 
 const unsigned char small_h[] = {
-    0x38, 0x38, 0x28, 0x00, 0x20, 0x20
+    0x38, 0x28, 0x00, 0x20, 0x20, 0x20
 };
 
 const unsigned char small_li[] = {
@@ -606,7 +606,7 @@ const unsigned char small_lj[] = {
 };
 
 const unsigned char small_lk[] = {
-    0x38, 0x38, 0x28, 0x18, 0x28, 0x20
+    0x38, 0x28, 0x18, 0x28, 0x20, 0x20
 };
 
 const unsigned char small_l[] = {
@@ -614,27 +614,27 @@ const unsigned char small_l[] = {
 };
 
 const unsigned char small_m[] = {
-    0x12, 0x00, 0x28, 0x28
+    0x12, 0x00, 0x28, 0x28, 0x28
 };
 
 const unsigned char small_n[] = {
-    0x28, 0x00, 0x20, 0x20
+    0x28, 0x00, 0x20, 0x20, 0x20
 };
 
 const unsigned char small_o[] = {
-    0x8f, 0x27, 0x27, 0x8f
+    0x8f, 0x27, 0x27, 0x27, 0x8f
 };
 
 const unsigned char small_p[] = {
-    0x48, 0x20, 0x20, 0x08, 0x38, 0x38
+    0x48, 0x00, 0x20, 0x20, 0x08, 0x38, 0x38
 };
 
 const unsigned char small_q[] = {
-    0x87, 0x27, 0x27, 0x87, 0xe7, 0xe7
+    0x87, 0x07, 0x27, 0x27, 0x87, 0xe7, 0xe7
 };
 
 const unsigned char small_r[] = {
-    0x40, 0x10, 0x30, 0x30
+    0x40, 0x10, 0x30, 0x30, 0x30
 };
 
 const unsigned char small_s[] = {
@@ -642,31 +642,31 @@ const unsigned char small_s[] = {
 };
 
 const unsigned char small_t[] = {
-    0x9f, 0x0f, 0x9f, 0x9f, 0xcf
+    0x9f, 0x0f, 0x9f, 0x9f, 0x9f, 0xcf
 };
 
 const unsigned char small_u[] = {
-    0x20, 0x20, 0x20, 0x90
+    0x20, 0x20, 0x20, 0x20, 0x90
 };
 
 const unsigned char small_v[] = {
-    0x60, 0x20, 0xa0, 0xd0
+    0x60, 0x60, 0x20, 0xa0, 0xc8
 };
 
 const unsigned char small_w[] = {
-    0x38, 0x28, 0xa8, 0x94
+    0x38, 0x28, 0x28, 0x80, 0x94
 };
 
 const unsigned char small_x[] = {
-    0x20, 0xd0, 0x90, 0x60
+    0x20, 0x88, 0xd8, 0x88, 0x20
 };
 
 const unsigned char small_y[] = {
-    0x30, 0x30, 0xa0, 0xc8, 0xe8, 0x98
+    0x20, 0x20, 0xa0, 0x80, 0xc8, 0xe8, 0x98
 };
 
 const unsigned char small_z[] = {
-    0x00, 0xd0, 0xb0, 0x00
+    0x00, 0xc0, 0xd0, 0x30, 0x00
 };
 
 // symbols
@@ -684,7 +684,8 @@ const unsigned char small_exclamation[] = {
 };
 
 const unsigned char small_percent[] = {
-    0xbb, 0x57, 0xb7, 0xef, 0xdb, 0xd5, 0xbb
+    0x9f,0xff, 0x2c,0xff, 0x29,0xff, 0x93,0xff,
+    0xe4,0xff, 0xc9,0x7f, 0x99,0x7f, 0xfc,0xff
 };
 
 const unsigned char small_plus[] = {
@@ -718,7 +719,7 @@ const unsigned char small_r_bracket[] = {
 static const uint8_t small_char_width[] = {
     ['\n'] = 0,
     // symbols
-    ['!'] = 2, ['%'] = 7, ['+'] = 3, ['-'] = 3, [','] = 2, ['.'] = 2,
+    ['!'] = 2, ['%'] = 9, ['+'] = 3, ['-'] = 3, [','] = 2, ['.'] = 2,
     [':'] = 2, [';'] = 2, ['?'] = 4, ['('] = 3, [')'] = 3, ['['] = 3,
     [']'] = 3,
     // numbers
@@ -728,20 +729,20 @@ static const uint8_t small_char_width[] = {
     ['A'] = 5, ['B'] = 5, ['C'] = 5, ['D'] = 5, ['E'] = 5, ['F'] = 5,
     ['G'] = 5, ['H'] = 5, ['I'] = 4, ['J'] = 4, ['K'] = 5, ['L'] = 5,
     ['M'] = 7, ['N'] = 6, ['O'] = 5, ['P'] = 5, ['Q'] = 5, ['R'] = 5,
-    ['S'] = 5, ['T'] = 6, ['U'] = 5, ['V'] = 6, ['W'] = 7, ['X'] = 5,
-    ['Y'] = 5, ['Z'] = 5,
+    ['S'] = 5, ['T'] = 6, ['U'] = 5, ['V'] = 6, ['W'] = 7, ['X'] = 6,
+    ['Y'] = 6, ['Z'] = 5,
     // lowercase
-    ['a'] = 5, ['b'] = 5, ['c'] = 4, ['d'] = 5, ['e'] = 4, ['f'] = 4,
-    ['g'] = 5, ['h'] = 5, ['i'] = 2, ['j'] = 3, ['k'] = 5, ['l'] = 4,
+    ['a'] = 6, ['b'] = 5, ['c'] = 4, ['d'] = 5, ['e'] = 4, ['f'] = 4,
+    ['g'] = 6, ['h'] = 5, ['i'] = 2, ['j'] = 3, ['k'] = 5, ['l'] = 4,
     ['m'] = 7, ['n'] = 5, ['o'] = 5, ['p'] = 5, ['q'] = 5, ['r'] = 4,
-    ['s'] = 5, ['t'] = 4, ['u'] = 5, ['v'] = 4, ['w'] = 6, ['x'] = 4,
+    ['s'] = 5, ['t'] = 4, ['u'] = 5, ['v'] = 5, ['w'] = 6, ['x'] = 5,
     ['y'] = 5, ['z'] = 4,
 };
 
 static const uint8_t small_char_height[] = {
     ['\n'] = 0,
     // symbols
-    ['!'] = 7, ['%'] = 7, ['+'] = 3, ['-'] = 1, [','] = 4, ['.'] = 2,
+    ['!'] = 7, ['%'] = 8, ['+'] = 3, ['-'] = 1, [','] = 4, ['.'] = 2,
     [':'] = 5, [';'] = 7, ['?'] = 7, ['('] = 6, [')'] = 6, ['['] = 8,
     [']'] = 8,
     // numbers
@@ -754,11 +755,11 @@ static const uint8_t small_char_height[] = {
     ['S'] = 6, ['T'] = 6, ['U'] = 6, ['V'] = 6, ['W'] = 6, ['X'] = 6,
     ['Y'] = 6, ['Z'] = 6,
     // lowercase
-    ['a'] = 5, ['b'] = 6, ['c'] = 4, ['d'] = 6, ['e'] = 5, ['f'] = 6,
-    ['g'] = 7, ['h'] = 6, ['i'] = 6, ['j'] = 8, ['k'] = 6, ['l'] = 6,
-    ['m'] = 4, ['n'] = 4, ['o'] = 4, ['p'] = 6, ['q'] = 6, ['r'] = 4,
-    ['s'] = 5, ['t'] = 5, ['u'] = 4, ['v'] = 4, ['w'] = 4, ['x'] = 4,
-    ['y'] = 6, ['z'] = 4,
+    ['a'] = 5, ['b'] = 6, ['c'] = 5, ['d'] = 6, ['e'] = 5, ['f'] = 7,
+    ['g'] = 8, ['h'] = 6, ['i'] = 6, ['j'] = 8, ['k'] = 6, ['l'] = 6,
+    ['m'] = 5, ['n'] = 5, ['o'] = 5, ['p'] = 7, ['q'] = 7, ['r'] = 5,
+    ['s'] = 5, ['t'] = 6, ['u'] = 5, ['v'] = 5, ['w'] = 5, ['x'] = 5,
+    ['y'] = 7, ['z'] = 5,
 };
 
 static const unsigned char *small_charmap[] = {

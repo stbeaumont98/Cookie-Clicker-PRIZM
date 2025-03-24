@@ -350,6 +350,7 @@ void small_disp_string(unsigned x, unsigned y, const char* message, int color, b
             switch (c) {
                 case '[':
                 case ']':
+                case '%':
                     y_offset = -1;
                     break;
                 case '(':
@@ -359,12 +360,14 @@ void small_disp_string(unsigned x, unsigned y, const char* message, int color, b
                 case 'Q':
                     y_offset = 0;
                     break;
-                case '+':
                 case ';':
                 case 'g':
                 case 'p':
                 case 'q':
                 case 'y':
+                    y_offset = 1;
+                    break;
+                case '+':
                     y_offset = 2;
                     break;
                 case '-':
