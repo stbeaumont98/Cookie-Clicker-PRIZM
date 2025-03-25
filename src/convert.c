@@ -6,25 +6,28 @@
 
 #include "convert.h"
 
-const char *suffixes[20] = { " million", " billion", " trillion",
+const char *suffixes[25] = { " million", " billion", " trillion",
     " quadrillion", " quintillion", " sextillion", " septillion", " octillion",
     " nonillion", " decillion", " undecillion", " duodecillion", " tredecillion",
     " quattuordecillion", " quindecillion", " sexdecillion", " septendecillion",
-    " octodecillion", " novemdecillion", " vigintillion" };
+    " octodecillion", " novemdecillion", " vigintillion", " unvigintillion",
+	" duovigintillion", " trevigintillion", " quattuorvigintillion",
+	" quinvigintillion"};
 
-const char *suffixes_abrev[20] = { " mil.", " bil.", " tril.", " quad.",
+const char *suffixes_abrev[25] = { " mil.", " bil.", " tril.", " quad.",
     " quin.", " sext.", " sept.", " oct.", " non.", " dec.", " udc.", " ddc.",
-    " tdc.", " qadc.", " qidc.", " sxdc.", " spdc.", " ocdc.", " nodc.", " vg." };
+    " tdc.", " qadc.", " qidc.", " sxdc.", " spdc.", " ocdc.", " nodc.", " vg.",
+	" uvg.", " dvg.", " tvg.", " qavg.", " qivg." };
 
 char *get_display_val(double val, bool disp_dec, bool abrev) {
 	double disp_val = val;
-	char *val_buf = malloc(30);
-	char *suffix = malloc(15);
+	char *val_buf = malloc(0x20);
+	char *suffix = malloc(0x18);
 	int dec = 0;
 
 	if (val >= 1E6) {
 		disp_val *= 1E-6;
-		for (int i = 0; i < 20; i++) {
+		for (int i = 0; i < 25; i++) {
 			if (disp_val < 1000) {
 				strcpy(suffix, abrev ? suffixes_abrev[i] : suffixes[i]);
 				break;
@@ -52,10 +55,10 @@ char *get_display_val(double val, bool disp_dec, bool abrev) {
 	return val_buf;
 }
 
-char *disp_decimal(double val, int32_t dec_pnt) {
+char *disp_decimal(double val, uint32_t dec_pnt) {
 	char *buffer = malloc(12);
 
-	int32_t integer = (int32_t) val;
+	uint32_t integer = (uint32_t) (val + 1E-9);
 
 	if (integer >= 1000) {
 		char *tmp = disp_comma(integer);
@@ -65,7 +68,8 @@ char *disp_decimal(double val, int32_t dec_pnt) {
 		itoa(integer, buffer, 10);
 	
 	if (dec_pnt != 0) {
-		int32_t decimal = (int32_t) round2((val - integer) * dec_pnt);
+		double remaining = val - (double) integer;
+		uint32_t decimal = (uint32_t) round2(remaining * dec_pnt);
 
 		if (decimal != 0) {
 
@@ -96,7 +100,7 @@ char *disp_decimal(double val, int32_t dec_pnt) {
 	return buffer;
 }
 
-char *disp_comma(int32_t val) {
+char *disp_comma(uint32_t val) {
 	char *buffer = malloc(10);
 
 	if (val < 1000) {
@@ -104,8 +108,8 @@ char *disp_comma(int32_t val) {
 		return buffer;
 	}
 
-	int16_t front = val / 1000;
-	int16_t back = val - (front * 1000);
+	uint16_t front = val / 1000;
+	uint16_t back = val - (front * 1000);
 
 	itoa(front, buffer, 10);
 

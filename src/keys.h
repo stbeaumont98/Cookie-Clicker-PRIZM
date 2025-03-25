@@ -10,4 +10,6 @@ int keydownhold(int basic_keycode);
 
 int keyPressed(int basic_keycode);
 
+int key_press(int keycode);
+
 #endif

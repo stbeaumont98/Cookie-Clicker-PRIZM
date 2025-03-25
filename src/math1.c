@@ -66,13 +66,13 @@ long factorial(int n)
 }
 
 int32_t round2(double num) {
-    return num < 0 ? num - 0.5 : num + 0.5; 
+   return num < 0 ? num - 0.5 : num + 0.5; 
 } 
 
 float floor2(double x) { 
-    return ((int) x) - (x < 0); 
+   return ((int) x) - (x < 0); 
 }
 
 float ceil2(double x) { 
-    return ((int) x) + (x < 0); 
+   return ((int) x) + (x < 0); 
 }
