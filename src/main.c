@@ -92,7 +92,7 @@ void set_message(struct Message *msg, const char *header,
 void display_msg(const struct Message msg) {
 	bool has_header = strlen(msg.header) != 0;
 	int width = max(text_width(msg.header), small_text_width(msg.body, false));
-	int height = (small_text_height(msg.body) * 9) + 5;
+	int height = (text_height(msg.body) * 9) + 5;
 	int box_width = width + 10;
 	int box_height = height + (has_header ? 20 : 0);
 	int box_x = (384 - box_width) / 2;
@@ -344,7 +344,7 @@ int main() {
 			strcat(mult, "%)");
 
 			tmp = get_display_val(current_cps, (current_cps < 1E3), false);
-			if (text_width(tmp) + small_text_width(mult, false) > 190) {
+			if (text_width(tmp) + small_text_width(mult, false) > 186) {
 				free(tmp);
 				tmp = get_display_val(current_cps, (current_cps < 1E3), true);
 			}
@@ -449,18 +449,22 @@ int main() {
 						if (u_id >= 222 && u_id < 236)
 							copy_sprite_4bit(rainbow, 26, 57 + i * 42, 24, 24, rainbow_pal, !data.upgrades_unlocked[u_id], 0x4208);
 					}
-					
-					char *name = get_upgrade_name(data, u_id);
-					y = (data.upgrades_unlocked[u_id] ? (text_height(name) > 1 ? 53 : 55) : 56) + i * 42;
-					color = data.upgrades_unlocked[u_id] ? (data.upgrades[u_id] ? 0x4208 : 0xffff) : 0x4208;
-					
-					disp_string(57, y, name, color);
 
+					char *name = get_upgrade_name(data, u_id);
 					char *desc = get_upgrade_description(data, u_id);
-					y = (data.upgrades_unlocked[u_id] ? (text_height(name) > 1 ? 79 : 70) : 71) + i * 42;
+
+					int n_h = text_height(name), d_h = text_height(desc);
+
+
+					y = (!data.upgrades_unlocked[u_id] || (n_h == 1 && d_h == 1) ? 73 : (n_h > 1 ? 80 : 69)) + i * 42;
 					color = data.upgrades_unlocked[u_id] ? (data.upgrades[u_id] ? 0x4208 : 0x8410) : 0x4208;
 
 					small_disp_string(57, y, desc, color, false);
+					
+					y = (!data.upgrades_unlocked[u_id] || (n_h == 1 && d_h == 1) ? 57 : 53) + i * 42;
+					color = data.upgrades_unlocked[u_id] ? (data.upgrades[u_id] ? 0x4208 : 0xffff) : 0x4208;
+					
+					disp_string(57, y, name, color);
 					
 					if (data.upgrades_unlocked[u_id]) {
 						if (!data.upgrades[u_id]) {
