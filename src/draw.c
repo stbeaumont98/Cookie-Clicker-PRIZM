@@ -236,7 +236,7 @@ void disp_string(unsigned x, unsigned y, const char* message, int color) {
             switch (c) {
                 case '\"':
                 case '\'':
-                    y_offset = -2;
+                    y_offset = -1;
                     break;
                 case '(':
                 case ')':
@@ -277,7 +277,7 @@ void disp_string(unsigned x, unsigned y, const char* message, int color) {
                     break;
             }
             copy_sprite_1bit((c == '\"' && quote) ? r_quote : charmap[(int) c],
-                x + x_offset, y + y_offset + (line * 13), w, h, charmap_palette, color);
+                x + x_offset + ((c == '\"' && quote) ? 1 : 0), y + y_offset + (line * 13), w, h, charmap_palette, color);
             x_offset += (c == ' ') ? 5 : (w + (c == 'Q' ? -1 : 1) + (c == '(' || c == ')' ? 1 : 0));
             if (c == '\"')
                 quote = !quote;
@@ -414,16 +414,4 @@ int small_text_width(const char *msg, bool caps) {
         }
 	}
 	return max(total, max_total);
-}
-
-int small_text_height(const char *msg) {
-    if (strlen(msg) == 0)
-        return 0;
-    
-    int total = 1;
-    for (int i = 0; i < strlen(msg); i++) {
-        if (msg[i] == '\n')
-            total ++;
-    }
-    return total;
 }

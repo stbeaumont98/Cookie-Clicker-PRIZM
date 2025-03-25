@@ -20,6 +20,5 @@ int text_width(const char *msg);
 int text_height(const char *msg);
 void small_disp_string(unsigned x, unsigned y, const char* message, int color, bool caps);
 int small_text_width(const char *msg, bool caps);
-int small_text_height(const char *msg);
 
 #endif
