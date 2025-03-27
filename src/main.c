@@ -272,12 +272,13 @@ int main() {
 	bool upgrades_toggle = false;
 	bool stats_toggle = false;
 
+	uint8_t autosave_time = 60;
+
 	while (1) {
         int key = PRGM_GetKey();
         if (key == KEY_PRGM_MENU) {
-			save_game(data, gold);
 			GetKey(&key);
-			return 0;
+			DrawFrame(0x0000);
 		}
 		
 		old_time = time;
@@ -836,6 +837,12 @@ int main() {
 				reset_gold(&gold);
 		}
 
+		if (autosave_time == 0) {
+			save_game(data, gold);
+			set_message(&msg, "", "Game saved", 2);
+			autosave_time = 60;
+		}
+
 		if (one_second) {
 			data.cookies += current_cps;
 			data.cookies_all_time += current_cps;
@@ -850,6 +857,8 @@ int main() {
 				msg.time--;
 			if (gold.time > 0)
 				gold.time--;
+			if (autosave_time > 0)
+				autosave_time--;
 		}
 
         Bdisp_PutDisp_DD();
