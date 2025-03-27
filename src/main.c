@@ -248,9 +248,6 @@ int main() {
 
 	struct Message msg;
 	
-	msg.header = malloc(30);
-	msg.body = malloc(150);
-	
 	int scale_w = 124, scale_h = 126;
 	
 	int b_sel = 0;
@@ -278,8 +275,6 @@ int main() {
         if (key == KEY_PRGM_MENU) {
 			save_game(data, gold);
 			GetKey(&key);
-			free(msg.header);
-			free(msg.body);
 			return 0;
 		}
 		

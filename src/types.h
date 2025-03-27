@@ -59,8 +59,8 @@ struct CookieData {
 };
 
 struct Message {
-	char *header;
-	char *body;
+	char header[30];
+	char body[150];
 	uint8_t time;
 };
 
