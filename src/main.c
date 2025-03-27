@@ -247,6 +247,8 @@ int main() {
 	};
 
 	struct Message msg;
+
+	set_message(&msg, "", "", 0);
 	
 	int scale_w = 124, scale_h = 126;
 	
