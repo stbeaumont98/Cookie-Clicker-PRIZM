@@ -383,7 +383,7 @@ int main() {
 			disp_string(185, 198, tmp, 0xFFFF);
 			free(tmp);
 
-			if (key_press(KEY_PRGM_EXIT) || key == KEY_PRGM_EXIT)
+			if (key_press(KEY_PRGM_EXIT))
 				stats_toggle = false;
 		} else {
 			uint16_t x, color;
@@ -488,33 +488,33 @@ int main() {
 
 				draw_rect(17, 49 + u_sel * 42, 349, 39, 0xff80, 1);
 
-				if ((key_press(KEY_PRGM_DOWN) || key == KEY_PRGM_DOWN) && u_sel < 3)
+				if (key_press(KEY_PRGM_DOWN) && u_sel < 3)
 					u_sel++;
-				else if ((key_press(KEY_PRGM_DOWN) || key == KEY_PRGM_DOWN) && u_sel == 3 && u_sel_offset < 478 - 4)
+				else if (key_press(KEY_PRGM_DOWN) && u_sel == 3 && u_sel_offset < 478 - 4)
 					u_sel_offset++;
 
-				if ((key_press(KEY_PRGM_UP) || key == KEY_PRGM_UP) && u_sel > 0)
+				if (key_press(KEY_PRGM_UP) && u_sel > 0)
 					u_sel--;
-				else if ((key_press(KEY_PRGM_UP) || key == KEY_PRGM_UP) && u_sel == 0 && u_sel_offset > 0)
+				else if (key_press(KEY_PRGM_UP) && u_sel == 0 && u_sel_offset > 0)
 					u_sel_offset--;
 
 				uint16_t u_id = u_sel + u_sel_offset;
 
-				if ((key_press(KEY_PRGM_LEFT) || key == KEY_PRGM_LEFT) && u_sel_offset >= 15)
+				if (key_press(KEY_PRGM_LEFT) && u_sel_offset >= 15)
 					u_sel_offset -= (15 + (u_id > 59));
-				else if ((key_press(KEY_PRGM_LEFT) || key == KEY_PRGM_LEFT) && u_sel_offset < 15) {
+				else if (key_press(KEY_PRGM_LEFT) && u_sel_offset < 15) {
 					u_sel = 0;
 					u_sel_offset = 0;
 				}
 
-				if ((key_press(KEY_PRGM_RIGHT) || key == KEY_PRGM_RIGHT) && u_sel_offset < 478 - 19)
+				if (key_press(KEY_PRGM_RIGHT) && u_sel_offset < 478 - 19)
 					u_sel_offset += (15 + (u_id >= 44));
-				else if ((key_press(KEY_PRGM_RIGHT) || key == KEY_PRGM_RIGHT) && u_sel_offset >= 478 - 19) {
+				else if (key_press(KEY_PRGM_RIGHT) && u_sel_offset >= 478 - 19) {
 					u_sel = 3;
 					u_sel_offset = 478 - 4;
 				}
 
-				if ((key_press(KEY_PRGM_ALPHA) || key == KEY_PRGM_ALPHA)
+				if (key_press(KEY_PRGM_ALPHA)
 					&& data.cookies >= upgrades[u_id].price
 					&& !data.upgrades[u_id] && data.upgrades_unlocked[u_id]) {
 					data.cookies -= upgrades[u_id].price;
@@ -580,19 +580,19 @@ int main() {
 
 				draw_rect(181, 49 + b_sel * 42, 201, 39, 0xff80, 1);
 
-				if ((key_press(KEY_PRGM_DOWN) || key == KEY_PRGM_DOWN) && b_sel < store_size - 1)
+				if (key_press(KEY_PRGM_DOWN) && b_sel < store_size - 1)
 					b_sel++;
-				else if ((key_press(KEY_PRGM_DOWN) || key == KEY_PRGM_DOWN) && b_sel == 3 && data.buildings_unlocked > 4
+				else if (key_press(KEY_PRGM_DOWN) && b_sel == 3 && data.buildings_unlocked > 4
 					&& b_sel_offset < data.buildings_unlocked - 4)
 					b_sel_offset++;
 
-				if ((key_press(KEY_PRGM_UP) || key == KEY_PRGM_UP) && b_sel > 0)
+				if (key_press(KEY_PRGM_UP) && b_sel > 0)
 					b_sel--;
-				else if ((key_press(KEY_PRGM_UP) || key == KEY_PRGM_UP) && b_sel == 0 && b_sel_offset > 0)
+				else if (key_press(KEY_PRGM_UP) && b_sel == 0 && b_sel_offset > 0)
 					b_sel_offset--;
 
 				uint8_t b_id = b_sel + b_sel_offset;
-				if ((key_press(KEY_PRGM_ALPHA) || key == KEY_PRGM_ALPHA)
+				if (key_press(KEY_PRGM_ALPHA)
 					&& data.cookies >= data.buildings[b_id].price) {
 					data.cookies -= data.buildings[b_id].price;
 					data.buildings[b_id].owned++;
@@ -602,7 +602,7 @@ int main() {
 
 				// end store code
 
-				if (key_press(KEY_PRGM_SHIFT) || key == KEY_PRGM_SHIFT) {
+				if (key_press(KEY_PRGM_SHIFT)) {
 					scale_w = 112;
 					scale_h = 114;
 					data.cookies += current_cpc;
@@ -677,14 +677,15 @@ int main() {
 				}
 			}
 	
-			if (key_press(KEY_PRGM_OPTN) || key == KEY_PRGM_OPTN) {
+			if (key_press(KEY_PRGM_OPTN)) {
 				if (!upgrades_toggle)
 					unlock_upgrades(&data);
 				upgrades_toggle = !upgrades_toggle;
 			}
 		}
 
-		if (key_press(KEY_PRGM_EXP) || key == KEY_PRGM_EXP) {
+		// manual save
+		if (key_press(KEY_PRGM_EXP)) {
 			save_game(data, gold);
 			set_message(&msg, "", "Game saved", 2);
 		}
@@ -698,16 +699,16 @@ int main() {
 		if (gold.boost_time <= 0) 
 			gold.boost_multiplier = 0;
 		
-		if (key_press(KEY_PRGM_VARS) || key == KEY_PRGM_VARS)
+		if (key_press(KEY_PRGM_VARS))
 			stats_toggle = !stats_toggle;
 
 		if (msg.time > 0) {
 			display_msg(msg);
-			if (key_press(KEY_PRGM_EXIT) || key == KEY_PRGM_EXIT)
+			if (key_press(KEY_PRGM_EXIT))
 				msg.time = 0;
 		}
 		
-		if ((key_press(f_buttons[gold.x]) || key == f_buttons[gold.x]) && gold.time <= (13 * gold.time_modifier)) {
+		if (key_press(f_buttons[gold.x]) && gold.time <= (13 * gold.time_modifier)) {
 			data.gold_click_count++;
 			if (gold.effect > 0 && gold.effect <= 425) {
 				// Lucky!
@@ -840,6 +841,7 @@ int main() {
 				reset_gold(&gold);
 		}
 
+		// autosave when the time runs out
 		if (autosave_time == 0) {
 			save_game(data, gold);
 			set_message(&msg, "", "Game saved", 2);
