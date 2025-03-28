@@ -403,8 +403,8 @@ int main() {
 				disp_string(172, 10, "Store", 0xffff);
 				small_disp_string(18, 37, "UPGRADES", 0xffff, true);
 
-				small_disp_string(28, 21, "[OPTN]", 0xffff, true);
-				copy_sprite_1bit(arrow[1], 20, 21, 6, 6, arrow_pal, 0xffff);
+				small_disp_string(28, 5, "[OPTN]", 0xffff, true);
+				copy_sprite_1bit(arrow[1], 20, 5, 6, 6, arrow_pal, 0xffff);
 
 				char *b_type = get_upgrade_type(data, u_sel + u_sel_offset);
 				x = 366 - small_text_width(b_type, true);
@@ -533,8 +533,8 @@ int main() {
 				disp_string(262, 10, "Store", 0xffff);
 				small_disp_string(182, 37, "BUILDINGS", 0xffff, true);
 
-				small_disp_string(339, 21, "[OPTN]", 0xffff, true);
-				copy_sprite_1bit(arrow[0], 374, 21, 6, 6, arrow_pal, 0xffff);
+				small_disp_string(339, 5, "[OPTN]", 0xffff, true);
+				copy_sprite_1bit(arrow[0], 374, 5, 6, 6, arrow_pal, 0xffff);
 
 				int store_size = (data.buildings_unlocked < 4) ? data.buildings_unlocked : 4;
 
