@@ -12,4 +12,4 @@ In case it wasn't clear, the concept and sprites were created by [Ortiel](https:
 
 Discussion thread: https://www.cemetech.net/forum/viewtopic.php?t=10476
 
-Download: https://www.cemetech.net/downloads/files/1127/x3364
+Download: https://www.cemetech.net/downloads/files/1127/x3369
