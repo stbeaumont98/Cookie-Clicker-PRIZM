@@ -228,6 +228,8 @@ char *get_upgrade_name(const struct CookieData data, uint16_t id) {
 }
 
 int main() {
+	EnableStatusArea(3);
+	EnableDisplayHeader(0, 0);
     Bdisp_EnableColor(1);
 	srandom(RTC_GetTicks());
 	DrawFrame(0x0000);
@@ -276,10 +278,6 @@ int main() {
 
 	while (1) {
         int key = PRGM_GetKey();
-        if (key == KEY_PRGM_MENU) {
-			GetKey(&key);
-			DrawFrame(0x0000);
-		}
 		
 		old_time = time;
 		time = get_time();
@@ -405,12 +403,12 @@ int main() {
 				disp_string(172, 10, "Store", 0xffff);
 				small_disp_string(18, 37, "UPGRADES", 0xffff, true);
 
+				small_disp_string(28, 21, "[OPTN]", 0xffff, true);
+				copy_sprite_1bit(arrow[1], 20, 21, 6, 6, arrow_pal, 0xffff);
+
 				char *b_type = get_upgrade_type(data, u_sel + u_sel_offset);
 				x = 366 - small_text_width(b_type, true);
 				small_disp_string(x, 37, b_type, 0xffff, true);
-
-				small_disp_string(28, 5, "[OPTN]", 0xffff, true);
-				copy_sprite_1bit(arrow[1], 20, 5, 6, 6, arrow_pal, 0xffff);
 
 				cookie_buf = get_display_val(data.cookies, false, false);
 				if (text_width(cookie_buf) > 162) {
@@ -534,9 +532,9 @@ int main() {
 
 				disp_string(262, 10, "Store", 0xffff);
 				small_disp_string(182, 37, "BUILDINGS", 0xffff, true);
-				small_disp_string(339, 5, "[OPTN]", 0xffff, true);
-			
-				copy_sprite_1bit(arrow[0], 374, 5, 6, 6, arrow_pal, 0xffff);
+
+				small_disp_string(339, 21, "[OPTN]", 0xffff, true);
+				copy_sprite_1bit(arrow[0], 374, 21, 6, 6, arrow_pal, 0xffff);
 
 				int store_size = (data.buildings_unlocked < 4) ? data.buildings_unlocked : 4;
 
@@ -684,6 +682,11 @@ int main() {
 					unlock_upgrades(&data);
 				upgrades_toggle = !upgrades_toggle;
 			}
+		}
+
+		if (key_press(KEY_PRGM_EXP) || key == KEY_PRGM_EXP) {
+			save_game(data, gold);
+			set_message(&msg, "", "Game saved", 2);
 		}
 
 		if (gold.frenzy_time <= 0)
@@ -859,6 +862,11 @@ int main() {
 				gold.time--;
 			if (autosave_time > 0)
 				autosave_time--;
+		}
+
+        if (key == KEY_PRGM_MENU) {
+			GetKey(&key);
+			DrawFrame(0x0000);
 		}
 
         Bdisp_PutDisp_DD();
