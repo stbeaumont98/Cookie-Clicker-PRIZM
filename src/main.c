@@ -228,6 +228,8 @@ char *get_upgrade_name(const struct CookieData data, uint16_t id) {
 }
 
 int main() {
+	EnableStatusArea(3);
+	EnableDisplayHeader(0, 0);
     Bdisp_EnableColor(1);
 	srandom(RTC_GetTicks());
 	DrawFrame(0x0000);
@@ -248,8 +250,7 @@ int main() {
 
 	struct Message msg;
 
-	msg.header = malloc(30);
-	msg.body = malloc(150);
+	set_message(&msg, "", "", 0);
 	
 	int scale_w = 124, scale_h = 126;
 	
@@ -273,15 +274,10 @@ int main() {
 	bool upgrades_toggle = false;
 	bool stats_toggle = false;
 
+	uint8_t autosave_time = 60;
+
 	while (1) {
         int key = PRGM_GetKey();
-        if (key == KEY_PRGM_MENU) {
-			save_game(data, gold);
-			GetKey(&key);
-			free(msg.header);
-			free(msg.body);
-			return 0;
-		}
 		
 		old_time = time;
 		time = get_time();
@@ -407,12 +403,12 @@ int main() {
 				disp_string(172, 10, "Store", 0xffff);
 				small_disp_string(18, 37, "UPGRADES", 0xffff, true);
 
+				small_disp_string(28, 21, "[OPTN]", 0xffff, true);
+				copy_sprite_1bit(arrow[1], 20, 21, 6, 6, arrow_pal, 0xffff);
+
 				char *b_type = get_upgrade_type(data, u_sel + u_sel_offset);
 				x = 366 - small_text_width(b_type, true);
 				small_disp_string(x, 37, b_type, 0xffff, true);
-
-				small_disp_string(28, 5, "[OPTN]", 0xffff, true);
-				copy_sprite_1bit(arrow[1], 20, 5, 6, 6, arrow_pal, 0xffff);
 
 				cookie_buf = get_display_val(data.cookies, false, false);
 				if (text_width(cookie_buf) > 162) {
@@ -536,9 +532,9 @@ int main() {
 
 				disp_string(262, 10, "Store", 0xffff);
 				small_disp_string(182, 37, "BUILDINGS", 0xffff, true);
-				small_disp_string(339, 5, "[OPTN]", 0xffff, true);
-			
-				copy_sprite_1bit(arrow[0], 374, 5, 6, 6, arrow_pal, 0xffff);
+
+				small_disp_string(339, 21, "[OPTN]", 0xffff, true);
+				copy_sprite_1bit(arrow[0], 374, 21, 6, 6, arrow_pal, 0xffff);
 
 				int store_size = (data.buildings_unlocked < 4) ? data.buildings_unlocked : 4;
 
@@ -686,6 +682,12 @@ int main() {
 					unlock_upgrades(&data);
 				upgrades_toggle = !upgrades_toggle;
 			}
+		}
+
+		// manual save
+		if (key_press(KEY_PRGM_EXP)) {
+			save_game(data, gold);
+			set_message(&msg, "", "Game saved", 2);
 		}
 
 		if (gold.frenzy_time <= 0)
@@ -839,6 +841,13 @@ int main() {
 				reset_gold(&gold);
 		}
 
+		// autosave when the time runs out
+		if (autosave_time == 0) {
+			save_game(data, gold);
+			set_message(&msg, "", "Game saved", 2);
+			autosave_time = 60;
+		}
+
 		if (one_second) {
 			data.cookies += current_cps;
 			data.cookies_all_time += current_cps;
@@ -853,6 +862,13 @@ int main() {
 				msg.time--;
 			if (gold.time > 0)
 				gold.time--;
+			if (autosave_time > 0)
+				autosave_time--;
+		}
+
+        if (key == KEY_PRGM_MENU) {
+			GetKey(&key);
+			DrawFrame(0x0000);
 		}
 
         Bdisp_PutDisp_DD();
