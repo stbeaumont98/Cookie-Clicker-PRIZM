@@ -73,7 +73,7 @@ static const char *blab[39] = {
 	"This golden cookie was a complete fabrication.",
 	"In theory there is no wrong way of clicking\na golden cookie, but you did that, somehow.",
 	"All cookies multiplied by 999!\nAll cookies divided by 999!", "Why?",
-	"Why did you click that?", "Your cookies will never give you up."
+	"Why did you click that?", "Your cookies are never gonna give you up."
 };
 
 int *screen;
@@ -276,6 +276,8 @@ int main() {
 
 	uint8_t autosave_time = 60;
 
+	bool sleep = false;
+
 	while (1) {
         int key = PRGM_GetKey();
 		
@@ -290,6 +292,10 @@ int main() {
 			+ (raw_cps * gold.cps_multiplier * gold.boost_multiplier);
 
 		current_cpc =  get_cpc(data, current_cps) * gold.click_multiplier;
+
+		if (key_press(KEY_PRGM_ACON))
+			sleep = !sleep;
+			//PowerOff(0);
 
 		if (stats_toggle) {
 			fill_scr(0x0000);
@@ -871,8 +877,11 @@ int main() {
 			DrawFrame(0x0000);
 		}
 
-        Bdisp_PutDisp_DD();
-        Bdisp_AllClr_VRAM();
+		if (sleep)
+			fill_scr(0x0000);
+
+		Bdisp_PutDisp_DD();
+		Bdisp_AllClr_VRAM();
 	}
 	return 0;
 }
