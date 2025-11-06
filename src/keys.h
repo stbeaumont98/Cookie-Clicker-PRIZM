@@ -11,5 +11,6 @@ int keydownhold(int basic_keycode);
 int keyPressed(int basic_keycode);
 
 int key_press(int keycode);
+int key_hold(int keycode);
 
 #endif

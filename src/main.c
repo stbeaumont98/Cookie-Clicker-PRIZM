@@ -277,6 +277,9 @@ int main() {
 	uint8_t autosave_time = 60;
 
 	bool sleep = false;
+	bool key_held = false;
+
+	int hold_ticks = RTC_GetTicks() + 64;
 
 	while (1) {
         int key = PRGM_GetKey();
@@ -494,28 +497,28 @@ int main() {
 
 				draw_rect(17, 49 + u_sel * 42, 349, 39, 0xff80, 1);
 
-				if (key_press(KEY_PRGM_DOWN) && u_sel < 3)
+				if ((key_press(KEY_PRGM_DOWN) || (key == KEY_PRGM_DOWN && key_held)) && u_sel < 3)
 					u_sel++;
-				else if (key_press(KEY_PRGM_DOWN) && u_sel == 3 && u_sel_offset < 478 - 4)
+				else if ((key_press(KEY_PRGM_DOWN) || (key == KEY_PRGM_DOWN && key_held)) && u_sel == 3 && u_sel_offset < 478 - 4)
 					u_sel_offset++;
 
-				if (key_press(KEY_PRGM_UP) && u_sel > 0)
+				if ((key_press(KEY_PRGM_UP) || (key == KEY_PRGM_UP && key_held)) && u_sel > 0)
 					u_sel--;
-				else if (key_press(KEY_PRGM_UP) && u_sel == 0 && u_sel_offset > 0)
+				else if ((key_press(KEY_PRGM_UP) || (key == KEY_PRGM_UP && key_held)) && u_sel == 0 && u_sel_offset > 0)
 					u_sel_offset--;
 
 				uint16_t u_id = u_sel + u_sel_offset;
 
-				if (key_press(KEY_PRGM_LEFT) && u_sel_offset >= 15)
+				if ((key_press(KEY_PRGM_LEFT) || (key == KEY_PRGM_LEFT && key_held)) && u_sel_offset >= 15)
 					u_sel_offset -= (15 + (u_id > 59));
-				else if (key_press(KEY_PRGM_LEFT) && u_sel_offset < 15) {
+				else if ((key_press(KEY_PRGM_LEFT) || (key == KEY_PRGM_LEFT && key_held)) && u_sel_offset < 15) {
 					u_sel = 0;
 					u_sel_offset = 0;
 				}
 
-				if (key_press(KEY_PRGM_RIGHT) && u_sel_offset < 478 - 19)
+				if ((key_press(KEY_PRGM_RIGHT) || (key == KEY_PRGM_RIGHT && key_held)) && u_sel_offset < 478 - 19)
 					u_sel_offset += (15 + (u_id >= 44));
-				else if (key_press(KEY_PRGM_RIGHT) && u_sel_offset >= 478 - 19) {
+				else if ((key_press(KEY_PRGM_RIGHT) || (key == KEY_PRGM_RIGHT && key_held)) && u_sel_offset >= 478 - 19) {
 					u_sel = 3;
 					u_sel_offset = 478 - 4;
 				}
@@ -586,15 +589,15 @@ int main() {
 
 				draw_rect(181, 49 + b_sel * 42, 201, 39, 0xff80, 1);
 
-				if (key_press(KEY_PRGM_DOWN) && b_sel < store_size - 1)
+				if ((key_press(KEY_PRGM_DOWN) || (key == KEY_PRGM_DOWN && key_held)) && b_sel < store_size - 1)
 					b_sel++;
-				else if (key_press(KEY_PRGM_DOWN) && b_sel == 3 && data.buildings_unlocked > 4
+				else if ((key_press(KEY_PRGM_DOWN) || (key == KEY_PRGM_DOWN && key_held)) && b_sel == 3 && data.buildings_unlocked > 4
 					&& b_sel_offset < data.buildings_unlocked - 4)
 					b_sel_offset++;
 
-				if (key_press(KEY_PRGM_UP) && b_sel > 0)
+				if ((key_press(KEY_PRGM_UP) || (key == KEY_PRGM_UP && key_held)) && b_sel > 0)
 					b_sel--;
-				else if (key_press(KEY_PRGM_UP) && b_sel == 0 && b_sel_offset > 0)
+				else if ((key_press(KEY_PRGM_UP) || (key == KEY_PRGM_UP && key_held)) && b_sel == 0 && b_sel_offset > 0)
 					b_sel_offset--;
 
 				uint8_t b_id = b_sel + b_sel_offset;
@@ -871,6 +874,11 @@ int main() {
 			if (autosave_time > 0)
 				autosave_time--;
 		}
+
+		key_held = (key != 0 && RTC_GetTicks() >= hold_ticks);
+
+		if (key == 0)
+			hold_ticks = RTC_GetTicks() + 64;
 
         if (key == KEY_PRGM_MENU) {
 			GetKey(&key);
