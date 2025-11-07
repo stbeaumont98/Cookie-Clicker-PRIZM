@@ -447,90 +447,92 @@ int main() {
 				x = 365 - small_text_width(cps_buf, false);
 				small_disp_string(x, 22, cps_buf, 0xffff, false);
 
-				for (int i = 0; i < 4; i++) {
-					uint16_t u_id = i + u_sel_offset;
+				if (filtered_size > 0) {
+					for (int i = 0; i < min(filtered_size, 4); i++) {
+						uint16_t u_id = i + u_sel_offset;
+						uint16_t f_id = filtered_upgrades[u_id].id;
+
+						if (u_id > filtered_size)
+							continue;
+
+						copy_sprite_masked(upgrade_frame, 23, 54 + i * 42, 30, 30, COLOR_RED);
+						if (filtered_upgrades[u_id].sprite != NULL) {
+							copy_sprite_4bit(filtered_upgrades[u_id].sprite, 26, 57 + i * 42, 24, 24,
+							filtered_upgrades[u_id].palette, false, 0x4208);
+							if (u_id >= 222 && u_id < 236)
+								copy_sprite_4bit(rainbow, 26, 57 + i * 42, 24, 24,
+									rainbow_pal, false, 0x4208);
+						}
+
+						char *name =  filtered_upgrades[u_id].name;//get_upgrade_name(data, u_id);
+						char *desc = get_upgrade_description(data, f_id);
+
+						int n_h = text_height(name), d_h = text_height(desc);
+
+						y = (!data.upgrades_unlocked[f_id] || (n_h == 1 && d_h == 1) ?
+							73 : (n_h > 1 ? 80 : 69)) + i * 42;
+						color = data.upgrades[f_id] ? 0x4208 : 0x8410;
+
+						small_disp_string(57, y, desc, color, false);
+						
+						y = (!data.upgrades_unlocked[f_id] || (n_h == 1 && d_h == 1) ? 57 : 53) + i * 42;
+						color = data.upgrades[f_id] ? 0x4208 : 0xffff;
+						
+						disp_string(57, y, name, color);
+						
+						if (!data.upgrades[f_id]) {
+							double p = filtered_upgrades[u_id].price;
+							price_buf = get_display_val(p, false, p >= 1e12);
+							x = 348 - text_width(price_buf), y =  53 + i * 42;
+							copy_sprite_masked(money, x, y, 14, 14, COLOR_RED);
+							x = 364 - text_width(price_buf), y = 54 + i * 42;
+							color = (data.cookies >= filtered_upgrades[u_id].price) ? 0x67ec : COLOR_RED;
+							disp_string(x, y, price_buf, color);
+							free(price_buf);
+						} else {
+							x = 353, y = 53 + i * 42;
+							copy_sprite_masked(check, x, y, 11, 10, COLOR_RED);
+						}
+					}
+
+					draw_rect(17, 49 + u_sel * 42, 349, 39, 0xff80, 1);
+
+					if ((key_press(KEY_PRGM_DOWN) || (key == KEY_PRGM_DOWN && key_held)) && u_sel < min(filtered_size - 1, 3))
+						u_sel++;
+					else if ((key_press(KEY_PRGM_DOWN) || (key == KEY_PRGM_DOWN && key_held)) && u_sel == 3 && u_sel_offset < filtered_size - 4)
+						u_sel_offset++;
+
+					if ((key_press(KEY_PRGM_UP) || (key == KEY_PRGM_UP && key_held)) && u_sel > 0)
+						u_sel--;
+					else if ((key_press(KEY_PRGM_UP) || (key == KEY_PRGM_UP && key_held)) && u_sel == 0 && u_sel_offset > 0)
+						u_sel_offset--;
+
+					uint16_t u_id = u_sel + u_sel_offset;
+
+					if ((key_press(KEY_PRGM_LEFT) || (key == KEY_PRGM_LEFT && key_held)) && u_sel_offset >= 15)
+						u_sel_offset -= (15 + (u_id > 59));
+					else if ((key_press(KEY_PRGM_LEFT) || (key == KEY_PRGM_LEFT && key_held)) && u_sel_offset < 15) {
+						u_sel = 0;
+						u_sel_offset = 0;
+					}
+
+					if ((key_press(KEY_PRGM_RIGHT) || (key == KEY_PRGM_RIGHT && key_held)) && u_sel_offset < filtered_size - 19)
+						u_sel_offset += (15 + (u_id >= 44));
+					else if ((key_press(KEY_PRGM_RIGHT) || (key == KEY_PRGM_RIGHT && key_held)) && u_sel_offset >= filtered_size - 19) {
+						u_sel = 3;
+						u_sel_offset = filtered_size - 4;
+					}
+
 					uint16_t f_id = filtered_upgrades[u_id].id;
 
-					if (u_id > filtered_size)
-						continue;
-
-					copy_sprite_masked(upgrade_frame, 23, 54 + i * 42, 30, 30, COLOR_RED);
-					if (filtered_upgrades[u_id].sprite != NULL) {
-						copy_sprite_4bit(filtered_upgrades[u_id].sprite, 26, 57 + i * 42, 24, 24,
-						 filtered_upgrades[u_id].palette, false, 0x4208);
-						if (u_id >= 222 && u_id < 236)
-							copy_sprite_4bit(rainbow, 26, 57 + i * 42, 24, 24,
-								rainbow_pal, false, 0x4208);
+					if (key_press(KEY_PRGM_ALPHA)
+						&& data.cookies >= filtered_upgrades[u_id].price
+						&& !data.upgrades[f_id]) {
+						data.cookies -= filtered_upgrades[u_id].price;
+						data.upgrades[f_id] = true;
+						enable_upgrade(&data, &gold, f_id);
+						unlock_upgrades(&data);
 					}
-
-					char *name =  filtered_upgrades[u_id].name;//get_upgrade_name(data, u_id);
-					char *desc = get_upgrade_description(data, f_id);
-
-					int n_h = text_height(name), d_h = text_height(desc);
-
-					y = (!data.upgrades_unlocked[f_id] || (n_h == 1 && d_h == 1) ?
-						73 : (n_h > 1 ? 80 : 69)) + i * 42;
-					color = data.upgrades[f_id] ? 0x4208 : 0x8410;
-
-					small_disp_string(57, y, desc, color, false);
-					
-					y = (!data.upgrades_unlocked[f_id] || (n_h == 1 && d_h == 1) ? 57 : 53) + i * 42;
-					color = data.upgrades[f_id] ? 0x4208 : 0xffff;
-					
-					disp_string(57, y, name, color);
-					
-					if (!data.upgrades[f_id]) {
-						double p = filtered_upgrades[u_id].price;
-						price_buf = get_display_val(p, false, p >= 1e12);
-						x = 348 - text_width(price_buf), y =  53 + i * 42;
-						copy_sprite_masked(money, x, y, 14, 14, COLOR_RED);
-						x = 364 - text_width(price_buf), y = 54 + i * 42;
-						color = (data.cookies >= filtered_upgrades[u_id].price) ? 0x67ec : COLOR_RED;
-						disp_string(x, y, price_buf, color);
-						free(price_buf);
-					} else {
-						x = 353, y = 53 + i * 42;
-						copy_sprite_masked(check, x, y, 11, 10, COLOR_RED);
-					}
-				}
-
-				draw_rect(17, 49 + u_sel * 42, 349, 39, 0xff80, 1);
-
-				if ((key_press(KEY_PRGM_DOWN) || (key == KEY_PRGM_DOWN && key_held)) && u_sel < 3)
-					u_sel++;
-				else if ((key_press(KEY_PRGM_DOWN) || (key == KEY_PRGM_DOWN && key_held)) && u_sel == 3 && u_sel_offset < filtered_size - 4)
-					u_sel_offset++;
-
-				if ((key_press(KEY_PRGM_UP) || (key == KEY_PRGM_UP && key_held)) && u_sel > 0)
-					u_sel--;
-				else if ((key_press(KEY_PRGM_UP) || (key == KEY_PRGM_UP && key_held)) && u_sel == 0 && u_sel_offset > 0)
-					u_sel_offset--;
-
-				uint16_t u_id = u_sel + u_sel_offset;
-
-				if ((key_press(KEY_PRGM_LEFT) || (key == KEY_PRGM_LEFT && key_held)) && u_sel_offset >= 15)
-					u_sel_offset -= (15 + (u_id > 59));
-				else if ((key_press(KEY_PRGM_LEFT) || (key == KEY_PRGM_LEFT && key_held)) && u_sel_offset < 15) {
-					u_sel = 0;
-					u_sel_offset = 0;
-				}
-
-				if ((key_press(KEY_PRGM_RIGHT) || (key == KEY_PRGM_RIGHT && key_held)) && u_sel_offset < filtered_size - 19)
-					u_sel_offset += (15 + (u_id >= 44));
-				else if ((key_press(KEY_PRGM_RIGHT) || (key == KEY_PRGM_RIGHT && key_held)) && u_sel_offset >= filtered_size - 19) {
-					u_sel = 3;
-					u_sel_offset = filtered_size - 4;
-				}
-
-				uint16_t f_id = filtered_upgrades[u_id].id;
-
-				if (key_press(KEY_PRGM_ALPHA)
-					&& data.cookies >= filtered_upgrades[u_id].price
-					&& !data.upgrades[f_id] && data.upgrades_unlocked[f_id]) {
-					data.cookies -= filtered_upgrades[u_id].price;
-					data.upgrades[f_id] = true;
-					enable_upgrade(&data, &gold, f_id);
-					unlock_upgrades(&data);
 				}
 
 				free(filtered_upgrades);
