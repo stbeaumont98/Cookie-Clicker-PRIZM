@@ -22,6 +22,7 @@ struct Building {
 };
 
 struct Upgrade {
+	uint16_t id;
 	double price;
 	char *name;
 	const unsigned char *sprite;
