@@ -420,10 +420,6 @@ int main() {
 				small_disp_string(28, 5, "[OPTN]", 0xffff, true);
 				copy_sprite_1bit(arrow[1], 20, 5, 6, 6, arrow_pal, 0xffff);
 
-				char *b_type = get_upgrade_type(data, u_sel + u_sel_offset);
-				x = 366 - small_text_width(b_type, true);
-				small_disp_string(x, 37, b_type, 0xffff, true);
-
 				cookie_buf = get_display_val(data.cookies, false, false);
 				if (text_width(cookie_buf) > 162) {
 					free(cookie_buf);
@@ -450,6 +446,13 @@ int main() {
 				small_disp_string(x, 22, cps_buf, 0xffff, false);
 
 				if (filtered_size > 0) {
+
+					uint16_t u_id = u_sel + u_sel_offset;
+					
+					char *b_type = get_upgrade_type(data, filtered_upgrades[u_id].id);
+					x = 366 - small_text_width(b_type, true);
+					small_disp_string(x, 37, b_type, 0xffff, true);
+
 					for (int i = 0; i < min(filtered_size, 4); i++) {
 						uint16_t u_id = i + u_sel_offset;
 						uint16_t f_id = filtered_upgrades[u_id].id;
@@ -508,8 +511,6 @@ int main() {
 						u_sel--;
 					else if ((key_press(KEY_PRGM_UP) || (key == KEY_PRGM_UP && key_held)) && u_sel == 0 && u_sel_offset > 0)
 						u_sel_offset--;
-
-					uint16_t u_id = u_sel + u_sel_offset;
 
 					if ((key_press(KEY_PRGM_LEFT) || (key == KEY_PRGM_LEFT && key_held)) && u_sel_offset >= 15)
 						u_sel_offset -= (15 + (u_id > 59));
