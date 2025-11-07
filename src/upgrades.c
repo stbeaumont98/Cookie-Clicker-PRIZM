@@ -585,6 +585,38 @@ struct Upgrade *filter_unlocked(struct CookieData *data, const struct Upgrade *u
     return filtered;
 }
 
+void swap(struct Upgrade *a, struct Upgrade *b) {
+    struct Upgrade tmp = *a;
+    *a = *b;
+    *b = tmp;
+}
+
+int partition(struct Upgrade arr[], int low, int high) {
+    double pivot = arr[high].price;
+    int i = (low - 1);
+
+    for (int j = low; j <= high - 1; j++) {
+        if (arr[j].price <= pivot) {
+            i++;
+            swap(&arr[i], &arr[j]);
+        }
+    }
+
+    swap(&arr[i + 1], &arr[high]);
+    return (i + 1);
+}
+
+void sort_prices(struct Upgrade arr[], int low, int high) {
+    if (low < high) {
+        // pi is partitioning index, arr[pi] is now at right place
+        int pi = partition(arr, low, high);
+
+        // Separately sort elements before partition and after partition
+        sort_prices(arr, low, pi - 1);
+        sort_prices(arr, pi + 1, high);
+    }
+}
+
 void unlock_upgrades(struct CookieData *data) {
     int i, j;
 

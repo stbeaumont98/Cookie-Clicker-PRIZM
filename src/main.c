@@ -405,6 +405,8 @@ int main() {
 				int filtered_size = 0;
 				struct Upgrade *filtered_upgrades = filter_unlocked(&data, upgrades, &filtered_size);
 
+				sort_prices(filtered_upgrades, 0, filtered_size - 1);
+
 				fill_scr(0x0000);
 				
 				copy_sprite_scaled(panel_h, 0, 32, 99, 8, 198, 16, false, 0);
