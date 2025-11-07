@@ -469,7 +469,7 @@ int main() {
 									rainbow_pal, false, 0x4208);
 						}
 
-						char *name =  filtered_upgrades[u_id].name;//get_upgrade_name(data, u_id);
+						char *name =  filtered_upgrades[u_id].name;
 						char *desc = get_upgrade_description(data, f_id);
 
 						int n_h = text_height(name), d_h = text_height(desc);
@@ -512,16 +512,16 @@ int main() {
 					else if ((key_press(KEY_PRGM_UP) || (key == KEY_PRGM_UP && key_held)) && u_sel == 0 && u_sel_offset > 0)
 						u_sel_offset--;
 
-					if ((key_press(KEY_PRGM_LEFT) || (key == KEY_PRGM_LEFT && key_held)) && u_sel_offset >= 15)
-						u_sel_offset -= (15 + (u_id > 59));
-					else if ((key_press(KEY_PRGM_LEFT) || (key == KEY_PRGM_LEFT && key_held)) && u_sel_offset < 15) {
+					if ((key_press(KEY_PRGM_LEFT) || (key == KEY_PRGM_LEFT && key_held)) && u_sel_offset - 4 >= 0)
+						u_sel_offset -= 4;
+					else if ((key_press(KEY_PRGM_LEFT) || (key == KEY_PRGM_LEFT && key_held)) && u_sel_offset - 4 < 0) {
 						u_sel = 0;
 						u_sel_offset = 0;
 					}
 
-					if ((key_press(KEY_PRGM_RIGHT) || (key == KEY_PRGM_RIGHT && key_held)) && u_sel_offset < filtered_size - 19)
-						u_sel_offset += (15 + (u_id >= 44));
-					else if ((key_press(KEY_PRGM_RIGHT) || (key == KEY_PRGM_RIGHT && key_held)) && u_sel_offset >= filtered_size - 19) {
+					if ((key_press(KEY_PRGM_RIGHT) || (key == KEY_PRGM_RIGHT && key_held)) && u_sel_offset + 4 <= filtered_size - 4)
+						u_sel_offset += 4;
+					else if ((key_press(KEY_PRGM_RIGHT) || (key == KEY_PRGM_RIGHT && key_held)) && u_sel_offset + 4 > filtered_size - 4) {
 						u_sel = 3;
 						u_sel_offset = filtered_size - 4;
 					}
