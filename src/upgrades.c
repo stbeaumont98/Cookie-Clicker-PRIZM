@@ -574,6 +574,8 @@ const struct Upgrade upgrades[] = {
     {477, 3.162E69, "Springerles", cookie[141], cookie_pal[141]}
 };
 
+// filter algorithm based on https://stackoverflow.com/a/50317973
+
 struct Upgrade *filter_unlocked(struct CookieData *data, const struct Upgrade *upgrades, int *filtered_size) {
     struct Upgrade *filtered = malloc(478 * sizeof(struct Upgrade));
     for (int i = 0; i < 478; i++) {
