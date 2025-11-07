@@ -585,6 +585,8 @@ struct Upgrade *filter_unlocked(struct CookieData *data, const struct Upgrade *u
     return filtered;
 }
 
+// quicksort algorithm
+
 void swap(struct Upgrade *a, struct Upgrade *b) {
     struct Upgrade tmp = *a;
     *a = *b;
