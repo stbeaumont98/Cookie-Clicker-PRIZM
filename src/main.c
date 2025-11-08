@@ -406,7 +406,7 @@ int main() {
 				int filtered_size = 0;
 				struct Upgrade *filtered_upgrades = filter_unlocked(&data, upgrades, &filtered_size);
 
-				sort_prices(filtered_upgrades, 0, filtered_size - 1, data.upgrades);
+				sort_upgrades(filtered_upgrades, 0, filtered_size - 1, data.upgrades);
 
 				fill_scr(0x0000);
 				

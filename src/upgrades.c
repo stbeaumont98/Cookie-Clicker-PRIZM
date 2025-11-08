@@ -594,28 +594,40 @@ void swap(struct Upgrade *a, struct Upgrade *b) {
 }
 
 int partition(struct Upgrade arr[], int low, int high, bool bought[]) {
-    double pivot = arr[high].price;
+    struct Upgrade pivot = arr[high];
     int i = (low - 1);
 
     for (int j = low; j <= high - 1; j++) {
-        if (arr[j].price <= pivot || !bought[arr[j].id]) {
-            i++;
-            swap(&arr[i], &arr[j]);
-        }
+        if (bought[arr[j].id] && bought[pivot.id]) {
+            // sort by id
+            if (arr[j].id <= pivot.id) {
+                i++;
+                swap(&arr[i], &arr[j]);
+            }
+        } else if (!bought[arr[j].id] && bought[pivot.id]) {
+                i++;
+                swap(&arr[i], &arr[j]);
+        } else if (!bought[arr[j].id] && !bought[pivot.id]) {
+            // sort by price
+            if (arr[j].price <= pivot.price) {
+                i++;
+                swap(&arr[i], &arr[j]);
+            }
+        } else {}
     }
 
     swap(&arr[i + 1], &arr[high]);
     return (i + 1);
 }
 
-void sort_prices(struct Upgrade arr[], int low, int high, bool bought[]) {
+void sort_upgrades(struct Upgrade arr[], int low, int high, bool bought[]) {
     if (low < high) {
         // pi is partitioning index, arr[pi] is now at right place
         int pi = partition(arr, low, high, bought);
 
         // Separately sort elements before partition and after partition
-        sort_prices(arr, low, pi - 1, bought);
-        sort_prices(arr, pi + 1, high, bought);
+        sort_upgrades(arr, low, pi - 1, bought);
+        sort_upgrades(arr, pi + 1, high, bought);
     }
 }
 
