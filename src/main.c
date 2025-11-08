@@ -18,6 +18,9 @@
 #include "convert.h"
 #include "upgrades.h"
 
+// essentially midnight
+#define MAX_TICKS 11059200
+
 static const double MAX_FRENZY = 77.;
 static const double MAX_CLICK_FRENZY = 13.;
 static const double MAX_BOOST = 30.;
@@ -281,6 +284,7 @@ int main() {
 
 	int hold_ticks = RTC_GetTicks() + 64;
 	int old_ticks = RTC_GetTicks();
+	int elapsed_ticks = 0;
 
 	while (1) {
         int key = PRGM_GetKey();
@@ -882,9 +886,20 @@ int main() {
 				autosave_time--;
 		}
 
-		data.cookies += current_cps * ((double)(RTC_GetTicks() - old_ticks) /  128.0);
-		data.cookies_all_time += current_cps * ((double)(RTC_GetTicks() - old_ticks) /  128.0);
-		old_ticks = RTC_GetTicks();
+		int cur_ticks = RTC_GetTicks();
+
+		// account for ticks resetting once a day
+		if (cur_ticks < old_ticks)
+			elapsed_ticks = (MAX_TICKS - old_ticks) + cur_ticks;
+		else
+			elapsed_ticks = cur_ticks - old_ticks;
+
+		old_ticks = cur_ticks;
+
+		double elapsed_secs = (double) elapsed_ticks / 128.;
+		
+		data.cookies += current_cps * elapsed_secs;
+		data.cookies_all_time += current_cps * elapsed_secs;
 
 		key_held = (key != 0 && RTC_GetTicks() >= hold_ticks);
 
