@@ -280,6 +280,7 @@ int main() {
 	bool key_held = false;
 
 	int hold_ticks = RTC_GetTicks() + 64;
+	int old_ticks = RTC_GetTicks();
 
 	while (1) {
         int key = PRGM_GetKey();
@@ -866,8 +867,6 @@ int main() {
 		}
 
 		if (one_second) {
-			data.cookies += current_cps;
-			data.cookies_all_time += current_cps;
 
 			if (gold.frenzy_time > 0)
 				gold.frenzy_time--;
@@ -882,6 +881,10 @@ int main() {
 			if (autosave_time > 0)
 				autosave_time--;
 		}
+
+		data.cookies += current_cps * ((double)(RTC_GetTicks() - old_ticks) /  128.0);
+		data.cookies_all_time += current_cps * ((double)(RTC_GetTicks() - old_ticks) /  128.0);
+		old_ticks = RTC_GetTicks();
 
 		key_held = (key != 0 && RTC_GetTicks() >= hold_ticks);
 
