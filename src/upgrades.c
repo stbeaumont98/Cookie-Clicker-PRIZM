@@ -599,16 +599,17 @@ int partition(struct Upgrade arr[], int low, int high, bool bought[]) {
 
     for (int j = low; j <= high - 1; j++) {
         if (bought[arr[j].id] && bought[pivot.id]) {
-            // sort by id
+            // bought upgrades sorted by id
             if (arr[j].id <= pivot.id) {
                 i++;
                 swap(&arr[i], &arr[j]);
             }
+        // sort by bought/unbought
         } else if (!bought[arr[j].id] && bought[pivot.id]) {
                 i++;
                 swap(&arr[i], &arr[j]);
         } else if (!bought[arr[j].id] && !bought[pivot.id]) {
-            // sort by price
+            // unbought upgrades sorted by price
             if (arr[j].price <= pivot.price) {
                 i++;
                 swap(&arr[i], &arr[j]);
