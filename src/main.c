@@ -848,7 +848,7 @@ int main() {
 			if (gold.time > 0 && gold.scale < 46)
 				gold.scale += 2;
 			else if (gold.time <= 0 && gold.scale >= 2)
-				gold.scale += 2;
+				gold.scale -= 2;
 			
 			if (gold.time <= 0 && gold.scale <= 2)
 				reset_gold(&gold);
