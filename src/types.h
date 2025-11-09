@@ -34,12 +34,12 @@ struct GoldenData {
 	uint8_t y;
 	uint8_t scale;
 	uint16_t effect;
-	uint16_t time;
-	uint8_t frenzy_time;
+	int32_t time;
+	int32_t frenzy_time;
 	double cps_multiplier;
-	uint8_t click_frenzy_time;
+	int32_t click_frenzy_time;
 	double click_multiplier;
-	uint8_t boost_time;
+	int32_t boost_time;
 	double boost_multiplier;
 	uint8_t time_modifier;
 	uint8_t effect_modifier;
@@ -62,7 +62,7 @@ struct CookieData {
 struct Message {
 	char header[30];
 	char body[150];
-	uint8_t time;
+	int32_t time;
 };
 
 void reset_buildings(struct CookieData *data);

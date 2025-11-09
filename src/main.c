@@ -17,6 +17,7 @@
 #include "save.h"
 #include "convert.h"
 #include "upgrades.h"
+#include "time.h"
 
 static const double MAX_FRENZY = 77.;
 static const double MAX_CLICK_FRENZY = 13.;
@@ -86,7 +87,7 @@ void set_message(struct Message *msg, const char *header,
 	const char *body, uint8_t time) {
 	strcpy(msg->header, header);
 	strcpy(msg->body, body);
-	msg->time = time;
+	msg->time = ticks(time);
 }
 
 void display_msg(const struct Message msg) {
@@ -233,8 +234,6 @@ int main() {
     Bdisp_EnableColor(1);
 	srandom(RTC_GetTicks());
 	DrawFrame(0x0000);
-	
-	int time = get_time(), old_time, one_second;
 
 	struct GoldenData gold;
 
@@ -274,20 +273,16 @@ int main() {
 	bool upgrades_toggle = false;
 	bool stats_toggle = false;
 
-	uint8_t autosave_time = 60;
+	int16_t autosave_time = (int16_t) ticks(60.);
 
 	bool sleep = false;
 	bool key_held = false;
 
-	int hold_ticks = RTC_GetTicks() + 64;
+	int hold_ticks = RTC_GetTicks() + ticks(0.5);
 	int old_ticks = RTC_GetTicks();
 
 	while (1) {
         int key = PRGM_GetKey();
-		
-		old_time = time;
-		time = get_time();
-		one_second = time - old_time;
 
 		keyupdate();
 
@@ -675,9 +670,9 @@ int main() {
 				x = ((164 - small_text_width(cps_buf, false)) / 2) + 1;
 				small_disp_string(x, 53, cps_buf, 0xffff, false);
 
-				double f = (double) gold.frenzy_time / (MAX_FRENZY * gold.effect_modifier);
-				double cf = (double) gold.click_frenzy_time / (MAX_CLICK_FRENZY * gold.effect_modifier);
-				double b = (double) gold.boost_time / (MAX_BOOST * gold.effect_modifier);
+				double f = (double) gold.frenzy_time / ticks(MAX_FRENZY * gold.effect_modifier);
+				double cf = (double) gold.click_frenzy_time / ticks(MAX_CLICK_FRENZY * gold.effect_modifier);
+				double b = (double) gold.boost_time / ticks(MAX_BOOST * gold.effect_modifier);
 
 				if (gold.frenzy_time > 0) {
 					y = (f < cf && f > b) || (f < b && f > cf) ? 3 : (f < cf && f < b) ? 6 : 0;
@@ -726,7 +721,7 @@ int main() {
 				msg.time = 0;
 		}
 		
-		if (key_press(f_buttons[gold.x]) && gold.time <= (13 * gold.time_modifier)) {
+		if (key_press(f_buttons[gold.x]) && gold.time <= ticks(13 * gold.time_modifier)) {
 			data.gold_click_count++;
 			if (gold.effect > 0 && gold.effect <= 425) {
 				// Lucky!
@@ -745,14 +740,14 @@ int main() {
 				data.cookies += earned;
 			} else if (gold.effect > 425 && gold.effect <= 850) {
 				// Frenzy
-				gold.frenzy_time = 77 * gold.effect_modifier;
+				gold.frenzy_time = ticks(MAX_FRENZY * gold.effect_modifier);
 				gold.cps_multiplier = 7;
 
 				char msg_buf[40];
 				strcpy(msg_buf, "Cookie production x7 for ");
 
 				tmp = malloc(3);
-				itoa(gold.frenzy_time, tmp, 10);
+				itoa(MAX_FRENZY * gold.effect_modifier, tmp, 10);
 				strcat(msg_buf, tmp);
 				free(tmp);
 
@@ -761,14 +756,14 @@ int main() {
 				set_message(&msg, "Frenzy", msg_buf, 6);
 			} else if (gold.effect > 850 && gold.effect <= 893) {
 				// Click Frenzy
-				gold.click_frenzy_time = 13 * gold.effect_modifier;
+				gold.click_frenzy_time = ticks(MAX_CLICK_FRENZY * gold.effect_modifier);
 				gold.click_multiplier = 777;
 
 				char msg_buf[40];
 				strcpy(msg_buf, "Clicking power x777 for ");
 
 				tmp = malloc(3);
-				itoa(gold.click_frenzy_time, tmp, 10);
+				itoa(MAX_CLICK_FRENZY * gold.effect_modifier, tmp, 10);
 				strcat(msg_buf, tmp);
 				free(tmp);
 
@@ -784,7 +779,7 @@ int main() {
 				}
 				if (cnt > 0) {
 					
-					gold.boost_time = 30 * gold.effect_modifier;
+					gold.boost_time = ticks(MAX_BOOST * gold.effect_modifier);
 
 					int r_b = random() % 20; 
 					while (data.buildings[r_b].owned < 10)
@@ -812,7 +807,7 @@ int main() {
 					strcat(msg_buf, "% for ");
 
 					tmp = malloc(3);
-					itoa(gold.boost_time, tmp, 10);
+					itoa(MAX_BOOST * gold.effect_modifier, tmp, 10);
 					strcat(msg_buf, tmp);
 					free(tmp);
 
@@ -843,7 +838,7 @@ int main() {
 			reset_gold(&gold);
 		}
 		
-		if (gold.time <= (13 * gold.time_modifier)) {
+		if (gold.time <= ticks(13 * gold.time_modifier)) {
 			
 			uint16_t x = 4 + gold.x * 66 + (23 - (gold.scale / 2));
 			uint8_t y = gold.y + (23 - (gold.scale / 2));
@@ -860,36 +855,37 @@ int main() {
 		}
 
 		// autosave when the time runs out
-		if (autosave_time == 0) {
+		if (autosave_time <= 0) {
 			save_game(data, gold);
 			set_message(&msg, "", "Game saved", 2);
-			autosave_time = 60;
+			autosave_time = ticks(60);
 		}
 
-		if (one_second) {
+		// handle time-based events
 
-			if (gold.frenzy_time > 0)
-				gold.frenzy_time--;
-			if (gold.click_frenzy_time > 0)
-				gold.click_frenzy_time--;
-			if (gold.boost_time > 0)
-				gold.boost_time--;
-			if (msg.time > 0)
-				msg.time--;
-			if (gold.time > 0)
-				gold.time--;
-			if (autosave_time > 0)
-				autosave_time--;
-		}
+		int elapsed = elapsed_ticks(&old_ticks);
+		double seconds = secs(elapsed);
+		
+		data.cookies += current_cps * seconds;
+		data.cookies_all_time += current_cps * seconds;
 
-		data.cookies += current_cps * ((double)(RTC_GetTicks() - old_ticks) /  128.0);
-		data.cookies_all_time += current_cps * ((double)(RTC_GetTicks() - old_ticks) /  128.0);
-		old_ticks = RTC_GetTicks();
+		if (gold.frenzy_time > 0)
+			gold.frenzy_time -= elapsed;
+		if (gold.click_frenzy_time > 0)
+			gold.click_frenzy_time -= elapsed;
+		if (gold.boost_time > 0)
+			gold.boost_time -= elapsed;
+		if (msg.time > 0)
+			msg.time -= elapsed;
+		if (gold.time > 0)
+			gold.time -= elapsed;
+		if (autosave_time > 0)
+			autosave_time -= elapsed;
 
 		key_held = (key != 0 && RTC_GetTicks() >= hold_ticks);
 
 		if (key == 0)
-			hold_ticks = RTC_GetTicks() + 64;
+			hold_ticks = RTC_GetTicks() + ticks(0.5);
 
         if (key == KEY_PRGM_MENU) {
 			GetKey(&key);

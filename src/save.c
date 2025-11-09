@@ -137,13 +137,13 @@ void save_game(const struct CookieData data, const struct GoldenData gold) {
 	strcat(save_buf, "\n");
 	free(tmp);
 
-	tmp = malloc(5);
+	tmp = malloc(7);
 	itoa(gold.time, tmp, 10);
 	strcat(save_buf, tmp);
 	strcat(save_buf, "\n");
 	free(tmp);
 
-	tmp = malloc(4);
+	tmp = malloc(6);
 	itoa(gold.frenzy_time, tmp, 10);
 	strcat(save_buf, tmp);
 	strcat(save_buf, "\n");
@@ -153,7 +153,7 @@ void save_game(const struct CookieData data, const struct GoldenData gold) {
 	strcat(save_buf, tmp);
 	free(tmp);
 
-	tmp = malloc(4);
+	tmp = malloc(6);
 	itoa(gold.click_frenzy_time, tmp, 10);
 	strcat(save_buf, tmp);
 	strcat(save_buf, "\n");
@@ -163,7 +163,7 @@ void save_game(const struct CookieData data, const struct GoldenData gold) {
 	strcat(save_buf, tmp);
 	free(tmp);
 
-	tmp = malloc(4);
+	tmp = malloc(6);
 	itoa(gold.boost_time, tmp, 10);
 	strcat(save_buf, tmp);
 	strcat(save_buf, "\n");
@@ -308,12 +308,12 @@ void load_game(struct CookieData *data, struct GoldenData *gold) {
 	gold->y = (uint8_t) strtod(strtok(NULL, "\n"), NULL);
 	gold->scale = (uint8_t) strtod(strtok(NULL, "\n"), NULL);
 	gold->effect = (uint16_t) strtod(strtok(NULL, "\n"), NULL);
-	gold->time = (uint16_t) strtod(strtok(NULL, "\n"), NULL);
-	gold->frenzy_time = (uint8_t) strtod(strtok(NULL, "\n"), NULL);
+	gold->time = (int32_t) strtod(strtok(NULL, "\n"), NULL);
+	gold->frenzy_time = (int32_t) strtod(strtok(NULL, "\n"), NULL);
 	char *cps_multiplier = strtok(NULL, "\n");
-	gold->click_frenzy_time = (uint8_t) strtod(strtok(NULL, "\n"), NULL);
+	gold->click_frenzy_time = (int32_t) strtod(strtok(NULL, "\n"), NULL);
 	char *click_multiplier = strtok(NULL, "\n");
-	gold->boost_time = (uint8_t) strtod(strtok(NULL, "\n"), NULL);
+	gold->boost_time = (int32_t) strtod(strtok(NULL, "\n"), NULL);
 	char *boost_multiplier = strtok(NULL, "\n");
 	char *multiplier = strtok(NULL, "\n");
 	char *upgrades = strtok(NULL, "\n");
