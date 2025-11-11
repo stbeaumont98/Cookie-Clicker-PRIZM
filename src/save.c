@@ -12,6 +12,7 @@
 #include "save.h"
 
 const char path[20] = "\\\\fls0\\cookies.sav";
+const char backup_path[24] = "\\\\fls0\\cookies.sav.bak";
 
 char *get_save_val(double val) {
 	char *val_buf = malloc(20);
@@ -350,4 +351,63 @@ void load_game(struct CookieData *data, struct GoldenData *gold) {
 	free(buf);
 
     Bfile_CloseFile_OS(h_file);
+}
+
+void rename_file(const char* old_path, const char* new_path) {
+    unsigned short p_old[sizeof(old_path) * 2];
+    unsigned short p_new[sizeof(new_path) * 2];
+
+    Bfile_StrToName_ncpy(p_old, old_path, sizeof(old_path));
+    Bfile_StrToName_ncpy(p_new, new_path, sizeof(new_path));
+
+	if(Bfile_RenameEntry(p_old, p_new) < 0) {
+		Bfile_DeleteEntry(p_new);
+		Bfile_RenameEntry(p_old, p_new);
+	}
+}
+
+void backup_game() {
+	rename_file(path, backup_path);
+}
+
+void restore_backup() {
+	rename_file(backup_path, path);
+}
+
+void reset_game(struct CookieData *data, struct GoldenData *gold) {
+
+	reset_buildings(data);
+	gold->time_modifier = 1;
+	gold->effect_modifier = 1;
+	reset_gold(gold);
+
+    int i;
+
+	data->buildings_unlocked = 2;
+
+	for (i = 0; i < 478; i++) {
+		data->upgrades[i] = false;
+		data->upgrades_unlocked[i] = false;
+	}
+
+	data->multiplier = 1.0;
+	data->cookies_all_time = 0.0;
+	data->cookies = 0.0;
+	data->handmade_cookies = 0.0;
+	data->click_count = 0;
+	data->gold_click_count = 0;
+	for (i = 0; i < 20; i ++) {
+		data->buildings[i].multiplier = 1.0;
+		data->buildings[i].modifier = 0.0;
+		data->buildings[i].percent = 0.0;
+		data->buildings[i].gma = false;
+	}
+	data->total_buildings = 0;
+	gold->frenzy_time = 0;
+	gold->cps_multiplier = 1.0;
+	gold->click_frenzy_time = 0;
+	gold->click_multiplier = 1.0;
+	gold->boost_time = 0;
+	gold->boost_multiplier = 0.0;
+
 }
