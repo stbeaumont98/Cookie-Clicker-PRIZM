@@ -231,16 +231,15 @@ char *get_upgrade_name(const struct CookieData data, uint16_t id) {
 void draw_button(uint16_t x, uint8_t y, uint8_t w, char *message, color_t color, bool selected) {
 	int text_width = small_text_width(message, true);
 	int box_width = w != 0 ? w : text_width + 10;
-	draw_rect(x, y, box_width, 16, dim_color(color, selected ? 1. : 0.5), 0);
+	draw_rect(x, y, box_width, 16, selected ? 0xff80 : dim_color(color, .5), selected ? 1 : 0);
 	small_disp_string(x + (box_width - 4 - text_width), y + 6, message, dim_color(color, selected ? 1. : 0.5), true);
 }
 
 void display_prompt(const struct Message msg, bool sel) {
-	bool has_header = strlen(msg.header) != 0;
 	int width = max(text_width(msg.header), small_text_width(msg.body, false));
 	int height = (text_height(msg.body) * 9) + 27;
-	int box_width = width + 10;
-	int box_height = height + (has_header ? (text_height(msg.header) * 14) + 6 : 0);
+	int box_width = width + 30;
+	int box_height = height + (text_height(msg.header) * 14) + 26;
 	int box_x = (384 - box_width) / 2;
 	int box_y =  (213 - box_height) / 2;
 
@@ -248,13 +247,13 @@ void display_prompt(const struct Message msg, bool sel) {
 	draw_rect(box_x - 2, box_y - 2,
 		box_width + 3, box_height + 3, 0x82a4, 1);
 	
-	if (has_header) {
-		disp_string(box_x + 5, box_y + 4, msg.header, 0xad55);
-		draw_line(box_x + 5, box_y + (text_height(msg.header) * 14) + 5,
-			box_x + width + 3, box_y + (text_height(msg.header) * 14) + 5, 0x632c, 0);
-		small_disp_string(box_x + 5, box_y + (text_height(msg.header) * 14) + 10, msg.body, 0xad55, false);
-	} else
-		small_disp_string(box_x + 5, box_y + 4, msg.body, 0xad55, false);
+	disp_string(box_x + ((box_width - text_width(msg.header)) / 2), box_y + 14, msg.header, 0xad55);
+
+	draw_line(box_x + ((box_width - width) / 2), box_y + (text_height(msg.header) * 14) + 15,
+		box_x + width + 13, box_y + (text_height(msg.header) * 14) + 15, 0x632c, 0);
+
+	small_disp_string(box_x + ((box_width - small_text_width(msg.body, false)) / 2),
+		box_y + (text_height(msg.header) * 14) + 20, msg.body, 0xad55, false);
 
 	draw_button(box_x + 5, box_y + box_height - 22, 0, "Yes!", 0xFFFF, sel);
 	draw_button(box_x + box_width - 29, box_y + box_height - 22, 0, "No", 0xFFFF, !sel);
@@ -278,6 +277,10 @@ void draw_prompt(int setting_selection, bool sel) {
 		case 2:
 			strcpy(msg.header, "Do you REALLY want to\nwipe your save?");
 			strcpy(msg.body, "You will lose all your progress!");
+			break;
+		case 4:
+			strcpy(msg.header, "Do you REALLY want to\nenable cheating?");
+			strcpy(msg.body, "Cheated cookies taste awful.");
 			break;
 		default:
 			break;
@@ -330,7 +333,7 @@ int main() {
 
 	bool upgrades_toggle = false;
 	bool stats_toggle = false;
-	bool options_toggle = true;
+	bool options_toggle = false;
 
 	int16_t autosave_time = (int16_t) ticks(60.);
 
@@ -343,6 +346,8 @@ int main() {
 	int s_sel = 0;
 	bool p_sel = true;
 	bool prompt = false;
+
+	bool cheating = false;
 
 	while (1) {
         int key = PRGM_GetKey();
@@ -413,7 +418,10 @@ int main() {
 			draw_line(203, 97, 273, 97, 0x632c, 0);
 
 			draw_button(207, 104, 110, "Message duration:", 0xFFFF, s_sel == 3);
-			draw_button(207, 127, 110, "Enable cheats", 0xFFFF, s_sel == 4);
+			char cheats_str[12];
+			strcpy(cheats_str, "Cheats ");
+			strcat(cheats_str, cheating ? "ON" : "OFF");
+			draw_button(207, 127, 110, cheats_str, 0xFFFF, s_sel == 4);
 
 			if (!prompt) {
 
@@ -427,9 +435,15 @@ int main() {
 					s_sel -= 3;
 
 				if (key_press(KEY_PRGM_ALPHA)) {
-					prompt = true;
-					p_sel = true;
+					if (s_sel <  3 || (s_sel == 4 && !cheating)) {
+						prompt = true;
+						p_sel = true;
+					} else if (s_sel == 4 && cheating)
+						cheating = false;
 				}
+
+				if (key_press(KEY_PRGM_EXIT))
+					options_toggle = false;
 
 			} else {
 				draw_prompt(s_sel, p_sel);
@@ -438,7 +452,6 @@ int main() {
 					p_sel = false;
 				if (key_press(KEY_PRGM_LEFT) && !p_sel)
 					p_sel = true;
-				
 
 				if (key_press(KEY_PRGM_ALPHA)) {
 					if (p_sel) {
@@ -464,12 +477,18 @@ int main() {
 								reset_game(&data, &gold);
 								save_game(data, gold);
 								break;
+							case 4:
+								cheating = true;
+								break;
 							default:
 								break;
 						}
 					}
 					prompt = false;
 				}
+
+				if (key_press(KEY_PRGM_EXIT))
+					prompt = false;
 			}
 
 		} else {
@@ -591,7 +610,8 @@ int main() {
 					disp_string(172, 10, "Store", 0xffff);
 					small_disp_string(18, 37, "UPGRADES", 0xffff, true);
 
-					small_disp_string(28, 5, "[OPTN]", 0xffff, true);
+					small_disp_string(28, 5, "[x  ]", 0xffff, false);
+					small_disp_string(28 + small_text_width("[x", false), 2, "2", 0xffff, false);
 					copy_sprite_1bit(arrow[1], 20, 5, 6, 6, arrow_pal, 0xffff);
 
 					cookie_buf = get_display_val(data.cookies, false, false);
@@ -724,7 +744,8 @@ int main() {
 					disp_string(262, 10, "Store", 0xffff);
 					small_disp_string(182, 37, "BUILDINGS", 0xffff, true);
 
-					small_disp_string(339, 5, "[OPTN]", 0xffff, true);
+					small_disp_string(352, 5, "[x  ]", 0xffff, true);
+					small_disp_string(353 + small_text_width("[x", false), 2, "2", 0xffff, true);
 					copy_sprite_1bit(arrow[0], 374, 5, 6, 6, arrow_pal, 0xffff);
 
 					int store_size = (data.buildings_unlocked < 4) ? data.buildings_unlocked : 4;
