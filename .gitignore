@@ -58,6 +58,7 @@ build/
 
 # Game save files
 *.sav
+*.sav.bak
 
 # Graphics files
 *.psd
