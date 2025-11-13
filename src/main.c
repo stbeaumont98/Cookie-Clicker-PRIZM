@@ -228,6 +228,64 @@ char *get_upgrade_name(const struct CookieData data, uint16_t id) {
 		return "???";
 }
 
+void draw_button(uint16_t x, uint8_t y, uint8_t w, char *message, color_t color, bool selected) {
+	int text_width = small_text_width(message, true);
+	int box_width = w != 0 ? w : text_width + 10;
+	draw_rect(x, y, box_width, 16, dim_color(color, selected ? 1. : 0.5), 0);
+	small_disp_string(x + (box_width - 4 - text_width), y + 6, message, dim_color(color, selected ? 1. : 0.5), true);
+}
+
+void display_prompt(const struct Message msg, bool sel) {
+	bool has_header = strlen(msg.header) != 0;
+	int width = max(text_width(msg.header), small_text_width(msg.body, false));
+	int height = (text_height(msg.body) * 9) + 27;
+	int box_width = width + 10;
+	int box_height = height + (has_header ? (text_height(msg.header) * 14) + 6 : 0);
+	int box_x = (384 - box_width) / 2;
+	int box_y =  (213 - box_height) / 2;
+
+	fill_area(box_x, box_y, box_width, box_height, 0x0000);
+	draw_rect(box_x - 2, box_y - 2,
+		box_width + 3, box_height + 3, 0x82a4, 1);
+	
+	if (has_header) {
+		disp_string(box_x + 5, box_y + 4, msg.header, 0xad55);
+		draw_line(box_x + 5, box_y + (text_height(msg.header) * 14) + 5,
+			box_x + width + 3, box_y + (text_height(msg.header) * 14) + 5, 0x632c, 0);
+		small_disp_string(box_x + 5, box_y + (text_height(msg.header) * 14) + 10, msg.body, 0xad55, false);
+	} else
+		small_disp_string(box_x + 5, box_y + 4, msg.body, 0xad55, false);
+
+	draw_button(box_x + 5, box_y + box_height - 22, 0, "Yes!", 0xFFFF, sel);
+	draw_button(box_x + box_width - 29, box_y + box_height - 22, 0, "No", 0xFFFF, !sel);
+}
+
+void draw_prompt(int setting_selection, bool sel) {
+	struct Message msg;
+
+	switch (setting_selection) {
+		// Backup save
+		case 0:
+			strcpy(msg.header, "Are you sure?");
+			strcpy(msg.body, "Any previous backups will be overwritten!");
+			break;
+		// Restore backup
+		case 1:
+			strcpy(msg.header, "Are you sure?");
+			strcpy(msg.body, "Current save file will be overwritten!");
+			break;
+		// Wipe save
+		case 2:
+			strcpy(msg.header, "Do you REALLY want to\nwipe your save?");
+			strcpy(msg.body, "You will lose all your progress!");
+			break;
+		default:
+			break;
+	}
+
+	display_prompt(msg, sel);
+}
+
 int main() {
 	EnableStatusArea(3);
 	EnableDisplayHeader(0, 0);
@@ -282,6 +340,10 @@ int main() {
 	int hold_ticks = RTC_GetTicks() + ticks(0.5);
 	int old_ticks = RTC_GetTicks();
 
+	int s_sel = 0;
+	bool p_sel = true;
+	bool prompt = false;
+
 	while (1) {
         int key = PRGM_GetKey();
 
@@ -293,42 +355,122 @@ int main() {
 
 		current_cpc =  get_cpc(data, current_cps) * gold.click_multiplier;
 
+		// handle time-based events
+
+		int elapsed = elapsed_ticks(&old_ticks);
+		double seconds = secs(elapsed);
+		
+		data.cookies += current_cps * seconds;
+		data.cookies_all_time += current_cps * seconds;
+
+		if (gold.frenzy_time > 0)
+			gold.frenzy_time -= elapsed;
+		if (gold.click_frenzy_time > 0)
+			gold.click_frenzy_time -= elapsed;
+		if (gold.boost_time > 0)
+			gold.boost_time -= elapsed;
+		if (msg.time > 0)
+			msg.time -= elapsed;
+		if (gold.time > 0)
+			gold.time -= elapsed;
+		if (autosave_time > 0)
+			autosave_time -= elapsed;
+
+		key_held = (key != 0 && RTC_GetTicks() >= hold_ticks);
+
+		if (key == 0)
+			hold_ticks = RTC_GetTicks() + ticks(0.5);
+
 		if (key_press(KEY_PRGM_ACON))
 			sleep = !sleep;
 			//PowerOff(0);
 
 		if (options_toggle) {
 			
-				fill_scr(0x0000);
-				draw_line(157, 22, 226, 22, 0x632c, 0);
-				disp_string(161, 29, "OPTIONS", 0xFFFF);
-				draw_line(157, 46, 226, 46, 0x632c, 0);
+			fill_scr(0x0000);
+			draw_line(157, 22, 226, 22, 0x632c, 0);
+			disp_string(161, 29, "OPTIONS", 0xFFFF);
+			draw_line(157, 46, 226, 46, 0x632c, 0);
 
-				copy_sprite_scaled(panel_h, 0, 0, 99, 8, 198, 16, false, 0);
-				copy_sprite_scaled(panel_h, 198, 0, 99, 8, 198, 16, false, 0);
-				copy_sprite_scaled(panel_h, 0, 53, 99, 8, 198, 16, false, 0);
-				copy_sprite_scaled(panel_h, 198, 53, 99, 8, 198, 16, false, 0);
-				copy_sprite_scaled(panel_v, 0, 0, 8, 108, 16, 216, false, 0);
-				copy_sprite_scaled(panel_v, 368, 0, 8, 108, 16, 216, false, 0);
-				copy_sprite_scaled(panel_v, 184, 69, 8, 108, 16, 216, false, 0);
+			copy_sprite_scaled(panel_h, 0, 0, 99, 8, 198, 16, false, 0);
+			copy_sprite_scaled(panel_h, 198, 0, 99, 8, 198, 16, false, 0);
+			copy_sprite_scaled(panel_h, 0, 53, 99, 8, 198, 16, false, 0);
+			copy_sprite_scaled(panel_h, 198, 53, 99, 8, 198, 16, false, 0);
+			copy_sprite_scaled(panel_v, 0, 0, 8, 108, 16, 216, false, 0);
+			copy_sprite_scaled(panel_v, 368, 0, 8, 108, 16, 216, false, 0);
+			copy_sprite_scaled(panel_v, 184, 69, 8, 108, 16, 216, false, 0);
 
-				draw_line(19, 73, 86, 73, 0x632c, 0);
-				disp_string(21, 80, "General", 0xFFFF);
-				draw_line(19, 97, 86, 97, 0x632c, 0);
+			draw_line(19, 73, 86, 73, 0x632c, 0);
+			disp_string(21, 80, "General", 0xFFFF);
+			draw_line(19, 97, 86, 97, 0x632c, 0);
 
-				small_disp_string(55, 110, "BACKUP SAVE", 0xFFFF, true);
-				draw_rect(23, 104, 100, 16, 0xFFFF, 0);
-				small_disp_string(37, 133, "RESTORE BACKUP", 0xFFFF, true);
-				draw_rect(23, 127, 100, 16, 0xFFFF, 0);
-				small_disp_string(119, 197, "WIPE SAVE", COLOR_RED, true);
-				draw_rect(88, 191, 88, 16, COLOR_RED, 0);
+			draw_button(23, 104, 110, "BACKUP SAVE", 0xFFFF, s_sel == 0);
+			draw_button(23, 127, 110, "RESTORE BACKUP", 0xFFFF, s_sel == 1);
+			draw_button(66, 191, 110, "WIPE SAVE", COLOR_RED, s_sel == 2);
 
-				draw_line(203, 73, 273, 73, 0x632c, 0);
-				disp_string(205, 80, "Settings", 0xFFFF);
-				draw_line(203, 97, 273, 97, 0x632c, 0);
+			draw_line(203, 73, 273, 73, 0x632c, 0);
+			disp_string(205, 80, "Settings", 0xFFFF);
+			draw_line(203, 97, 273, 97, 0x632c, 0);
 
-				small_disp_string(207, 109, "Message duration:", 0xFFFF, true);
-				small_disp_string(207, 129, "Enable cheats", 0xFFFF, true);
+			draw_button(207, 104, 110, "Message duration:", 0xFFFF, s_sel == 3);
+			draw_button(207, 127, 110, "Enable cheats", 0xFFFF, s_sel == 4);
+
+			if (!prompt) {
+
+				if ((key_press(KEY_PRGM_DOWN) || (key == KEY_PRGM_DOWN && key_held)) && s_sel < 4)
+					s_sel++;
+				if ((key_press(KEY_PRGM_UP) || (key == KEY_PRGM_UP && key_held)) && s_sel > 0)
+					s_sel--;
+				if ((key_press(KEY_PRGM_RIGHT) || (key == KEY_PRGM_RIGHT && key_held)) && s_sel + 3 <= 4)
+					s_sel += 3;
+				if ((key_press(KEY_PRGM_LEFT) || (key == KEY_PRGM_LEFT && key_held)) && s_sel - 3 >= 0)
+					s_sel -= 3;
+
+				if (key_press(KEY_PRGM_ALPHA)) {
+					prompt = true;
+					p_sel = true;
+				}
+
+			} else {
+				draw_prompt(s_sel, p_sel);
+
+				if (key_press(KEY_PRGM_RIGHT) && p_sel)
+					p_sel = false;
+				if (key_press(KEY_PRGM_LEFT) && !p_sel)
+					p_sel = true;
+				
+
+				if (key_press(KEY_PRGM_ALPHA)) {
+					if (p_sel) {
+						switch (s_sel) {
+							// Backup save
+							case 0:
+								backup_game();
+								save_game(data, gold);
+								set_message(&msg, "", "Backup created", 3);
+								break;
+							// Restore backup
+							case 1:
+								restore_backup();
+								load_game(&data, &gold);
+								// Create another copy of the backup.
+								backup_game();
+								save_game(data, gold);
+								set_message(&msg, "", "Backup restored", 3);
+								break;
+							// Wipe save
+							case 2:
+								// Reset all variables and reset the cookies.sav file.
+								reset_game(&data, &gold);
+								save_game(data, gold);
+								break;
+							default:
+								break;
+						}
+					}
+					prompt = false;
+				}
+			}
 
 		} else {
 
@@ -901,39 +1043,13 @@ int main() {
 			autosave_time = ticks(60);
 		}
 
-		// handle time-based events
-
-		int elapsed = elapsed_ticks(&old_ticks);
-		double seconds = secs(elapsed);
+		if (sleep)
+			fill_scr(0x0000);
 		
-		data.cookies += current_cps * seconds;
-		data.cookies_all_time += current_cps * seconds;
-
-		if (gold.frenzy_time > 0)
-			gold.frenzy_time -= elapsed;
-		if (gold.click_frenzy_time > 0)
-			gold.click_frenzy_time -= elapsed;
-		if (gold.boost_time > 0)
-			gold.boost_time -= elapsed;
-		if (msg.time > 0)
-			msg.time -= elapsed;
-		if (gold.time > 0)
-			gold.time -= elapsed;
-		if (autosave_time > 0)
-			autosave_time -= elapsed;
-
-		key_held = (key != 0 && RTC_GetTicks() >= hold_ticks);
-
-		if (key == 0)
-			hold_ticks = RTC_GetTicks() + ticks(0.5);
-
         if (key == KEY_PRGM_MENU) {
 			GetKey(&key);
 			DrawFrame(0x0000);
 		}
-
-		if (sleep)
-			fill_scr(0x0000);
 
 		Bdisp_PutDisp_DD();
 		Bdisp_AllClr_VRAM();
