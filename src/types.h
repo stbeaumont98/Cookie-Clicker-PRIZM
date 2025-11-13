@@ -60,7 +60,7 @@ struct CookieData {
 };
 
 struct Message {
-	char header[30];
+	char header[40];
 	char body[150];
 	int32_t time;
 };
