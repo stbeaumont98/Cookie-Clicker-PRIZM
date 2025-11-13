@@ -4,6 +4,7 @@
 #include "fxcg\display.h"
 
 int rgb_color(int r, int g, int b);
+color_t dim_color(color_t color, float f);
 void fill_scr(color_t color);
 void plot(int x0, int y0, int color);
 void fill_area(int x, int y, int width, int height, int color);

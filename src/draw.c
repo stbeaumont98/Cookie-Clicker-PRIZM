@@ -11,6 +11,21 @@ int rgb_color(int r, int g, int b) {
   	return ((r / 8) << 11) | ((g / 4) << 5) | (b / 8);
 }
 
+color_t dim_color(color_t color, float f) {
+    // Extract individual r, g, & b values
+    uint8_t r = (color >> 11) * 8;
+    uint8_t g = ((color >> 5) & 0x3F) * 4;
+    uint8_t b = (color & 0x1F) * 8;
+
+    // "Dim" each value by the defined factor.
+    r = (uint8_t)(r * f);
+    g = (uint8_t)(g * f);
+    b = (uint8_t)(b * f);
+
+    // Recombine r, g, &  b.
+    return rgb_color(r, g, b);
+}
+
 void fill_scr(color_t color) {
     unsigned int temp_color = (unsigned int)(color << 16) | color;
     for(int i = 0; i < LCD_WIDTH_PX*LCD_HEIGHT_PX / 2; i++) {
