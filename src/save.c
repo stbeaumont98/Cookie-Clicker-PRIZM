@@ -12,7 +12,7 @@
 #include "save.h"
 
 const char path[20] = "\\\\fls0\\cookies.sav";
-const char backup_path[24] = "\\\\fls0\\cookies.sav.bak";
+const char bak_path[24] = "\\\\fls0\\cookies.sav.bak";
 
 char *get_save_val(double val) {
 	char *val_buf = malloc(20);
@@ -353,25 +353,30 @@ void load_game(struct CookieData *data, struct GoldenData *gold) {
     Bfile_CloseFile_OS(h_file);
 }
 
-void rename_file(const char* old_path, const char* new_path) {
-    unsigned short p_old[sizeof(old_path) * 2];
-    unsigned short p_new[sizeof(new_path) * 2];
+void backup_game() {
+	unsigned short save[sizeof(path) * 2];
+    unsigned short back[sizeof(bak_path) * 2];
 
-    Bfile_StrToName_ncpy(p_old, old_path, sizeof(old_path));
-    Bfile_StrToName_ncpy(p_new, new_path, sizeof(new_path));
+    Bfile_StrToName_ncpy(save, path, sizeof(path));
+    Bfile_StrToName_ncpy(back, bak_path, sizeof(bak_path));
 
-	if(Bfile_RenameEntry(p_old, p_new) < 0) {
-		Bfile_DeleteEntry(p_new);
-		Bfile_RenameEntry(p_old, p_new);
+	if(Bfile_RenameEntry(save, back) < 0) {
+		Bfile_DeleteEntry(back);
+		Bfile_RenameEntry(save, back);
 	}
 }
 
-void backup_game() {
-	rename_file(path, backup_path);
-}
-
 void restore_backup() {
-	rename_file(backup_path, path);
+	unsigned short save[sizeof(path) * 2];
+    unsigned short back[sizeof(bak_path) * 2];
+
+    Bfile_StrToName_ncpy(save, path, sizeof(path));
+    Bfile_StrToName_ncpy(back, bak_path, sizeof(bak_path));
+
+	if(Bfile_RenameEntry(back, save) < 0) {
+		Bfile_DeleteEntry(save);
+		Bfile_RenameEntry(back, save);
+	}
 }
 
 void reset_game(struct CookieData *data, struct GoldenData *gold) {
