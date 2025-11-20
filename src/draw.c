@@ -7,6 +7,24 @@
 
 #include "draw.h"
 
+const color_t toggle_x_palette[2] = {0xffff, 0xf800};
+
+const unsigned char toggle_x[26] = {
+	0xff,0xff,
+	0x9f,0xcf,
+	0x8f,0x8f,
+	0xc7,0x1f,
+	0xe2,0x3f,
+	0xf0,0x7f,
+	0xf8,0xff,
+	0xf0,0x7f,
+	0xe2,0x3f,
+	0xc7,0x1f,
+	0x8f,0x8f,
+	0x9f,0xcf,
+	0xff,0xff
+};
+
 int rgb_color(int r, int g, int b) {
   	return ((r / 8) << 11) | ((g / 4) << 5) | (b / 8);
 }
@@ -292,7 +310,7 @@ void disp_string(unsigned x, unsigned y, const char* message, int color) {
                     break;
             }
             copy_sprite_1bit((c == '\"' && quote) ? r_quote : charmap[(int) c],
-                x + x_offset + ((c == '\"' && quote) ? 1 : 0), y + y_offset + (line * 13), w, h, charmap_palette, color);
+                x + x_offset + ((c == '\"' && quote) ? 1 : 0), y + y_offset + (line * 14), w, h, charmap_palette, color);
             x_offset += (c == ' ') ? 5 : (w + (c == 'Q' ? -1 : 1) + (c == '(' || c == ')' ? 1 : 0));
             if (c == '\"')
                 quote = !quote;
@@ -429,4 +447,12 @@ int small_text_width(const char *msg, bool caps) {
         }
 	}
 	return max(total, max_total);
+}
+
+void draw_toggle_box(uint16_t x, uint8_t y, char *message, color_t color, bool toggle) {
+	small_disp_string(x, y, message, color, true);
+	draw_rect(349, y + 2, 10, 10, color, 1);
+
+	if (toggle)
+		copy_sprite_1bit(toggle_x, 348, y + 1, 13, 13, toggle_x_palette, color);
 }
