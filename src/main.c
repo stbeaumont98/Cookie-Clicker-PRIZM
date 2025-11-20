@@ -350,6 +350,14 @@ int main() {
 	bool cheating = false;
 	bool auto_click_gold = false;
 	bool hold_click = false;
+	bool free_buildings = false;
+	bool free_upgrades = false;
+
+	int filtered_size = 0;
+	struct Upgrade filtered_upgrades[478];
+
+	filter_unlocked(filtered_upgrades, &data, upgrades, &filtered_size);
+	sort_upgrades(filtered_upgrades, 0, filtered_size - 1, data.upgrades);
 
 	while (1) {
         int key = PRGM_GetKey();
@@ -425,17 +433,19 @@ int main() {
 			draw_button(207, 104, 110, cheats_str, 0xFFFF, s_sel == 3);
 
 			if (cheating) {
-				draw_toggle_box(207, 133, "Auto-click\ngolden cookies", s_sel == 4 ? 0xFFFF : dim_color(0xFFFF, 0.5), auto_click_gold);
-				draw_toggle_box(207, 156, "Press and hold\nto click", s_sel == 5 ? 0xFFFF : dim_color(0xFFFF, 0.5), hold_click);
+				draw_toggle_box(213, 133, "Auto-click\ngolden cookies", s_sel == 4 ? 0xFFFF : dim_color(0xFFFF, 0.5), auto_click_gold);
+				draw_toggle_box(213, 156, "Press and hold\nto click", s_sel == 5 ? 0xFFFF : dim_color(0xFFFF, 0.5), hold_click);
+				draw_toggle_box(213, 179, "Free Buildings", s_sel == 6 ? 0xFFFF : dim_color(0xFFFF, 0.5), free_buildings);
+				draw_toggle_box(213, 198, "Free Upgrades", s_sel == 7 ? 0xFFFF : dim_color(0xFFFF, 0.5), free_upgrades);
 			}
 
 			if (!prompt) {
 
-				if ((key_press(KEY_PRGM_DOWN) || (key == KEY_PRGM_DOWN && key_held)) && s_sel < (cheating ? 5 : 3))
+				if ((key_press(KEY_PRGM_DOWN) || (key == KEY_PRGM_DOWN && key_held)) && s_sel < (cheating ? 7 : 3))
 					s_sel++;
 				if ((key_press(KEY_PRGM_UP) || (key == KEY_PRGM_UP && key_held)) && s_sel > 0)
 					s_sel--;
-				if ((key_press(KEY_PRGM_RIGHT) || (key == KEY_PRGM_RIGHT && key_held)) && s_sel + 3 <= (cheating ? 5 : 3))
+				if ((key_press(KEY_PRGM_RIGHT) || (key == KEY_PRGM_RIGHT && key_held)) && s_sel + 3 <= (cheating ? 7 : 3))
 					s_sel += 3;
 				if ((key_press(KEY_PRGM_LEFT) || (key == KEY_PRGM_LEFT && key_held)) && s_sel - 3 >= 0)
 					s_sel -= 3;
@@ -463,6 +473,12 @@ int main() {
 							break;
 						case 5:
 							hold_click = !hold_click;
+							break;
+						case 6:
+							free_buildings = !free_buildings;
+							break;
+						case 7:
+							free_upgrades = !free_upgrades;
 							break;
 						default:
 							break;
@@ -498,6 +514,10 @@ int main() {
 							case 1:
 								restore_backup();
 								load_game(&data, &gold);
+				
+								filter_unlocked(filtered_upgrades, &data, upgrades, &filtered_size);
+								sort_upgrades(filtered_upgrades, 0, filtered_size - 1, data.upgrades);
+
 								// Create another copy of the backup.
 								backup_game();
 								save_game(data, gold);
@@ -505,8 +525,13 @@ int main() {
 								break;
 							// Wipe save
 							case 2:
-								// Reset all variables and reset the cookies.sav file.
+								// Reset all variables.
 								reset_game(&data, &gold);
+								
+								filter_unlocked(filtered_upgrades, &data, upgrades, &filtered_size);
+								sort_upgrades(filtered_upgrades, 0, filtered_size - 1, data.upgrades);
+
+								// Reset the cookies.sav file.
 								save_game(data, gold);
 								break;
 							case 3:
@@ -627,11 +652,6 @@ int main() {
 
 					// upgrades store
 
-					int filtered_size = 0;
-					struct Upgrade *filtered_upgrades = filter_unlocked(&data, upgrades, &filtered_size);
-
-					sort_upgrades(filtered_upgrades, 0, filtered_size - 1, data.upgrades);
-
 					fill_scr(0x0000);
 					
 					copy_sprite_scaled(panel_h, 0, 32, 99, 8, 198, 16, false, 0);
@@ -712,12 +732,12 @@ int main() {
 							disp_string(57, y, name, color);
 							
 							if (!data.upgrades[f_id]) {
-								double p = filtered_upgrades[u_id].price;
+								double p = !(cheating && free_upgrades) * filtered_upgrades[u_id].price;
 								price_buf = get_display_val(p, false, p >= 1e12);
 								x = 348 - text_width(price_buf), y =  53 + i * 42;
 								copy_sprite_masked(money, x, y, 14, 14, COLOR_RED);
 								x = 364 - text_width(price_buf), y = 54 + i * 42;
-								color = (data.cookies >= filtered_upgrades[u_id].price) ? 0x67ec : COLOR_RED;
+								color = (data.cookies >= p) ? 0x67ec : COLOR_RED;
 								disp_string(x, y, price_buf, color);
 								free(price_buf);
 							} else {
@@ -755,16 +775,17 @@ int main() {
 						uint16_t f_id = filtered_upgrades[u_id].id;
 
 						if (key_press(KEY_PRGM_ALPHA)
-							&& data.cookies >= filtered_upgrades[u_id].price
+							&& data.cookies >= (!(cheating && free_upgrades) * filtered_upgrades[u_id].price)
 							&& !data.upgrades[f_id]) {
-							data.cookies -= filtered_upgrades[u_id].price;
+							data.cookies -= (!(cheating && free_upgrades) * filtered_upgrades[u_id].price);
 							data.upgrades[f_id] = true;
 							enable_upgrade(&data, &gold, f_id);
 							unlock_upgrades(&data);
+							
+							filter_unlocked(filtered_upgrades, &data, upgrades, &filtered_size);
+							sort_upgrades(filtered_upgrades, 0, filtered_size - 1, data.upgrades);
 						}
 					}
-
-					free(filtered_upgrades);
 
 				} else {
 					draw_background();
@@ -922,8 +943,14 @@ int main() {
 				}
 
 				if (key_press(KEY_PRGM_X2)) {
-					if (!upgrades_toggle)
+					if (!upgrades_toggle) {
 						unlock_upgrades(&data);
+						
+						filter_unlocked(filtered_upgrades, &data, upgrades, &filtered_size);
+						sort_upgrades(filtered_upgrades, 0, filtered_size - 1, data.upgrades);
+					}
+					
+
 					upgrades_toggle = !upgrades_toggle;
 				}
 			}

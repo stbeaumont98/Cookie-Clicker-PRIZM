@@ -38,7 +38,7 @@ extern char *upgrade_descriptions[21];
 extern char *grandma_descriptions[21];
 extern const struct Upgrade upgrades[];
 
-struct Upgrade *filter_unlocked(struct CookieData *data, const struct Upgrade *upgrades, int *filtered_size);
+void filter_unlocked(struct Upgrade filtered[], struct CookieData *data, const struct Upgrade *upgrades, int *filtered_size);
 void sort_upgrades(struct Upgrade arr[], int low, int high, bool bought[]);
 
 void unlock_upgrades(struct CookieData *data);
