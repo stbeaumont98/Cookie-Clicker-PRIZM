@@ -231,7 +231,7 @@ char *get_upgrade_name(const struct CookieData data, uint16_t id) {
 void draw_button(uint16_t x, uint8_t y, uint8_t w, char *message, color_t color, bool selected) {
 	int text_width = small_text_width(message, true);
 	int box_width = w != 0 ? w : text_width + 10;
-	draw_rect(x, y, box_width, 16, selected ? 0xff80 : dim_color(color, .5), selected ? 1 : 0);
+	draw_rect(x, y, box_width, 16, selected ? 0xff80 : dim_color(color, .5), 1);
 	small_disp_string(x + (box_width - 4 - text_width), y + 6, message, dim_color(color, selected ? 1. : 0.5), true);
 }
 
@@ -278,7 +278,7 @@ void draw_prompt(int setting_selection, bool sel) {
 			strcpy(msg.header, "Do you REALLY want to\nwipe your save?");
 			strcpy(msg.body, "You will lose all your progress!");
 			break;
-		case 4:
+		case 3:
 			strcpy(msg.header, "Do you REALLY want to\nenable cheating?");
 			strcpy(msg.body, "Cheated cookies taste awful.");
 			break;
@@ -348,6 +348,8 @@ int main() {
 	bool prompt = false;
 
 	bool cheating = false;
+	bool auto_click_gold = false;
+	bool hold_click = false;
 
 	while (1) {
         int key = PRGM_GetKey();
@@ -414,36 +416,66 @@ int main() {
 			draw_button(66, 191, 110, "WIPE SAVE", COLOR_RED, s_sel == 2);
 
 			draw_line(203, 73, 273, 73, 0x632c, 0);
-			disp_string(205, 80, "Settings", 0xFFFF);
+			disp_string(205, 80, "Cheating", 0xFFFF);
 			draw_line(203, 97, 273, 97, 0x632c, 0);
 
-			draw_button(207, 104, 110, "Message duration:", 0xFFFF, s_sel == 3);
 			char cheats_str[12];
 			strcpy(cheats_str, "Cheats ");
 			strcat(cheats_str, cheating ? "ON" : "OFF");
-			draw_button(207, 127, 110, cheats_str, 0xFFFF, s_sel == 4);
+			draw_button(207, 104, 110, cheats_str, 0xFFFF, s_sel == 3);
+
+			if (cheating) {
+				draw_toggle_box(207, 133, "Auto-click\ngolden cookies", s_sel == 4 ? 0xFFFF : dim_color(0xFFFF, 0.5), auto_click_gold);
+				draw_toggle_box(207, 156, "Press and hold\nto click", s_sel == 5 ? 0xFFFF : dim_color(0xFFFF, 0.5), hold_click);
+			}
 
 			if (!prompt) {
 
-				if ((key_press(KEY_PRGM_DOWN) || (key == KEY_PRGM_DOWN && key_held)) && s_sel < 4)
+				if ((key_press(KEY_PRGM_DOWN) || (key == KEY_PRGM_DOWN && key_held)) && s_sel < (cheating ? 5 : 3))
 					s_sel++;
 				if ((key_press(KEY_PRGM_UP) || (key == KEY_PRGM_UP && key_held)) && s_sel > 0)
 					s_sel--;
-				if ((key_press(KEY_PRGM_RIGHT) || (key == KEY_PRGM_RIGHT && key_held)) && s_sel + 3 <= 4)
+				if ((key_press(KEY_PRGM_RIGHT) || (key == KEY_PRGM_RIGHT && key_held)) && s_sel + 3 <= (cheating ? 5 : 3))
 					s_sel += 3;
 				if ((key_press(KEY_PRGM_LEFT) || (key == KEY_PRGM_LEFT && key_held)) && s_sel - 3 >= 0)
 					s_sel -= 3;
 
-				if (key_press(KEY_PRGM_ALPHA)) {
-					if (s_sel <  3 || (s_sel == 4 && !cheating)) {
-						prompt = true;
-						p_sel = true;
-					} else if (s_sel == 4 && cheating)
-						cheating = false;
+				if (key_press(KEY_PRGM_SHIFT)) {
+					switch (s_sel) {
+						case 0:
+						case 1:
+						case 2:
+							prompt = true;
+							p_sel = true;
+							break;
+						case 3:
+							if (!cheating) {
+								prompt = true;
+								p_sel = true;
+							} else {
+								cheating = false;
+								auto_click_gold = false;
+								hold_click = false;
+							}
+							break;
+						case 4:
+							auto_click_gold = !auto_click_gold;
+							break;
+						case 5:
+							hold_click = !hold_click;
+							break;
+						default:
+							break;
+					}
 				}
 
 				if (key_press(KEY_PRGM_EXIT))
 					options_toggle = false;
+
+				if (key_press(KEY_PRGM_VARS)) {
+					options_toggle = false;
+					stats_toggle = true;
+				}
 
 			} else {
 				draw_prompt(s_sel, p_sel);
@@ -453,7 +485,7 @@ int main() {
 				if (key_press(KEY_PRGM_LEFT) && !p_sel)
 					p_sel = true;
 
-				if (key_press(KEY_PRGM_ALPHA)) {
+				if (key_press(KEY_PRGM_SHIFT)) {
 					if (p_sel) {
 						switch (s_sel) {
 							// Backup save
@@ -477,7 +509,7 @@ int main() {
 								reset_game(&data, &gold);
 								save_game(data, gold);
 								break;
-							case 4:
+							case 3:
 								cheating = true;
 								break;
 							default:
@@ -487,7 +519,7 @@ int main() {
 					prompt = false;
 				}
 
-				if (key_press(KEY_PRGM_EXIT))
+				if (key_press(KEY_PRGM_EXIT) || key_press(KEY_PRGM_ALPHA))
 					prompt = false;
 			}
 
@@ -658,7 +690,7 @@ int main() {
 							if (filtered_upgrades[u_id].sprite != NULL) {
 								copy_sprite_4bit(filtered_upgrades[u_id].sprite, 26, 57 + i * 42, 24, 24,
 								filtered_upgrades[u_id].palette, false, 0x4208);
-								if (u_id >= 222 && u_id < 236)
+								if (f_id >= 222 && f_id < 236)
 									copy_sprite_4bit(rainbow, 26, 57 + i * 42, 24, 24,
 										rainbow_pal, false, 0x4208);
 							}
@@ -814,7 +846,7 @@ int main() {
 
 					// end store code
 
-					if (key_press(KEY_PRGM_SHIFT)) {
+					if (key_press(KEY_PRGM_SHIFT) || (key_hold(KEY_PRGM_SHIFT) && cheating && hold_click)) {
 						scale_w = 112;
 						scale_h = 114;
 						data.cookies += current_cpc;
@@ -895,6 +927,9 @@ int main() {
 					upgrades_toggle = !upgrades_toggle;
 				}
 			}
+			
+			if (key_press(KEY_PRGM_VARS))
+				stats_toggle = !stats_toggle;
 		}
 
 		// manual save
@@ -915,16 +950,13 @@ int main() {
 		if (key_press(KEY_PRGM_OPTN))
 			options_toggle = !options_toggle;
 
-		if (key_press(KEY_PRGM_VARS))
-			stats_toggle = !stats_toggle;
-
 		if (msg.time > 0) {
 			display_msg(msg);
 			if (key_press(KEY_PRGM_EXIT))
 				msg.time = 0;
 		}
 		
-		if (key_press(f_buttons[gold.x]) && gold.time <= ticks(13 * gold.time_modifier)) {
+		if ((key_press(f_buttons[gold.x]) || (auto_click_gold && cheating)) && gold.time <= ticks(13 * gold.time_modifier)) {
 			data.gold_click_count++;
 			if (gold.effect > 0 && gold.effect <= 425) {
 				// Lucky!
