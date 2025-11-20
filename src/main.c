@@ -805,6 +805,7 @@ int main() {
 
 					for (int i = 0; i < store_size; i++) {
 						uint8_t b_id = i + b_sel_offset;
+						double p = !(cheating && free_buildings) * data.buildings[b_id].price;
 
 						x = 180, y = 48 + i * 42;
 						draw_store_tile(x, y);
@@ -814,17 +815,17 @@ int main() {
 						x = 223, y = 70 + i * 42;
 						copy_sprite_masked(money, x, y, 14, 14, COLOR_RED);
 
-						price_buf = get_display_val(data.buildings[b_id].price, false, false);
+						price_buf = get_display_val(p, false, false);
 
 						if ((text_width(price_buf) > 116 && data.buildings[b_id].owned >= 100)
 							|| (text_width(price_buf) > 121 && data.buildings[b_id].owned >= 10)
 							|| (text_width(price_buf) > 130)) {
 							free(price_buf);
-							price_buf = get_display_val(data.buildings[b_id].price, false, true);
+							price_buf = get_display_val(p, false, true);
 						}
 
 						x = 240;
-						color = (data.cookies >= data.buildings[b_id].price) ? 0x67ec : COLOR_RED;
+						color = (data.cookies >= p) ? 0x67ec : COLOR_RED;
 						disp_string(x, y, price_buf, color);
 						free(price_buf);
 
@@ -857,9 +858,10 @@ int main() {
 						b_sel_offset--;
 
 					uint8_t b_id = b_sel + b_sel_offset;
+					double p = !(cheating && free_buildings) * data.buildings[b_id].price;
 					if (key_press(KEY_PRGM_ALPHA)
-						&& data.cookies >= data.buildings[b_id].price) {
-						data.cookies -= data.buildings[b_id].price;
+						&& data.cookies >= p) {
+						data.cookies -= p;
 						data.buildings[b_id].owned++;
 						data.buildings[b_id].price += (data.buildings[b_id].price * .15);
 						data.total_buildings++;
