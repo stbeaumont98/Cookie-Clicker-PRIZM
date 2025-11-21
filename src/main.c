@@ -970,8 +970,11 @@ int main() {
 		if (gold.boost_time <= 0) 
 			gold.boost_multiplier = 0;
 		
-		if (key_press(KEY_PRGM_OPTN))
+		if (key_press(KEY_PRGM_OPTN)) {
+			if (!options_toggle && stats_toggle)
+				stats_toggle = false;
 			options_toggle = !options_toggle;
+		}
 
 		if (msg.time > 0) {
 			display_msg(msg);
