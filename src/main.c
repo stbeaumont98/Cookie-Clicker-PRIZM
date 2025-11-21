@@ -347,12 +347,6 @@ int main() {
 	bool p_sel = true;
 	bool prompt = false;
 
-	bool cheating = false;
-	bool auto_click_gold = false;
-	bool hold_click = false;
-	bool free_buildings = false;
-	bool free_upgrades = false;
-
 	int filtered_size = 0;
 	struct Upgrade filtered_upgrades[478];
 
@@ -429,24 +423,24 @@ int main() {
 
 			char cheats_str[12];
 			strcpy(cheats_str, "Cheats ");
-			strcat(cheats_str, cheating ? "ON" : "OFF");
+			strcat(cheats_str, data.cheats.on ? "ON" : "OFF");
 			draw_button(207, 104, 110, cheats_str, 0xFFFF, s_sel == 3);
 
-			if (cheating) {
-				draw_toggle_box(213, 133, "Auto-click\ngolden cookies", s_sel == 4 ? 0xFFFF : dim_color(0xFFFF, 0.5), auto_click_gold);
-				draw_toggle_box(213, 156, "Press and hold\nto click", s_sel == 5 ? 0xFFFF : dim_color(0xFFFF, 0.5), hold_click);
-				draw_toggle_box(213, 179, "Free Buildings", s_sel == 6 ? 0xFFFF : dim_color(0xFFFF, 0.5), free_buildings);
-				draw_toggle_box(213, 198, "Free Upgrades", s_sel == 7 ? 0xFFFF : dim_color(0xFFFF, 0.5), free_upgrades);
+			if (data.cheats.on) {
+				draw_toggle_box(213, 133, "Auto-click\ngolden cookies", s_sel == 4 ? 0xFFFF : dim_color(0xFFFF, 0.5), data.cheats.acg);
+				draw_toggle_box(213, 156, "Press and hold\nto click", s_sel == 5 ? 0xFFFF : dim_color(0xFFFF, 0.5), data.cheats.hc);
+				draw_toggle_box(213, 179, "Free Buildings", s_sel == 6 ? 0xFFFF : dim_color(0xFFFF, 0.5), data.cheats.fb);
+				draw_toggle_box(213, 198, "Free Upgrades", s_sel == 7 ? 0xFFFF : dim_color(0xFFFF, 0.5), data.cheats.fu);
 			}
 
 			if (!prompt) {
 
-				if ((key_press(KEY_PRGM_DOWN) || (key == KEY_PRGM_DOWN && key_held)) && s_sel < (cheating ? 7 : 3))
+				if ((key_press(KEY_PRGM_DOWN) || (key == KEY_PRGM_DOWN && key_held)) && s_sel < (data.cheats.on ? 7 : 3))
 					s_sel++;
 				if ((key_press(KEY_PRGM_UP) || (key == KEY_PRGM_UP && key_held)) && s_sel > 0)
 					s_sel--;
 				if (key_press(KEY_PRGM_RIGHT) || (key == KEY_PRGM_RIGHT && key_held))
-					s_sel += (cheating && (s_sel >= 2)) || (!cheating && (s_sel >= 0)) ? (cheating ? 7 : 3) - s_sel : 3;
+					s_sel += (data.cheats.on && (s_sel >= 2)) || (!data.cheats.on && (s_sel >= 0)) ? (data.cheats.on ? 7 : 3) - s_sel : 3;
 				if (key_press(KEY_PRGM_LEFT) || (key == KEY_PRGM_LEFT && key_held))
 					s_sel -= (s_sel > 5) ? s_sel - 2 : (s_sel < 3) ? s_sel : 3;
 
@@ -459,26 +453,26 @@ int main() {
 							p_sel = true;
 							break;
 						case 3:
-							if (!cheating) {
+							if (!data.cheats.on) {
 								prompt = true;
 								p_sel = true;
 							} else {
-								cheating = false;
-								auto_click_gold = false;
-								hold_click = false;
+								data.cheats.on = false;
+								data.cheats.acg = false;
+								data.cheats.hc = false;
 							}
 							break;
 						case 4:
-							auto_click_gold = !auto_click_gold;
+							data.cheats.acg = !data.cheats.acg;
 							break;
 						case 5:
-							hold_click = !hold_click;
+							data.cheats.hc = !data.cheats.hc;
 							break;
 						case 6:
-							free_buildings = !free_buildings;
+							data.cheats.fb = !data.cheats.fb;
 							break;
 						case 7:
-							free_upgrades = !free_upgrades;
+							data.cheats.fu = !data.cheats.fu;
 							break;
 						default:
 							break;
@@ -535,7 +529,7 @@ int main() {
 								save_game(data, gold);
 								break;
 							case 3:
-								cheating = true;
+								data.cheats.on = true;
 								break;
 							default:
 								break;
@@ -732,7 +726,7 @@ int main() {
 							disp_string(57, y, name, color);
 							
 							if (!data.upgrades[f_id]) {
-								double p = !(cheating && free_upgrades) * filtered_upgrades[u_id].price;
+								double p = !(data.cheats.on && data.cheats.fu) * filtered_upgrades[u_id].price;
 								price_buf = get_display_val(p, false, p >= 1e12);
 								x = 348 - text_width(price_buf), y =  53 + i * 42;
 								copy_sprite_masked(money, x, y, 14, 14, COLOR_RED);
@@ -775,9 +769,9 @@ int main() {
 						uint16_t f_id = filtered_upgrades[u_id].id;
 
 						if (key_press(KEY_PRGM_ALPHA)
-							&& data.cookies >= (!(cheating && free_upgrades) * filtered_upgrades[u_id].price)
+							&& data.cookies >= (!(data.cheats.on && data.cheats.fu) * filtered_upgrades[u_id].price)
 							&& !data.upgrades[f_id]) {
-							data.cookies -= (!(cheating && free_upgrades) * filtered_upgrades[u_id].price);
+							data.cookies -= (!(data.cheats.on && data.cheats.fu) * filtered_upgrades[u_id].price);
 							data.upgrades[f_id] = true;
 							enable_upgrade(&data, &gold, f_id);
 							unlock_upgrades(&data);
@@ -805,7 +799,7 @@ int main() {
 
 					for (int i = 0; i < store_size; i++) {
 						uint8_t b_id = i + b_sel_offset;
-						double p = !(cheating && free_buildings) * data.buildings[b_id].price;
+						double p = !(data.cheats.on && data.cheats.fb) * data.buildings[b_id].price;
 
 						x = 180, y = 48 + i * 42;
 						draw_store_tile(x, y);
@@ -858,7 +852,7 @@ int main() {
 						b_sel_offset--;
 
 					uint8_t b_id = b_sel + b_sel_offset;
-					double p = !(cheating && free_buildings) * data.buildings[b_id].price;
+					double p = !(data.cheats.on && data.cheats.fb) * data.buildings[b_id].price;
 					if (key_press(KEY_PRGM_ALPHA)
 						&& data.cookies >= p) {
 						data.cookies -= p;
@@ -869,7 +863,7 @@ int main() {
 
 					// end store code
 
-					if (key_press(KEY_PRGM_SHIFT) || (key_hold(KEY_PRGM_SHIFT) && cheating && hold_click)) {
+					if (key_press(KEY_PRGM_SHIFT) || (key_hold(KEY_PRGM_SHIFT) && data.cheats.on && data.cheats.hc)) {
 						scale_w = 112;
 						scale_h = 114;
 						data.cookies += current_cpc;
@@ -985,7 +979,7 @@ int main() {
 				msg.time = 0;
 		}
 		
-		if ((key_press(f_buttons[gold.x]) || (auto_click_gold && cheating)) && gold.time <= ticks(13 * gold.time_modifier)) {
+		if ((key_press(f_buttons[gold.x]) || (data.cheats.acg && data.cheats.on)) && gold.time <= ticks(13 * gold.time_modifier)) {
 			data.gold_click_count++;
 			if (gold.effect > 0 && gold.effect <= 425) {
 				// Lucky!
