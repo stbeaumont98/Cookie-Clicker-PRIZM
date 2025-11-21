@@ -186,6 +186,26 @@ void save_game(const struct CookieData data, const struct GoldenData gold) {
 	strcat(save_buf, "\n");
 	free(tmp);
 
+	tmp = malloc(2);
+
+	itoa(data.cheats.on, tmp, 10);
+	strcat(save_buf, tmp);
+
+	itoa(data.cheats.acg, tmp, 10);
+	strcat(save_buf, tmp);
+
+	itoa(data.cheats.hc, tmp, 10);
+	strcat(save_buf, tmp);
+
+	itoa(data.cheats.fb, tmp, 10);
+	strcat(save_buf, tmp);
+
+	itoa(data.cheats.fu, tmp, 10);
+	strcat(save_buf, tmp);
+
+	strcat(save_buf, "\n");
+	free(tmp);
+
     Bfile_WriteFile_OS(h_file, save_buf, strlen(save_buf));
 
     Bfile_CloseFile_OS(h_file);
@@ -318,6 +338,7 @@ void load_game(struct CookieData *data, struct GoldenData *gold) {
 	char *boost_multiplier = strtok(NULL, "\n");
 	char *multiplier = strtok(NULL, "\n");
 	char *upgrades = strtok(NULL, "\n");
+	char *cheats = strtok(NULL, "\n");
 
 	dec = strtok(cps_multiplier, "E");
 	pow = strtok(NULL, "E");
@@ -346,6 +367,14 @@ void load_game(struct CookieData *data, struct GoldenData *gold) {
 			if (isowned && i < 336)
 				enable_upgrade(data, gold, i);
 		}
+	}
+
+	if (strlen(cheats) == 5) {
+		data->cheats.on = (cheats[0] == 1);
+		data->cheats.acg = (cheats[1] == 1);
+		data->cheats.hc = (cheats[2] == 1);
+		data->cheats.fb = (cheats[3] == 1);
+		data->cheats.fu = (cheats[4] == 1);
 	}
 
 	free(buf);
@@ -408,6 +437,13 @@ void reset_game(struct CookieData *data, struct GoldenData *gold) {
 		data->buildings[i].gma = false;
 	}
 	data->total_buildings = 0;
+
+	data->cheats.on = false;
+	data->cheats.acg = false;
+	data->cheats.hc = false;
+	data->cheats.fb = false;
+	data->cheats.fu = false;
+
 	gold->frenzy_time = 0;
 	gold->cps_multiplier = 1.0;
 	gold->click_frenzy_time = 0;
