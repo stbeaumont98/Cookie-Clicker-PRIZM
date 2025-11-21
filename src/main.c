@@ -232,7 +232,7 @@ void draw_button(uint16_t x, uint8_t y, uint8_t w, char *message, color_t color,
 	int text_width = small_text_width(message, true);
 	int box_width = w != 0 ? w : text_width + 10;
 	draw_rect(x, y, box_width, 16, selected ? 0xff80 : dim_color(color, .5), 1);
-	small_disp_string(x + (box_width - 4 - text_width), y + 6, message, dim_color(color, selected ? 1. : 0.5), true);
+	small_disp_string(x + (box_width - 4 - text_width), y + 6, message, color, true);
 }
 
 void display_prompt(const struct Message msg, bool sel) {
@@ -445,10 +445,10 @@ int main() {
 					s_sel++;
 				if ((key_press(KEY_PRGM_UP) || (key == KEY_PRGM_UP && key_held)) && s_sel > 0)
 					s_sel--;
-				if ((key_press(KEY_PRGM_RIGHT) || (key == KEY_PRGM_RIGHT && key_held)) && s_sel + 3 <= (cheating ? 7 : 3))
-					s_sel += 3;
-				if ((key_press(KEY_PRGM_LEFT) || (key == KEY_PRGM_LEFT && key_held)) && s_sel - 3 >= 0)
-					s_sel -= 3;
+				if (key_press(KEY_PRGM_RIGHT) || (key == KEY_PRGM_RIGHT && key_held))
+					s_sel += (cheating && (s_sel >= 2)) || (!cheating && (s_sel >= 0)) ? (cheating ? 7 : 3) - s_sel : 3;
+				if (key_press(KEY_PRGM_LEFT) || (key == KEY_PRGM_LEFT && key_held))
+					s_sel -= (s_sel > 5) ? s_sel - 2 : (s_sel < 3) ? s_sel : 3;
 
 				if (key_press(KEY_PRGM_SHIFT)) {
 					switch (s_sel) {
@@ -664,7 +664,7 @@ int main() {
 
 					small_disp_string(28, 5, "[x  ]", 0xffff, false);
 					small_disp_string(28 + small_text_width("[x", false), 2, "2", 0xffff, false);
-					copy_sprite_1bit(arrow[1], 20, 5, 6, 6, arrow_pal, 0xffff);
+					copy_sprite_1bit(arrow[1], 20, 5, 6, 6, one_bit_pal, 0xffff);
 
 					cookie_buf = get_display_val(data.cookies, false, false);
 					if (text_width(cookie_buf) > 162) {
@@ -742,7 +742,7 @@ int main() {
 								free(price_buf);
 							} else {
 								x = 353, y = 53 + i * 42;
-								copy_sprite_masked(check, x, y, 11, 10, COLOR_RED);
+								copy_sprite_1bit(check, x, y, 11, 10, one_bit_pal, 0x4208);
 							}
 						}
 
@@ -799,7 +799,7 @@ int main() {
 
 					small_disp_string(352, 5, "[x  ]", 0xffff, true);
 					small_disp_string(353 + small_text_width("[x", false), 2, "2", 0xffff, true);
-					copy_sprite_1bit(arrow[0], 374, 5, 6, 6, arrow_pal, 0xffff);
+					copy_sprite_1bit(arrow[0], 374, 5, 6, 6, one_bit_pal, 0xffff);
 
 					int store_size = (data.buildings_unlocked < 4) ? data.buildings_unlocked : 4;
 
