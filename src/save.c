@@ -243,6 +243,12 @@ void load_game(struct CookieData *data, struct GoldenData *gold) {
 
 	data->multiplier = 1.0;
 
+	data->cheats.on = false;
+	data->cheats.acg = false;
+	data->cheats.hc = false;
+	data->cheats.fb = false;
+	data->cheats.fu = false;
+
 	char *buf = malloc(0x320);
 	
     unsigned short p_file[sizeof(path) * 2];
@@ -269,6 +275,7 @@ void load_game(struct CookieData *data, struct GoldenData *gold) {
 		gold->click_multiplier = 1.0;
 		gold->boost_time = 0;
 		gold->boost_multiplier = 0.0;
+
 		return;
 	}
 	
@@ -370,11 +377,11 @@ void load_game(struct CookieData *data, struct GoldenData *gold) {
 	}
 
 	if (strlen(cheats) == 5) {
-		data->cheats.on = (cheats[0] == 1);
-		data->cheats.acg = (cheats[1] == 1);
-		data->cheats.hc = (cheats[2] == 1);
-		data->cheats.fb = (cheats[3] == 1);
-		data->cheats.fu = (cheats[4] == 1);
+		data->cheats.on = (cheats[0] == '1');
+		data->cheats.acg = (cheats[1] == '1');
+		data->cheats.hc = (cheats[2] == '1');
+		data->cheats.fb = (cheats[3] == '1');
+		data->cheats.fu = (cheats[4] == '1');
 	}
 
 	free(buf);
