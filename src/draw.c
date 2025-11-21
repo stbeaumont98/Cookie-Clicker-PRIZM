@@ -4,6 +4,7 @@
 #include "fxcg\display.h"
 #include "charmap.h"
 #include "math1.h"
+#include "sprites.h"
 
 #include "draw.h"
 
@@ -453,9 +454,10 @@ void draw_toggle_box(uint16_t x, uint8_t y, char *message, color_t color, bool t
 	small_disp_string(x, y, message, color, true);
     int msg_h = text_height(message);
 
+	draw_rect(349, y + (((msg_h * 9) - 13) / 2), 10, 10, dim_color(0xFFFF, toggle ? 1. : 0.5), 1);
+
 	if (toggle)
 		//copy_sprite_1bit(toggle_x, 348, y + 1, 13, 13, toggle_x_palette, color);
-        fill_area(350, y + (((msg_h * 9) - 13) / 2), 9, 9, color);
-    
-	draw_rect(349, y + (((msg_h * 9) - 13) / 2), 10, 10, color, 1);
+        //fill_area(350, y + (((msg_h * 9) - 13) / 2), 9, 9, color);
+		copy_sprite_1bit(check, 351, y + (((msg_h * 9) - 13) / 2) - 1, 11, 10, one_bit_pal, 0x67ec);
 }
