@@ -470,6 +470,25 @@ int main() {
 							break;
 						case 6:
 							data.cheats.fb = !data.cheats.fb;
+							if (!data.cheats.fb) {
+								bool last_hide = true;
+								for (int i = 19; i >= 0 && data.buildings[i].owned == 0; i--) {
+									if (i >= 2) {
+										if (data.cookies_all_time < base_prices[i - 2]) {
+											data.buildings[i].locked = true;
+											data.buildings_unlocked--;
+										}
+									}
+									if (data.cookies_all_time >= base_prices[i])
+										last_hide = false;
+									if (data.cookies_all_time < base_prices[i] && last_hide)
+										data.buildings[i].hidden = true;
+								}
+								if (b_sel + b_sel_offset > data.buildings_unlocked) {
+									b_sel = 3;
+									b_sel_offset = data.buildings_unlocked - 4;
+								}
+							}
 							break;
 						case 7:
 							data.cheats.fu = !data.cheats.fu;
@@ -873,10 +892,11 @@ int main() {
 					}
 
 					for (int i = 0; i < 20; i++) {
-						if (data.cookies_all_time >= base_prices[i])
+						if (data.cookies_all_time >= base_prices[i] || (data.cheats.on && data.cheats.fb))
 							data.buildings[i].hidden = false;
+
 						if (i >= 2) {
-							if (data.buildings[i].locked && (data.cookies_all_time >= base_prices[i - 2])) {
+							if (data.buildings[i].locked && ((data.cookies_all_time >= base_prices[i - 2]) || (data.cheats.on && data.cheats.fb))) {
 								data.buildings[i].locked = false;
 								data.buildings_unlocked++;
 							}
