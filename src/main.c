@@ -92,7 +92,7 @@ void set_message(struct Message *msg, const char *header,
 
 void display_msg(const struct Message msg) {
 	bool has_header = strlen(msg.header) != 0;
-	int width = max(text_width(msg.header), small_text_width(msg.body, false));
+	int width = max(text_width(msg.header), text_width_small(msg.body, false));
 	int height = (text_height(msg.body) * 9) + 5;
 	int box_width = width + 10;
 	int box_height = height + (has_header ? 20 : 0);
@@ -104,12 +104,12 @@ void display_msg(const struct Message msg) {
 		box_width + 3, box_height + 3, 0x82a4, 1);
 	
 	if (has_header) {
-		disp_string(box_x + 5, box_y + 4, msg.header, 0xad55);
+		disp_string(box_x + 5, box_y + 4, msg.header, 0xad55, 0);
 		draw_line(box_x + 5, box_y + 19,
 			box_x + width + 3, box_y + 19, 0x632c, 0);
-		small_disp_string(box_x + 5, box_y + 24, msg.body, 0xad55, false);
+		disp_string_small(box_x + 5, box_y + 24, msg.body, 0xad55, false, 0);
 	} else
-		small_disp_string(box_x + 5, box_y + 4, msg.body, 0xad55, false);
+		disp_string_small(box_x + 5, box_y + 4, msg.body, 0xad55, false, 0);
 }
 
 void draw_background() {
@@ -229,17 +229,17 @@ char *get_upgrade_name(const struct CookieData data, uint16_t id) {
 }
 
 void draw_button(uint16_t x, uint8_t y, uint8_t w, char *message, color_t color, bool selected) {
-	int text_width = small_text_width(message, true);
+	int text_width = text_width_small(message, true);
 	int box_width = w != 0 ? w : text_width + 10;
 	draw_rect(x, y, box_width, 16, selected ? 0xff80 : dim_color(color, .5), 1);
-	small_disp_string(x + (box_width - 4 - text_width), y + 6, message, color, true);
+	disp_string_small(x + (box_width - 4 - text_width), y + 6, message, color, true, 0);
 }
 
 void display_prompt(const struct Message msg, bool sel) {
-	int width = max(text_width(msg.header), small_text_width(msg.body, false));
+	int width = max(text_width(msg.header), text_width_small(msg.body, false));
 	int height = (text_height(msg.body) * 9) + 27;
-	int box_width = width + 30;
-	int box_height = height + (text_height(msg.header) * 14) + 26;
+	int box_width = width + 50;
+	int box_height = height + (text_height(msg.header) * 15) + 25;
 	int box_x = (384 - box_width) / 2;
 	int box_y =  (213 - box_height) / 2;
 
@@ -247,16 +247,18 @@ void display_prompt(const struct Message msg, bool sel) {
 	draw_rect(box_x - 2, box_y - 2,
 		box_width + 3, box_height + 3, 0x82a4, 1);
 	
-	disp_string(box_x + ((box_width - text_width(msg.header)) / 2), box_y + 14, msg.header, 0xad55);
+	disp_string(box_x + ((box_width - text_width(msg.header)) / 2), box_y + 6, msg.header, 0xad55, ALIGN_CENTER);
 
-	draw_line(box_x + ((box_width - width) / 2), box_y + (text_height(msg.header) * 14) + 15,
-		box_x + width + 13, box_y + (text_height(msg.header) * 14) + 15, 0x632c, 0);
+	draw_rect(box_x + 14, box_y + 23, box_width - 29, (text_height(msg.body) * 9) + 14, 0x632c, 0);
 
-	small_disp_string(box_x + ((box_width - small_text_width(msg.body, false)) / 2),
-		box_y + (text_height(msg.header) * 14) + 20, msg.body, 0xad55, false);
+	//draw_line(box_x + ((box_width - width) / 2), box_y + (text_height(msg.header) * 14) + 35,
+		//box_x + width + 13, box_y + (text_height(msg.header) * 14) + 35, 0x632c, 0);
 
-	draw_button(box_x + 5, box_y + box_height - 22, 0, "Yes!", 0xFFFF, sel);
-	draw_button(box_x + box_width - 29, box_y + box_height - 22, 0, "No", 0xFFFF, !sel);
+	disp_string_small(box_x + ((box_width - text_width_small(msg.body, false)) / 2),
+		box_y + (text_height(msg.header) * 15) + 17, msg.body, 0xad55, false, ALIGN_CENTER);
+
+	draw_button(box_x + 15, box_y + box_height - 22, 0, "Yes!", 0xFFFF, sel);
+	draw_button(box_x + box_width - 39, box_y + box_height - 22, 0, "No", 0xFFFF, !sel);
 }
 
 void draw_prompt(int setting_selection, bool sel) {
@@ -265,22 +267,22 @@ void draw_prompt(int setting_selection, bool sel) {
 	switch (setting_selection) {
 		// Backup save
 		case 0:
-			strcpy(msg.header, "Are you sure?");
-			strcpy(msg.body, "Any previous backups will be overwritten!");
+			strcpy(msg.header, "BACKUP SAVE");
+			strcpy(msg.body, "Are you sure?\nAny previous backups will be\noverwritten!");
 			break;
 		// Restore backup
 		case 1:
-			strcpy(msg.header, "Are you sure?");
-			strcpy(msg.body, "Current save file will be overwritten!");
+			strcpy(msg.header, "RESTORE BACKUP");
+			strcpy(msg.body, "Are you sure?\nCurrent save file will be\noverwritten!");
 			break;
 		// Wipe save
 		case 2:
-			strcpy(msg.header, "Do you REALLY want to\nwipe your save?");
-			strcpy(msg.body, "You will lose all your progress!");
+			strcpy(msg.header, "WIPE SAVE");
+			strcpy(msg.body, "Do you REALLY want to\nwipe your save?\nYou will lose all your progress!");
 			break;
 		case 3:
-			strcpy(msg.header, "Do you REALLY want to\nenable cheating?");
-			strcpy(msg.body, "Cheated cookies taste awful.");
+			strcpy(msg.header, "ENABLE CHEATS");
+			strcpy(msg.body, "Do you REALLY want to\nenable cheating?\nCheated cookies taste awful.");
 			break;
 		default:
 			break;
@@ -398,7 +400,7 @@ int main() {
 			
 			fill_scr(0x0000);
 			draw_line(157, 22, 226, 22, 0x632c, 0);
-			disp_string(161, 29, "OPTIONS", 0xFFFF);
+			disp_string(161, 29, "OPTIONS", 0xFFFF, 0);
 			draw_line(157, 46, 226, 46, 0x632c, 0);
 
 			copy_sprite_scaled(panel_h, 0, 0, 99, 8, 198, 16, false, 0);
@@ -410,7 +412,7 @@ int main() {
 			copy_sprite_scaled(panel_v, 184, 69, 8, 108, 16, 216, false, 0);
 
 			draw_line(19, 73, 86, 73, 0x632c, 0);
-			disp_string(21, 80, "General", 0xFFFF);
+			disp_string(21, 80, "General", 0xFFFF, 0);
 			draw_line(19, 97, 86, 97, 0x632c, 0);
 
 			draw_button(23, 104, 110, "BACKUP SAVE", 0xFFFF, s_sel == 0);
@@ -418,7 +420,7 @@ int main() {
 			draw_button(66, 191, 110, "WIPE SAVE", COLOR_RED, s_sel == 2);
 
 			draw_line(203, 73, 273, 73, 0x632c, 0);
-			disp_string(205, 80, "Cheating", 0xFFFF);
+			disp_string(205, 80, "Cheating", 0xFFFF, 0);
 			draw_line(203, 97, 273, 97, 0x632c, 0);
 
 			char cheats_str[12];
@@ -566,7 +568,7 @@ int main() {
 			if (stats_toggle) {
 				fill_scr(0x0000);
 				draw_line(148, 22, 236, 22, 0x632c, 0);
-				disp_string(150, 29, "STATISTICS", 0xFFFF);
+				disp_string(150, 29, "STATISTICS", 0xFFFF, 0);
 				draw_line(148, 46, 236, 46, 0x632c, 0);
 
 				copy_sprite_scaled(panel_h, 0, 0, 99, 8, 198, 16, false, 0);
@@ -575,7 +577,7 @@ int main() {
 				copy_sprite_scaled(panel_v, 368, 0, 8, 108, 16, 216, false, 0);
 				
 				for (int i = 0; i < 9; i++)
-					disp_string(21, 54 + i * 18, stats[i], 0x94b2);
+					disp_string(21, 54 + i * 18, stats[i], 0x94b2, 0);
 				
 				copy_sprite_masked(money, 152, 54, 14, 14, COLOR_RED);
 				copy_sprite_masked(money, 214, 72, 14, 14, COLOR_RED);
@@ -585,7 +587,7 @@ int main() {
 					free(tmp);
 					tmp = get_display_val(data.cookies, false, true);
 				}
-				disp_string(170, 54, tmp, 0xFFFF);
+				disp_string(170, 54, tmp, 0xFFFF, 0);
 				free(tmp);
 
 				tmp = get_display_val(data.cookies_all_time, false, false);
@@ -593,7 +595,7 @@ int main() {
 					free(tmp);
 					tmp = get_display_val(data.cookies_all_time, false, true);
 				}
-				disp_string(232, 72, tmp, 0xFFFF);
+				disp_string(232, 72, tmp, 0xFFFF, 0);
 				free(tmp);
 
 				int num_buildings = 0;
@@ -601,7 +603,7 @@ int main() {
 					num_buildings += data.buildings[i].owned;
 
 				tmp = disp_comma(num_buildings);
-				disp_string(156, 90, tmp, 0xFFFF);
+				disp_string(156, 90, tmp, 0xFFFF, 0);
 				free(tmp);
 				
 				char mult[10];
@@ -614,21 +616,21 @@ int main() {
 				strcat(mult, "%)");
 
 				tmp = get_display_val(current_cps, (current_cps < 1E3), false);
-				if (text_width(tmp) + small_text_width(mult, false) > 186) {
+				if (text_width(tmp) + text_width_small(mult, false) > 186) {
 					free(tmp);
 					tmp = get_display_val(current_cps, (current_cps < 1E3), true);
 				}
 				int cps_w = text_width(tmp);
-				disp_string(177, 108, tmp, 0xFFFF);
+				disp_string(177, 108, tmp, 0xFFFF, 0);
 				free(tmp);
-				small_disp_string(180 + cps_w, 113, mult, 0xFFFF, false);
+				disp_string_small(180 + cps_w, 113, mult, 0xFFFF, false, 0);
 				
 				tmp = get_display_val(raw_cps, (raw_cps < 1E3), false);
 				if (text_width(tmp) > 154) {
 					free(tmp);
 					tmp = get_display_val(raw_cps, (raw_cps < 1E3), true);
 				}
-				disp_string(213, 126, tmp, 0xFFFF);
+				disp_string(213, 126, tmp, 0xFFFF, 0);
 				free(tmp);
 
 				tmp = get_display_val(current_cpc, (current_cpc < 1E3), false);
@@ -636,11 +638,11 @@ int main() {
 					free(tmp);
 					tmp = get_display_val(current_cpc, (current_cpc < 1E3), true);
 				}
-				disp_string(160, 144, tmp, 0xFFFF);
+				disp_string(160, 144, tmp, 0xFFFF, 0);
 				free(tmp);
 
 				tmp = get_display_val(data.click_count, false, false);
-				disp_string(130, 162, tmp, 0xFFFF);
+				disp_string(130, 162, tmp, 0xFFFF, 0);
 				free(tmp);
 
 				tmp = get_display_val(data.handmade_cookies, false, false);
@@ -648,11 +650,11 @@ int main() {
 					free(tmp);
 					tmp = get_display_val(data.handmade_cookies, false, true);
 				}
-				disp_string(180, 180, tmp, 0xFFFF);
+				disp_string(180, 180, tmp, 0xFFFF, 0);
 				free(tmp);
 
 				tmp = get_display_val(data.gold_click_count, false, false);
-				disp_string(185, 198, tmp, 0xFFFF);
+				disp_string(185, 198, tmp, 0xFFFF, 0);
 				free(tmp);
 
 				if (key_press(KEY_PRGM_EXIT))
@@ -672,11 +674,11 @@ int main() {
 					copy_sprite_scaled(panel_v, 0, 0, 8, 108, 16, 216, false, 0);
 					copy_sprite_scaled(panel_v, 368, 0, 8, 108, 16, 216, false, 0);
 					
-					disp_string(172, 10, "Store", 0xffff);
-					small_disp_string(18, 37, "UPGRADES", 0xffff, true);
+					disp_string(172, 10, "Store", 0xffff, 0);
+					disp_string_small(18, 37, "UPGRADES", 0xffff, true, 0);
 
-					small_disp_string(28, 5, "[x  ]", 0xffff, false);
-					small_disp_string(28 + small_text_width("[x", false), 2, "2", 0xffff, false);
+					disp_string_small(28, 5, "[x  ]", 0xffff, false, 0);
+					disp_string_small(28 + text_width_small("[x", false), 2, "2", 0xffff, false, 0);
 					copy_sprite_1bit(arrow[1], 20, 5, 6, 6, one_bit_pal, 0xffff);
 
 					cookie_buf = get_display_val(data.cookies, false, false);
@@ -684,12 +686,12 @@ int main() {
 						free(cookie_buf);
 						cookie_buf = get_display_val(data.cookies, false, true);
 					}
-					x = 365 - small_text_width(cookie_buf, false);
-					small_disp_string(x, 4, cookie_buf, 0xffff, false);
+					x = 365 - text_width_small(cookie_buf, false);
+					disp_string_small(x, 4, cookie_buf, 0xffff, false, 0);
 					free(cookie_buf);
 					
-					x = 365 - small_text_width("cookies", false);
-					small_disp_string(x, 12, "cookies", 0xffff, false);
+					x = 365 - text_width_small("cookies", false);
+					disp_string_small(x, 12, "cookies", 0xffff, false, 0);
 
 					strcpy(cps_buf, "CpS: ");
 
@@ -701,16 +703,16 @@ int main() {
 					strcat(cps_buf, tmp);
 					free(tmp);
 
-					x = 365 - small_text_width(cps_buf, false);
-					small_disp_string(x, 22, cps_buf, 0xffff, false);
+					x = 365 - text_width_small(cps_buf, false);
+					disp_string_small(x, 22, cps_buf, 0xffff, false, 0);
 
 					if (filtered_size > 0) {
 
 						uint16_t u_id = u_sel + u_sel_offset;
 						
 						char *b_type = get_upgrade_type(data, filtered_upgrades[u_id].id);
-						x = 366 - small_text_width(b_type, true);
-						small_disp_string(x, 37, b_type, 0xffff, true);
+						x = 366 - text_width_small(b_type, true);
+						disp_string_small(x, 37, b_type, 0xffff, true, 0);
 
 						for (int i = 0; i < min(filtered_size, 4); i++) {
 							uint16_t u_id = i + u_sel_offset;
@@ -737,12 +739,12 @@ int main() {
 								73 : (n_h > 1 ? 80 : 69)) + i * 42;
 							color = data.upgrades[f_id] ? 0x4208 : 0x8410;
 
-							small_disp_string(57, y, desc, color, false);
+							disp_string_small(57, y, desc, color, false, 0);
 							
 							y = (!data.upgrades_unlocked[f_id] || (n_h == 1 && d_h == 1) ? 57 : 53) + i * 42;
 							color = data.upgrades[f_id] ? 0x4208 : 0xffff;
 							
-							disp_string(57, y, name, color);
+							disp_string(57, y, name, color, 0);
 							
 							if (!data.upgrades[f_id]) {
 								double p = !(data.cheats.on && data.cheats.fu) * filtered_upgrades[u_id].price;
@@ -751,7 +753,7 @@ int main() {
 								copy_sprite_masked(money, x, y, 14, 14, COLOR_RED);
 								x = 364 - text_width(price_buf), y = 54 + i * 42;
 								color = (data.cookies >= p) ? 0x67ec : COLOR_RED;
-								disp_string(x, y, price_buf, color);
+								disp_string(x, y, price_buf, color, 0);
 								free(price_buf);
 							} else {
 								x = 353, y = 53 + i * 42;
@@ -800,6 +802,9 @@ int main() {
 						}
 					}
 
+					if (key_press(KEY_PRGM_EXIT))
+						upgrades_toggle = false;
+
 				} else {
 					draw_background();
 
@@ -807,11 +812,11 @@ int main() {
 
 					fill_area(180, 0, 204, 32, 0x0000);
 
-					disp_string(262, 10, "Store", 0xffff);
-					small_disp_string(182, 37, "BUILDINGS", 0xffff, true);
+					disp_string(262, 10, "Store", 0xffff, 0);
+					disp_string_small(182, 37, "BUILDINGS", 0xffff, true, 0);
 
-					small_disp_string(352, 5, "[x  ]", 0xffff, true);
-					small_disp_string(353 + small_text_width("[x", false), 2, "2", 0xffff, true);
+					disp_string_small(352, 5, "[x  ]", 0xffff, true, 0);
+					disp_string_small(353 + text_width_small("[x", false), 2, "2", 0xffff, true, 0);
 					copy_sprite_1bit(arrow[0], 374, 5, 6, 6, one_bit_pal, 0xffff);
 
 					int store_size = (data.buildings_unlocked < 4) ? data.buildings_unlocked : 4;
@@ -839,14 +844,14 @@ int main() {
 
 						x = 240;
 						color = (data.cookies >= p) ? 0x67ec : COLOR_RED;
-						disp_string(x, y, price_buf, color);
+						disp_string(x, y, price_buf, color, 0);
 						free(price_buf);
 
 						if (data.buildings[b_id].owned > 0) {
 							char owned_buf[5];
 							itoa(data.buildings[b_id].owned, owned_buf, 10);
 							disp_string(380 - text_width(owned_buf), 62 + i * 42,
-								owned_buf, 0x2924);
+								owned_buf, 0x2924, 0);
 						}
 
 						char type[18];
@@ -854,7 +859,7 @@ int main() {
 							strcpy(type, building_types[b_id]);
 						else
 							strcpy(type, "???");
-						disp_string(223, 54 + i * 42, type, 0xffff);
+						disp_string(223, 54 + i * 42, type, 0xffff, 0);
 					}
 
 					draw_rect(181, 49 + b_sel * 42, 201, 39, 0xff80, 1);
@@ -930,13 +935,13 @@ int main() {
 					}
 
 					x = ((164 - text_width(cookie_buf)) / 2) + 1;
-					disp_string(x, 19, cookie_buf, 0xffff);
+					disp_string(x, 19, cookie_buf, 0xffff, 0);
 					free(cookie_buf);
 
-					disp_string(53, 36, "cookies", 0xffff);
+					disp_string(53, 36, "cookies", 0xffff, 0);
 
-					x = ((164 - small_text_width(cps_buf, false)) / 2) + 1;
-					small_disp_string(x, 53, cps_buf, 0xffff, false);
+					x = ((164 - text_width_small(cps_buf, false)) / 2) + 1;
+					disp_string_small(x, 53, cps_buf, 0xffff, false, 0);
 
 					double f = (double) gold.frenzy_time / ticks(MAX_FRENZY * gold.effect_modifier);
 					double cf = (double) gold.click_frenzy_time / ticks(MAX_CLICK_FRENZY * gold.effect_modifier);
@@ -994,6 +999,7 @@ int main() {
 			if (!options_toggle && stats_toggle)
 				stats_toggle = false;
 			options_toggle = !options_toggle;
+			s_sel = 0;
 		}
 
 		if (msg.time > 0) {
