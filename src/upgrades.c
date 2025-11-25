@@ -576,13 +576,12 @@ const struct Upgrade upgrades[] = {
 
 // filter algorithm based on https://stackoverflow.com/a/50317973
 
-struct Upgrade *filter_unlocked(struct CookieData *data, const struct Upgrade *upgrades, int *filtered_size) {
-    struct Upgrade *filtered = malloc(478 * sizeof(struct Upgrade));
+void filter_unlocked(struct Upgrade filtered[], struct CookieData *data, const struct Upgrade *upgrades, int *filtered_size) {
+    *filtered_size = 0;
     for (int i = 0; i < 478; i++) {
         if (data->upgrades_unlocked[i])
             filtered[(*filtered_size)++] = upgrades[i];
     }
-    return filtered;
 }
 
 // quicksort algorithm

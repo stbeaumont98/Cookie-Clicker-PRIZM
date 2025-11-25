@@ -1,14 +1,49 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include <string.h>
+#include <stdlib.h>
 #include "fxcg\display.h"
 #include "charmap.h"
 #include "math1.h"
+#include "sprites.h"
 
 #include "draw.h"
 
+const color_t toggle_x_palette[2] = {0xffff, 0xf800};
+
+const unsigned char toggle_x[26] = {
+	0xff,0xff,
+	0x9f,0xcf,
+	0x8f,0x8f,
+	0xc7,0x1f,
+	0xe2,0x3f,
+	0xf0,0x7f,
+	0xf8,0xff,
+	0xf0,0x7f,
+	0xe2,0x3f,
+	0xc7,0x1f,
+	0x8f,0x8f,
+	0x9f,0xcf,
+	0xff,0xff
+};
+
 int rgb_color(int r, int g, int b) {
   	return ((r / 8) << 11) | ((g / 4) << 5) | (b / 8);
+}
+
+color_t dim_color(color_t color, float f) {
+    // Extract individual r, g, & b values
+    uint8_t r = (color >> 11) * 8;
+    uint8_t g = ((color >> 5) & 0x3F) * 4;
+    uint8_t b = (color & 0x1F) * 8;
+
+    // "Dim" each value by the defined factor.
+    r = (uint8_t)(r * f);
+    g = (uint8_t)(g * f);
+    b = (uint8_t)(b * f);
+
+    // Recombine r, g, &  b.
+    return rgb_color(r, g, b);
 }
 
 void fill_scr(color_t color) {
@@ -212,12 +247,41 @@ void copy_sprite_4bit(const unsigned char* data, unsigned x, unsigned y, unsigne
     }
 }
 
+int text_height(const char *msg) {
+    if (strlen(msg) == 0)
+        return 0;
+    
+    int total = 1;
+    for (int i = 0; i < strlen(msg); i++) {
+        if (msg[i] == '\n')
+            total++;
+    }
+    return total;
+}
+
 // normal font
 
-void disp_string(unsigned x, unsigned y, const char* message, int color) {
+void disp_string(unsigned x, unsigned y, const char *message, int color, int alignment) {
+    int width = text_width(message);
+    int height = text_height(message);
+    
+    char *msg = strdup(message);
+    char *token = strtok(msg, "\n");
+
+    for (int line = 0; line < height && token != NULL; line++) {
+        int w = text_width(token);
+        int x_mod = (alignment == ALIGN_LEFT ? 0 : (alignment == ALIGN_CENTER ? ((width - w) / 2) : width - w));
+        disp_line(x + x_mod, y + (line * 15), token, color);
+        token = strtok(NULL, "\n");
+    }
+
+    free(msg);
+    msg = NULL;
+}
+
+void disp_line(unsigned x, unsigned y, const char *message, int color) {
     int l = strlen(message);
     int i;
-    unsigned line = 0;
     int x_offset = 0;
     int y_offset = 0;
     char c;
@@ -226,68 +290,54 @@ void disp_string(unsigned x, unsigned y, const char* message, int color) {
         c = message[i];
         int w = char_width[(int) c];
         int h = char_height[(int) c];
-        if (c == '\n') {
-            x_offset = 0;
-            ++line;
+        switch (c) {
+            case '\"':
+            case '\'':
+                y_offset = -1;
+                break;
+            case '(':
+            case ')':
+                y_offset = -1;
+                break;
+            case 'j':
+            case 'J':
+            case 'Q':
+                y_offset = 0;
+                break;
+            case '4':
+            case '5':
+                y_offset = 1;
+                break;
+            case '3':
+            case '7':
+            case '9':
+                y_offset = 2;
+                break;
+            case ';':
+            case 'g':
+            case 'p':
+            case 'q':
+            case 'y':
+                y_offset = 3;
+                break;
+            case '+':
+                y_offset = 4;
+                break;
+            case '-':
+                y_offset = 7;
+                break;
+            case ',':
+                y_offset = 9;
+                break;
+            default:
+                y_offset = 11 - h;
+                break;
         }
-        else if (c == '\t') {}
-            //x_offset += 20;
-        else {
-            switch (c) {
-                case '\"':
-                case '\'':
-                    y_offset = -1;
-                    break;
-                case '(':
-                case ')':
-                    y_offset = -1;
-                    break;
-                case 'j':
-                case 'J':
-                case 'Q':
-                    y_offset = 0;
-                    break;
-                case '4':
-                case '5':
-                    y_offset = 1;
-                    break;
-                case '3':
-                case '7':
-                case '9':
-                    y_offset = 2;
-                    break;
-                case ';':
-                case 'g':
-                case 'p':
-                case 'q':
-                case 'y':
-                    y_offset = 3;
-                    break;
-                case '+':
-                    y_offset = 4;
-                    break;
-                case '-':
-                    y_offset = 7;
-                    break;
-                case ',':
-                    y_offset = 9;
-                    break;
-                default:
-                    y_offset = 11 - h;
-                    break;
-            }
-            copy_sprite_1bit((c == '\"' && quote) ? r_quote : charmap[(int) c],
-                x + x_offset + ((c == '\"' && quote) ? 1 : 0), y + y_offset + (line * 13), w, h, charmap_palette, color);
-            x_offset += (c == ' ') ? 5 : (w + (c == 'Q' ? -1 : 1) + (c == '(' || c == ')' ? 1 : 0));
-            if (c == '\"')
-                quote = !quote;
-        }
-        if (x + x_offset >= 384) {
-            x_offset = 0;
-            ++line;
-        }
-        if (y + y_offset + (line * h) >= 216)
-            break;
+        copy_sprite_1bit((c == '\"' && quote) ? r_quote : charmap[(int) c],
+            x + x_offset + ((c == '\"' && quote) ? 1 : 0), y + y_offset, w, h, charmap_palette, color);
+        x_offset += (c == ' ') ? 5 : (w + (c == 'Q' ? -1 : 1) + (c == '(' || c == ')' ? 1 : 0));
+        if (c == '\"')
+            quote = !quote;
     }
 }
 
@@ -315,24 +365,29 @@ int text_width(const char *msg) {
 	return max(total, max_total);
 }
 
-int text_height(const char *msg) {
-    if (strlen(msg) == 0)
-        return 0;
-    
-    int total = 1;
-    for (int i = 0; i < strlen(msg); i++) {
-        if (msg[i] == '\n')
-            total++;
-    }
-    return total;
-}
-
 // small font
 
-void small_disp_string(unsigned x, unsigned y, const char* message, int color, bool caps) {
+void disp_string_small(unsigned x, unsigned y, const char *message, int color, bool caps, int alignment) {
+    int width = text_width_small(message, caps);
+    int height = text_height(message);
+    
+    char *msg = strdup(message);
+    char *token = strtok(msg, "\n");
+
+    for (int line = 0; line < height && token != NULL; line++) {
+        int w = text_width_small(token, caps);
+        int x_mod = (alignment == ALIGN_LEFT ? 0 : (alignment == ALIGN_CENTER ? ((width - w) / 2) : width - w));
+        disp_line_small(x + x_mod, y + (line * 9), token, color, caps);
+        token = strtok(NULL, "\n");
+    }
+
+    free(msg);
+    msg = NULL;
+}
+
+void disp_line_small(unsigned x, unsigned y, const char* message, int color, bool caps) {
     int l = strlen(message);
     int i;
-    unsigned line = 0;
     int x_offset = 0;
     int y_offset = 0;
     char c;
@@ -340,60 +395,46 @@ void small_disp_string(unsigned x, unsigned y, const char* message, int color, b
         c = message[i] - ((caps && message[i] > 0x60 && message[i] < 0x7b) ? 0x20 : 0);
         int w = small_char_width[(int) c];
         int h = small_char_height[(int) c];
-        if (c == '\n') {
-            x_offset = 0;
-            ++line;
-        }
-        else if (c == '\t') {}
-            //x_offset += 20;
-        else {
-            switch (c) {
-                case '[':
-                case ']':
-                case '%':
-                    y_offset = -1;
-                    break;
-                case '(':
-                case ')':
-                case 'j':
-                case 'J':
-                case 'Q':
-                    y_offset = 0;
-                    break;
-                case ';':
-                case 'g':
-                case 'p':
-                case 'q':
-                case 'y':
-                    y_offset = 1;
-                    break;
-                case '+':
-                    y_offset = 2;
-                    break;
-                case '-':
-                    y_offset = 3;
-                    break;
-                case ',':
-                    y_offset = 4;
-                    break;
-                default:
-                    y_offset = 6 - h;
-                    break;
-            } 
-            copy_sprite_1bit(small_charmap[(int) c], x + x_offset, y + y_offset + (line * 9),\
-                w, h, charmap_palette, color);
-            x_offset += (c == ' ') ? 3 : (w + (c == '(' || c == ')' ? 2 : 1));
-        }
-        if (x + x_offset >= 384) {
-            x_offset = 0;
-            ++line;
-        }
-        if (y + y_offset + (line * h) >= 216)
-            break;
+        switch (c) {
+            case '[':
+            case ']':
+            case '%':
+                y_offset = -1;
+                break;
+            case '(':
+            case ')':
+            case 'j':
+            case 'J':
+            case 'Q':
+                y_offset = 0;
+                break;
+            case ';':
+            case 'g':
+            case 'p':
+            case 'q':
+            case 'y':
+                y_offset = 1;
+                break;
+            case '+':
+                y_offset = 2;
+                break;
+            case '-':
+                y_offset = 3;
+                break;
+            case ',':
+                y_offset = 4;
+                break;
+            default:
+                y_offset = 6 - h;
+                break;
+        } 
+        copy_sprite_1bit(small_charmap[(int) c], x + x_offset, y + y_offset,\
+            w, h, charmap_palette, color);
+        x_offset += (c == ' ') ? 3 : (w + (c == '(' || c == ')' ? 2 : 1));
     }
 }
 
-int small_text_width(const char *msg, bool caps) {
+int text_width_small(const char *msg, bool caps) {
     int total = 0, max_total = 0;
     char c;
 	for (int i = 0; i < strlen(msg); i++) {
@@ -414,4 +455,16 @@ int small_text_width(const char *msg, bool caps) {
         }
 	}
 	return max(total, max_total);
+}
+
+void draw_toggle_box(uint16_t x, uint8_t y, char *message, color_t color, bool toggle) {
+	disp_string_small(x, y, message, color, true, 0);
+    int msg_h = text_height(message);
+
+	draw_rect(349, y + (((msg_h * 9) - 13) / 2), 10, 10, dim_color(0xFFFF, toggle ? 1. : 0.5), 1);
+
+	if (toggle)
+		//copy_sprite_1bit(toggle_x, 348, y + 1, 13, 13, toggle_x_palette, color);
+        //fill_area(350, y + (((msg_h * 9) - 13) / 2), 9, 9, color);
+		copy_sprite_1bit(check, 351, y + (((msg_h * 9) - 13) / 2) - 1, 11, 10, one_bit_pal, 0x67ec);
 }

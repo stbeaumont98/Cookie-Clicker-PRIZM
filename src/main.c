@@ -92,7 +92,7 @@ void set_message(struct Message *msg, const char *header,
 
 void display_msg(const struct Message msg) {
 	bool has_header = strlen(msg.header) != 0;
-	int width = max(text_width(msg.header), small_text_width(msg.body, false));
+	int width = max(text_width(msg.header), text_width_small(msg.body, false));
 	int height = (text_height(msg.body) * 9) + 5;
 	int box_width = width + 10;
 	int box_height = height + (has_header ? 20 : 0);
@@ -104,12 +104,12 @@ void display_msg(const struct Message msg) {
 		box_width + 3, box_height + 3, 0x82a4, 1);
 	
 	if (has_header) {
-		disp_string(box_x + 5, box_y + 4, msg.header, 0xad55);
+		disp_string(box_x + 5, box_y + 4, msg.header, 0xad55, 0);
 		draw_line(box_x + 5, box_y + 19,
 			box_x + width + 3, box_y + 19, 0x632c, 0);
-		small_disp_string(box_x + 5, box_y + 24, msg.body, 0xad55, false);
+		disp_string_small(box_x + 5, box_y + 24, msg.body, 0xad55, false, 0);
 	} else
-		small_disp_string(box_x + 5, box_y + 4, msg.body, 0xad55, false);
+		disp_string_small(box_x + 5, box_y + 4, msg.body, 0xad55, false, 0);
 }
 
 void draw_background() {
@@ -228,6 +228,69 @@ char *get_upgrade_name(const struct CookieData data, uint16_t id) {
 		return "???";
 }
 
+void draw_button(uint16_t x, uint8_t y, uint8_t w, char *message, color_t color, bool selected) {
+	int text_width = text_width_small(message, true);
+	int box_width = w != 0 ? w : text_width + 10;
+	draw_rect(x, y, box_width, 16, selected ? 0xff80 : dim_color(color, .5), 1);
+	disp_string_small(x + (box_width - 4 - text_width), y + 6, message, color, true, 0);
+}
+
+void display_prompt(const struct Message msg, bool sel) {
+	int width = max(text_width(msg.header), text_width_small(msg.body, false));
+	int height = (text_height(msg.body) * 9) + 27;
+	int box_width = width + 50;
+	int box_height = height + (text_height(msg.header) * 15) + 25;
+	int box_x = (384 - box_width) / 2;
+	int box_y =  (213 - box_height) / 2;
+
+	fill_area(box_x, box_y, box_width, box_height, 0x0000);
+	draw_rect(box_x - 2, box_y - 2,
+		box_width + 3, box_height + 3, 0x82a4, 1);
+	
+	disp_string(box_x + ((box_width - text_width(msg.header)) / 2), box_y + 6, msg.header, 0xad55, ALIGN_CENTER);
+
+	draw_rect(box_x + 14, box_y + 23, box_width - 29, (text_height(msg.body) * 9) + 14, 0x632c, 0);
+
+	//draw_line(box_x + ((box_width - width) / 2), box_y + (text_height(msg.header) * 14) + 35,
+		//box_x + width + 13, box_y + (text_height(msg.header) * 14) + 35, 0x632c, 0);
+
+	disp_string_small(box_x + ((box_width - text_width_small(msg.body, false)) / 2),
+		box_y + (text_height(msg.header) * 15) + 17, msg.body, 0xad55, false, ALIGN_CENTER);
+
+	draw_button(box_x + 15, box_y + box_height - 22, 0, "Yes!", 0xFFFF, sel);
+	draw_button(box_x + box_width - 39, box_y + box_height - 22, 0, "No", 0xFFFF, !sel);
+}
+
+void draw_prompt(int setting_selection, bool sel) {
+	struct Message msg;
+
+	switch (setting_selection) {
+		// Backup save
+		case 0:
+			strcpy(msg.header, "BACKUP SAVE");
+			strcpy(msg.body, "Are you sure?\nAny previous backups will be\noverwritten!");
+			break;
+		// Restore backup
+		case 1:
+			strcpy(msg.header, "RESTORE BACKUP");
+			strcpy(msg.body, "Are you sure?\nCurrent save file will be\noverwritten!");
+			break;
+		// Wipe save
+		case 2:
+			strcpy(msg.header, "WIPE SAVE");
+			strcpy(msg.body, "Do you REALLY want to\nwipe your save?\nYou will lose all your progress!");
+			break;
+		case 3:
+			strcpy(msg.header, "ENABLE CHEATS");
+			strcpy(msg.body, "Do you REALLY want to\nenable cheating?\nCheated cookies taste awful.");
+			break;
+		default:
+			break;
+	}
+
+	display_prompt(msg, sel);
+}
+
 int main() {
 	EnableStatusArea(3);
 	EnableDisplayHeader(0, 0);
@@ -272,6 +335,7 @@ int main() {
 
 	bool upgrades_toggle = false;
 	bool stats_toggle = false;
+	bool options_toggle = false;
 
 	int16_t autosave_time = (int16_t) ticks(60.);
 
@@ -280,6 +344,16 @@ int main() {
 
 	int hold_ticks = RTC_GetTicks() + ticks(0.5);
 	int old_ticks = RTC_GetTicks();
+
+	int s_sel = 0;
+	bool p_sel = true;
+	bool prompt = false;
+
+	int filtered_size = 0;
+	struct Upgrade filtered_upgrades[478];
+
+	filter_unlocked(filtered_upgrades, &data, upgrades, &filtered_size);
+	sort_upgrades(filtered_upgrades, 0, filtered_size - 1, data.upgrades);
 
 	while (1) {
         int key = PRGM_GetKey();
@@ -292,409 +366,618 @@ int main() {
 
 		current_cpc =  get_cpc(data, current_cps) * gold.click_multiplier;
 
+		// handle time-based events
+
+		int elapsed = elapsed_ticks(&old_ticks);
+		double seconds = secs(elapsed);
+		
+		data.cookies += current_cps * seconds;
+		data.cookies_all_time += current_cps * seconds;
+
+		if (gold.frenzy_time > 0)
+			gold.frenzy_time -= elapsed;
+		if (gold.click_frenzy_time > 0)
+			gold.click_frenzy_time -= elapsed;
+		if (gold.boost_time > 0)
+			gold.boost_time -= elapsed;
+		if (msg.time > 0)
+			msg.time -= elapsed;
+		if (gold.time > 0)
+			gold.time -= elapsed;
+		if (autosave_time > 0)
+			autosave_time -= elapsed;
+
+		key_held = (key != 0 && RTC_GetTicks() >= hold_ticks);
+
+		if (key == 0)
+			hold_ticks = RTC_GetTicks() + ticks(0.5);
+
 		if (key_press(KEY_PRGM_ACON))
 			sleep = !sleep;
 			//PowerOff(0);
 
-		if (stats_toggle) {
+		if (options_toggle) {
+			
 			fill_scr(0x0000);
-			draw_line(148, 22, 236, 22, 0x632c, 0);
-			disp_string(150, 29, "STATISTICS", 0xFFFF);
-			draw_line(148, 46, 236, 46, 0x632c, 0);
+			draw_line(157, 22, 226, 22, 0x632c, 0);
+			disp_string(161, 29, "OPTIONS", 0xFFFF, 0);
+			draw_line(157, 46, 226, 46, 0x632c, 0);
 
 			copy_sprite_scaled(panel_h, 0, 0, 99, 8, 198, 16, false, 0);
 			copy_sprite_scaled(panel_h, 198, 0, 99, 8, 198, 16, false, 0);
+			copy_sprite_scaled(panel_h, 0, 53, 99, 8, 198, 16, false, 0);
+			copy_sprite_scaled(panel_h, 198, 53, 99, 8, 198, 16, false, 0);
 			copy_sprite_scaled(panel_v, 0, 0, 8, 108, 16, 216, false, 0);
 			copy_sprite_scaled(panel_v, 368, 0, 8, 108, 16, 216, false, 0);
-			
-			for (int i = 0; i < 9; i++)
-				disp_string(21, 54 + i * 18, stats[i], 0x94b2);
-			
-			copy_sprite_masked(money, 152, 54, 14, 14, COLOR_RED);
-			copy_sprite_masked(money, 214, 72, 14, 14, COLOR_RED);
+			copy_sprite_scaled(panel_v, 184, 69, 8, 108, 16, 216, false, 0);
 
-			tmp = get_display_val(data.cookies, false, false);
-			if (text_width(tmp) > 197) {
-				free(tmp);
-				tmp = get_display_val(data.cookies, false, true);
+			draw_line(19, 73, 86, 73, 0x632c, 0);
+			disp_string(21, 80, "General", 0xFFFF, 0);
+			draw_line(19, 97, 86, 97, 0x632c, 0);
+
+			draw_button(23, 104, 110, "BACKUP SAVE", 0xFFFF, s_sel == 0);
+			draw_button(23, 127, 110, "RESTORE BACKUP", 0xFFFF, s_sel == 1);
+			draw_button(66, 191, 110, "WIPE SAVE", COLOR_RED, s_sel == 2);
+
+			draw_line(203, 73, 273, 73, 0x632c, 0);
+			disp_string(205, 80, "Cheating", 0xFFFF, 0);
+			draw_line(203, 97, 273, 97, 0x632c, 0);
+
+			char cheats_str[12];
+			strcpy(cheats_str, "Cheats ");
+			strcat(cheats_str, data.cheats.on ? "ON" : "OFF");
+			draw_button(207, 104, 110, cheats_str, 0xFFFF, s_sel == 3);
+
+			if (data.cheats.on) {
+				draw_toggle_box(213, 133, "Auto-click\ngolden cookies", s_sel == 4 ? 0xFFFF : dim_color(0xFFFF, 0.5), data.cheats.acg);
+				draw_toggle_box(213, 156, "Press and hold\nto click", s_sel == 5 ? 0xFFFF : dim_color(0xFFFF, 0.5), data.cheats.hc);
+				draw_toggle_box(213, 179, "Free Buildings", s_sel == 6 ? 0xFFFF : dim_color(0xFFFF, 0.5), data.cheats.fb);
+				draw_toggle_box(213, 198, "Free Upgrades", s_sel == 7 ? 0xFFFF : dim_color(0xFFFF, 0.5), data.cheats.fu);
 			}
-			disp_string(170, 54, tmp, 0xFFFF);
-			free(tmp);
 
-			tmp = get_display_val(data.cookies_all_time, false, false);
-			if (text_width(tmp) > 135) {
-				free(tmp);
-				tmp = get_display_val(data.cookies_all_time, false, true);
-			}
-			disp_string(232, 72, tmp, 0xFFFF);
-			free(tmp);
+			if (!prompt) {
 
-			int num_buildings = 0;
-			for (int i = 0; i < 20; i++)
-				num_buildings += data.buildings[i].owned;
+				if ((key_press(KEY_PRGM_DOWN) || (key == KEY_PRGM_DOWN && key_held)) && s_sel < (data.cheats.on ? 7 : 3))
+					s_sel++;
+				if ((key_press(KEY_PRGM_UP) || (key == KEY_PRGM_UP && key_held)) && s_sel > 0)
+					s_sel--;
+				if (key_press(KEY_PRGM_RIGHT) || (key == KEY_PRGM_RIGHT && key_held))
+					s_sel += (data.cheats.on && (s_sel >= 2)) || (!data.cheats.on && (s_sel >= 0)) ? (data.cheats.on ? 7 : 3) - s_sel : 3;
+				if (key_press(KEY_PRGM_LEFT) || (key == KEY_PRGM_LEFT && key_held))
+					s_sel -= (s_sel > 5) ? s_sel - 2 : (s_sel < 3) ? s_sel : 3;
 
-			tmp = disp_comma(num_buildings);
-			disp_string(156, 90, tmp, 0xFFFF);
-			free(tmp);
-			
-			char mult[10];
-			double percent = (data.multiplier * 100.0 * gold.cps_multiplier) \
-				+ (gold.boost_multiplier * 100.0);
-			tmp = get_display_val(percent, false, false);
-			strcpy(mult, "(");
-			strcat(mult, tmp);
-			free(tmp);
-			strcat(mult, "%)");
+				if (key_press(KEY_PRGM_SHIFT)) {
+					switch (s_sel) {
+						case 0:
+						case 1:
+						case 2:
+							prompt = true;
+							p_sel = true;
+							break;
+						case 3:
+							if (!data.cheats.on) {
+								prompt = true;
+								p_sel = true;
+							} else {
+								data.cheats.on = false;
+								data.cheats.acg = false;
+								data.cheats.hc = false;
+							}
+							break;
+						case 4:
+							data.cheats.acg = !data.cheats.acg;
+							break;
+						case 5:
+							data.cheats.hc = !data.cheats.hc;
+							break;
+						case 6:
+							data.cheats.fb = !data.cheats.fb;
+							if (!data.cheats.fb) {
+								bool last_hide = true;
+								for (int i = 19; i >= 0 && data.buildings[i].owned == 0; i--) {
+									if (i >= 2) {
+										if (data.cookies_all_time < base_prices[i - 2]) {
+											data.buildings[i].locked = true;
+											data.buildings_unlocked--;
+										}
+									}
+									if (data.cookies_all_time >= base_prices[i])
+										last_hide = false;
+									if (data.cookies_all_time < base_prices[i] && last_hide)
+										data.buildings[i].hidden = true;
+								}
+								if (b_sel + b_sel_offset > data.buildings_unlocked) {
+									b_sel = 3;
+									b_sel_offset = data.buildings_unlocked - 4;
+								}
+							}
+							break;
+						case 7:
+							data.cheats.fu = !data.cheats.fu;
+							break;
+						default:
+							break;
+					}
+				}
 
-			tmp = get_display_val(current_cps, (current_cps < 1E3), false);
-			if (text_width(tmp) + small_text_width(mult, false) > 186) {
-				free(tmp);
-				tmp = get_display_val(current_cps, (current_cps < 1E3), true);
-			}
-			int cps_w = text_width(tmp);
-			disp_string(177, 108, tmp, 0xFFFF);
-			free(tmp);
-			small_disp_string(180 + cps_w, 113, mult, 0xFFFF, false);
-			
-			tmp = get_display_val(raw_cps, (raw_cps < 1E3), false);
-			if (text_width(tmp) > 154) {
-				free(tmp);
-				tmp = get_display_val(raw_cps, (raw_cps < 1E3), true);
-			}
-			disp_string(213, 126, tmp, 0xFFFF);
-			free(tmp);
+				if (key_press(KEY_PRGM_EXIT))
+					options_toggle = false;
 
-			tmp = get_display_val(current_cpc, (current_cpc < 1E3), false);
-			if (text_width(tmp) > 207) {
-				free(tmp);
-				tmp = get_display_val(current_cpc, (current_cpc < 1E3), true);
-			}
-			disp_string(160, 144, tmp, 0xFFFF);
-			free(tmp);
+				if (key_press(KEY_PRGM_VARS)) {
+					options_toggle = false;
+					stats_toggle = true;
+				}
 
-			tmp = get_display_val(data.click_count, false, false);
-			disp_string(130, 162, tmp, 0xFFFF);
-			free(tmp);
+			} else {
+				draw_prompt(s_sel, p_sel);
 
-			tmp = get_display_val(data.handmade_cookies, false, false);
-			if (text_width(tmp) > 187) {
-				free(tmp);
-				tmp = get_display_val(data.handmade_cookies, false, true);
-			}
-			disp_string(180, 180, tmp, 0xFFFF);
-			free(tmp);
+				if (key_press(KEY_PRGM_RIGHT) && p_sel)
+					p_sel = false;
+				if (key_press(KEY_PRGM_LEFT) && !p_sel)
+					p_sel = true;
 
-			tmp = get_display_val(data.gold_click_count, false, false);
-			disp_string(185, 198, tmp, 0xFFFF);
-			free(tmp);
-
-			if (key_press(KEY_PRGM_EXIT))
-				stats_toggle = false;
-		} else {
-			uint16_t x, color;
-			uint8_t y;
-
-			if (upgrades_toggle) {
-
-				// upgrades store
-
-				int filtered_size = 0;
-				struct Upgrade *filtered_upgrades = filter_unlocked(&data, upgrades, &filtered_size);
-
-				sort_upgrades(filtered_upgrades, 0, filtered_size - 1, data.upgrades);
-
-				fill_scr(0x0000);
+				if (key_press(KEY_PRGM_SHIFT)) {
+					if (p_sel) {
+						switch (s_sel) {
+							// Backup save
+							case 0:
+								backup_game();
+								save_game(data, gold);
+								set_message(&msg, "", "Backup created", 3);
+								break;
+							// Restore backup
+							case 1:
+								restore_backup();
+								load_game(&data, &gold);
 				
-				copy_sprite_scaled(panel_h, 0, 32, 99, 8, 198, 16, false, 0);
-				copy_sprite_scaled(panel_h, 198, 32, 99, 8, 198, 16, false, 0);
+								filter_unlocked(filtered_upgrades, &data, upgrades, &filtered_size);
+								sort_upgrades(filtered_upgrades, 0, filtered_size - 1, data.upgrades);
+
+								// Create another copy of the backup.
+								backup_game();
+								save_game(data, gold);
+								set_message(&msg, "", "Backup restored", 3);
+								break;
+							// Wipe save
+							case 2:
+								// Reset all variables.
+								reset_game(&data, &gold);
+								
+								filter_unlocked(filtered_upgrades, &data, upgrades, &filtered_size);
+								sort_upgrades(filtered_upgrades, 0, filtered_size - 1, data.upgrades);
+
+								// Reset the cookies.sav file.
+								save_game(data, gold);
+								break;
+							case 3:
+								data.cheats.on = true;
+								break;
+							default:
+								break;
+						}
+					}
+					prompt = false;
+				}
+
+				if (key_press(KEY_PRGM_EXIT) || key_press(KEY_PRGM_ALPHA))
+					prompt = false;
+			}
+
+		} else {
+
+			if (stats_toggle) {
+				fill_scr(0x0000);
+				draw_line(148, 22, 236, 22, 0x632c, 0);
+				disp_string(150, 29, "STATISTICS", 0xFFFF, 0);
+				draw_line(148, 46, 236, 46, 0x632c, 0);
+
+				copy_sprite_scaled(panel_h, 0, 0, 99, 8, 198, 16, false, 0);
+				copy_sprite_scaled(panel_h, 198, 0, 99, 8, 198, 16, false, 0);
 				copy_sprite_scaled(panel_v, 0, 0, 8, 108, 16, 216, false, 0);
 				copy_sprite_scaled(panel_v, 368, 0, 8, 108, 16, 216, false, 0);
 				
-				disp_string(172, 10, "Store", 0xffff);
-				small_disp_string(18, 37, "UPGRADES", 0xffff, true);
-
-				small_disp_string(28, 5, "[OPTN]", 0xffff, true);
-				copy_sprite_1bit(arrow[1], 20, 5, 6, 6, arrow_pal, 0xffff);
-
-				cookie_buf = get_display_val(data.cookies, false, false);
-				if (text_width(cookie_buf) > 162) {
-					free(cookie_buf);
-					cookie_buf = get_display_val(data.cookies, false, true);
-				}
-				x = 365 - small_text_width(cookie_buf, false);
-				small_disp_string(x, 4, cookie_buf, 0xffff, false);
-				free(cookie_buf);
+				for (int i = 0; i < 9; i++)
+					disp_string(21, 54 + i * 18, stats[i], 0x94b2, 0);
 				
-				x = 365 - small_text_width("cookies", false);
-				small_disp_string(x, 12, "cookies", 0xffff, false);
+				copy_sprite_masked(money, 152, 54, 14, 14, COLOR_RED);
+				copy_sprite_masked(money, 214, 72, 14, 14, COLOR_RED);
 
-				strcpy(cps_buf, "CpS: ");
+				tmp = get_display_val(data.cookies, false, false);
+				if (text_width(tmp) > 197) {
+					free(tmp);
+					tmp = get_display_val(data.cookies, false, true);
+				}
+				disp_string(170, 54, tmp, 0xFFFF, 0);
+				free(tmp);
+
+				tmp = get_display_val(data.cookies_all_time, false, false);
+				if (text_width(tmp) > 135) {
+					free(tmp);
+					tmp = get_display_val(data.cookies_all_time, false, true);
+				}
+				disp_string(232, 72, tmp, 0xFFFF, 0);
+				free(tmp);
+
+				int num_buildings = 0;
+				for (int i = 0; i < 20; i++)
+					num_buildings += data.buildings[i].owned;
+
+				tmp = disp_comma(num_buildings);
+				disp_string(156, 90, tmp, 0xFFFF, 0);
+				free(tmp);
+				
+				char mult[10];
+				double percent = (data.multiplier * 100.0 * gold.cps_multiplier) \
+					+ (gold.boost_multiplier * 100.0);
+				tmp = get_display_val(percent, false, false);
+				strcpy(mult, "(");
+				strcat(mult, tmp);
+				free(tmp);
+				strcat(mult, "%)");
 
 				tmp = get_display_val(current_cps, (current_cps < 1E3), false);
-				if (text_width(tmp) > 126) {
+				if (text_width(tmp) + text_width_small(mult, false) > 186) {
 					free(tmp);
 					tmp = get_display_val(current_cps, (current_cps < 1E3), true);
 				}
-				strcat(cps_buf, tmp);
+				int cps_w = text_width(tmp);
+				disp_string(177, 108, tmp, 0xFFFF, 0);
+				free(tmp);
+				disp_string_small(180 + cps_w, 113, mult, 0xFFFF, false, 0);
+				
+				tmp = get_display_val(raw_cps, (raw_cps < 1E3), false);
+				if (text_width(tmp) > 154) {
+					free(tmp);
+					tmp = get_display_val(raw_cps, (raw_cps < 1E3), true);
+				}
+				disp_string(213, 126, tmp, 0xFFFF, 0);
 				free(tmp);
 
-				x = 365 - small_text_width(cps_buf, false);
-				small_disp_string(x, 22, cps_buf, 0xffff, false);
+				tmp = get_display_val(current_cpc, (current_cpc < 1E3), false);
+				if (text_width(tmp) > 207) {
+					free(tmp);
+					tmp = get_display_val(current_cpc, (current_cpc < 1E3), true);
+				}
+				disp_string(160, 144, tmp, 0xFFFF, 0);
+				free(tmp);
 
-				if (filtered_size > 0) {
+				tmp = get_display_val(data.click_count, false, false);
+				disp_string(130, 162, tmp, 0xFFFF, 0);
+				free(tmp);
 
-					uint16_t u_id = u_sel + u_sel_offset;
+				tmp = get_display_val(data.handmade_cookies, false, false);
+				if (text_width(tmp) > 187) {
+					free(tmp);
+					tmp = get_display_val(data.handmade_cookies, false, true);
+				}
+				disp_string(180, 180, tmp, 0xFFFF, 0);
+				free(tmp);
+
+				tmp = get_display_val(data.gold_click_count, false, false);
+				disp_string(185, 198, tmp, 0xFFFF, 0);
+				free(tmp);
+
+				if (key_press(KEY_PRGM_EXIT))
+					stats_toggle = false;
+			} else {
+				uint16_t x, color;
+				uint8_t y;
+
+				if (upgrades_toggle) {
+
+					// upgrades store
+
+					fill_scr(0x0000);
 					
-					char *b_type = get_upgrade_type(data, filtered_upgrades[u_id].id);
-					x = 366 - small_text_width(b_type, true);
-					small_disp_string(x, 37, b_type, 0xffff, true);
+					copy_sprite_scaled(panel_h, 0, 32, 99, 8, 198, 16, false, 0);
+					copy_sprite_scaled(panel_h, 198, 32, 99, 8, 198, 16, false, 0);
+					copy_sprite_scaled(panel_v, 0, 0, 8, 108, 16, 216, false, 0);
+					copy_sprite_scaled(panel_v, 368, 0, 8, 108, 16, 216, false, 0);
+					
+					disp_string(172, 10, "Store", 0xffff, 0);
+					disp_string_small(18, 37, "UPGRADES", 0xffff, true, 0);
 
-					for (int i = 0; i < min(filtered_size, 4); i++) {
-						uint16_t u_id = i + u_sel_offset;
+					disp_string_small(28, 5, "[x  ]", 0xffff, false, 0);
+					disp_string_small(28 + text_width_small("[x", false), 2, "2", 0xffff, false, 0);
+					copy_sprite_1bit(arrow[1], 20, 5, 6, 6, one_bit_pal, 0xffff);
+
+					cookie_buf = get_display_val(data.cookies, false, false);
+					if (text_width(cookie_buf) > 162) {
+						free(cookie_buf);
+						cookie_buf = get_display_val(data.cookies, false, true);
+					}
+					x = 365 - text_width_small(cookie_buf, false);
+					disp_string_small(x, 4, cookie_buf, 0xffff, false, 0);
+					free(cookie_buf);
+					
+					x = 365 - text_width_small("cookies", false);
+					disp_string_small(x, 12, "cookies", 0xffff, false, 0);
+
+					strcpy(cps_buf, "CpS: ");
+
+					tmp = get_display_val(current_cps, (current_cps < 1E3), false);
+					if (text_width(tmp) > 126) {
+						free(tmp);
+						tmp = get_display_val(current_cps, (current_cps < 1E3), true);
+					}
+					strcat(cps_buf, tmp);
+					free(tmp);
+
+					x = 365 - text_width_small(cps_buf, false);
+					disp_string_small(x, 22, cps_buf, 0xffff, false, 0);
+
+					if (filtered_size > 0) {
+
+						uint16_t u_id = u_sel + u_sel_offset;
+						
+						char *b_type = get_upgrade_type(data, filtered_upgrades[u_id].id);
+						x = 366 - text_width_small(b_type, true);
+						disp_string_small(x, 37, b_type, 0xffff, true, 0);
+
+						for (int i = 0; i < min(filtered_size, 4); i++) {
+							uint16_t u_id = i + u_sel_offset;
+							uint16_t f_id = filtered_upgrades[u_id].id;
+
+							if (u_id > filtered_size)
+								continue;
+
+							copy_sprite_masked(upgrade_frame, 23, 54 + i * 42, 30, 30, COLOR_RED);
+							if (filtered_upgrades[u_id].sprite != NULL) {
+								copy_sprite_4bit(filtered_upgrades[u_id].sprite, 26, 57 + i * 42, 24, 24,
+								filtered_upgrades[u_id].palette, false, 0x4208);
+								if (f_id >= 222 && f_id < 236)
+									copy_sprite_4bit(rainbow, 26, 57 + i * 42, 24, 24,
+										rainbow_pal, false, 0x4208);
+							}
+
+							char *name =  filtered_upgrades[u_id].name;
+							char *desc = get_upgrade_description(data, f_id);
+
+							int n_h = text_height(name), d_h = text_height(desc);
+
+							y = (!data.upgrades_unlocked[f_id] || (n_h == 1 && d_h == 1) ?
+								73 : (n_h > 1 ? 80 : 69)) + i * 42;
+							color = data.upgrades[f_id] ? 0x4208 : 0x8410;
+
+							disp_string_small(57, y, desc, color, false, 0);
+							
+							y = (!data.upgrades_unlocked[f_id] || (n_h == 1 && d_h == 1) ? 57 : 53) + i * 42;
+							color = data.upgrades[f_id] ? 0x4208 : 0xffff;
+							
+							disp_string(57, y, name, color, 0);
+							
+							if (!data.upgrades[f_id]) {
+								double p = !(data.cheats.on && data.cheats.fu) * filtered_upgrades[u_id].price;
+								price_buf = get_display_val(p, false, p >= 1e12);
+								x = 348 - text_width(price_buf), y =  53 + i * 42;
+								copy_sprite_masked(money, x, y, 14, 14, COLOR_RED);
+								x = 364 - text_width(price_buf), y = 54 + i * 42;
+								color = (data.cookies >= p) ? 0x67ec : COLOR_RED;
+								disp_string(x, y, price_buf, color, 0);
+								free(price_buf);
+							} else {
+								x = 353, y = 53 + i * 42;
+								copy_sprite_1bit(check, x, y, 11, 10, one_bit_pal, 0x4208);
+							}
+						}
+
+						draw_rect(17, 49 + u_sel * 42, 349, 39, 0xff80, 1);
+
+						if ((key_press(KEY_PRGM_DOWN) || (key == KEY_PRGM_DOWN && key_held)) && u_sel < min(filtered_size - 1, 3))
+							u_sel++;
+						else if ((key_press(KEY_PRGM_DOWN) || (key == KEY_PRGM_DOWN && key_held)) && u_sel == 3 && u_sel_offset < filtered_size - 4)
+							u_sel_offset++;
+
+						if ((key_press(KEY_PRGM_UP) || (key == KEY_PRGM_UP && key_held)) && u_sel > 0)
+							u_sel--;
+						else if ((key_press(KEY_PRGM_UP) || (key == KEY_PRGM_UP && key_held)) && u_sel == 0 && u_sel_offset > 0)
+							u_sel_offset--;
+
+						if ((key_press(KEY_PRGM_LEFT) || (key == KEY_PRGM_LEFT && key_held)) && u_sel_offset - 4 >= 0)
+							u_sel_offset -= 4;
+						else if ((key_press(KEY_PRGM_LEFT) || (key == KEY_PRGM_LEFT && key_held)) && u_sel_offset - 4 < 0) {
+							u_sel = 0;
+							u_sel_offset = 0;
+						}
+
+						if ((key_press(KEY_PRGM_RIGHT) || (key == KEY_PRGM_RIGHT && key_held)) && u_sel_offset + 4 <= filtered_size - 4)
+							u_sel_offset += 4;
+						else if ((key_press(KEY_PRGM_RIGHT) || (key == KEY_PRGM_RIGHT && key_held)) && u_sel_offset + 4 > filtered_size - 4) {
+							u_sel = 3;
+							u_sel_offset = filtered_size - 4;
+						}
+
 						uint16_t f_id = filtered_upgrades[u_id].id;
 
-						if (u_id > filtered_size)
-							continue;
-
-						copy_sprite_masked(upgrade_frame, 23, 54 + i * 42, 30, 30, COLOR_RED);
-						if (filtered_upgrades[u_id].sprite != NULL) {
-							copy_sprite_4bit(filtered_upgrades[u_id].sprite, 26, 57 + i * 42, 24, 24,
-							filtered_upgrades[u_id].palette, false, 0x4208);
-							if (u_id >= 222 && u_id < 236)
-								copy_sprite_4bit(rainbow, 26, 57 + i * 42, 24, 24,
-									rainbow_pal, false, 0x4208);
+						if (key_press(KEY_PRGM_ALPHA)
+							&& data.cookies >= (!(data.cheats.on && data.cheats.fu) * filtered_upgrades[u_id].price)
+							&& !data.upgrades[f_id]) {
+							data.cookies -= (!(data.cheats.on && data.cheats.fu) * filtered_upgrades[u_id].price);
+							data.upgrades[f_id] = true;
+							enable_upgrade(&data, &gold, f_id);
+							unlock_upgrades(&data);
+							
+							filter_unlocked(filtered_upgrades, &data, upgrades, &filtered_size);
+							sort_upgrades(filtered_upgrades, 0, filtered_size - 1, data.upgrades);
 						}
+					}
 
-						char *name =  filtered_upgrades[u_id].name;
-						char *desc = get_upgrade_description(data, f_id);
+					if (key_press(KEY_PRGM_EXIT))
+						upgrades_toggle = false;
 
-						int n_h = text_height(name), d_h = text_height(desc);
+				} else {
+					draw_background();
 
-						y = (!data.upgrades_unlocked[f_id] || (n_h == 1 && d_h == 1) ?
-							73 : (n_h > 1 ? 80 : 69)) + i * 42;
-						color = data.upgrades[f_id] ? 0x4208 : 0x8410;
+					// buildings store
 
-						small_disp_string(57, y, desc, color, false);
-						
-						y = (!data.upgrades_unlocked[f_id] || (n_h == 1 && d_h == 1) ? 57 : 53) + i * 42;
-						color = data.upgrades[f_id] ? 0x4208 : 0xffff;
-						
-						disp_string(57, y, name, color);
-						
-						if (!data.upgrades[f_id]) {
-							double p = filtered_upgrades[u_id].price;
-							price_buf = get_display_val(p, false, p >= 1e12);
-							x = 348 - text_width(price_buf), y =  53 + i * 42;
-							copy_sprite_masked(money, x, y, 14, 14, COLOR_RED);
-							x = 364 - text_width(price_buf), y = 54 + i * 42;
-							color = (data.cookies >= filtered_upgrades[u_id].price) ? 0x67ec : COLOR_RED;
-							disp_string(x, y, price_buf, color);
+					fill_area(180, 0, 204, 32, 0x0000);
+
+					disp_string(262, 10, "Store", 0xffff, 0);
+					disp_string_small(182, 37, "BUILDINGS", 0xffff, true, 0);
+
+					disp_string_small(352, 5, "[x  ]", 0xffff, true, 0);
+					disp_string_small(353 + text_width_small("[x", false), 2, "2", 0xffff, true, 0);
+					copy_sprite_1bit(arrow[0], 374, 5, 6, 6, one_bit_pal, 0xffff);
+
+					int store_size = (data.buildings_unlocked < 4) ? data.buildings_unlocked : 4;
+
+					for (int i = 0; i < store_size; i++) {
+						uint8_t b_id = i + b_sel_offset;
+						double p = !(data.cheats.on && data.cheats.fb) * data.buildings[b_id].price;
+
+						x = 180, y = 48 + i * 42;
+						draw_store_tile(x, y);
+						copy_sprite_scaled(icons[b_id], x, y, 21, 21, 42, 42,
+							data.buildings[b_id].hidden, 0x0000);
+
+						x = 223, y = 70 + i * 42;
+						copy_sprite_masked(money, x, y, 14, 14, COLOR_RED);
+
+						price_buf = get_display_val(p, false, false);
+
+						if ((text_width(price_buf) > 116 && data.buildings[b_id].owned >= 100)
+							|| (text_width(price_buf) > 121 && data.buildings[b_id].owned >= 10)
+							|| (text_width(price_buf) > 130)) {
 							free(price_buf);
-						} else {
-							x = 353, y = 53 + i * 42;
-							copy_sprite_masked(check, x, y, 11, 10, COLOR_RED);
+							price_buf = get_display_val(p, false, true);
 						}
-					}
 
-					draw_rect(17, 49 + u_sel * 42, 349, 39, 0xff80, 1);
-
-					if ((key_press(KEY_PRGM_DOWN) || (key == KEY_PRGM_DOWN && key_held)) && u_sel < min(filtered_size - 1, 3))
-						u_sel++;
-					else if ((key_press(KEY_PRGM_DOWN) || (key == KEY_PRGM_DOWN && key_held)) && u_sel == 3 && u_sel_offset < filtered_size - 4)
-						u_sel_offset++;
-
-					if ((key_press(KEY_PRGM_UP) || (key == KEY_PRGM_UP && key_held)) && u_sel > 0)
-						u_sel--;
-					else if ((key_press(KEY_PRGM_UP) || (key == KEY_PRGM_UP && key_held)) && u_sel == 0 && u_sel_offset > 0)
-						u_sel_offset--;
-
-					if ((key_press(KEY_PRGM_LEFT) || (key == KEY_PRGM_LEFT && key_held)) && u_sel_offset - 4 >= 0)
-						u_sel_offset -= 4;
-					else if ((key_press(KEY_PRGM_LEFT) || (key == KEY_PRGM_LEFT && key_held)) && u_sel_offset - 4 < 0) {
-						u_sel = 0;
-						u_sel_offset = 0;
-					}
-
-					if ((key_press(KEY_PRGM_RIGHT) || (key == KEY_PRGM_RIGHT && key_held)) && u_sel_offset + 4 <= filtered_size - 4)
-						u_sel_offset += 4;
-					else if ((key_press(KEY_PRGM_RIGHT) || (key == KEY_PRGM_RIGHT && key_held)) && u_sel_offset + 4 > filtered_size - 4) {
-						u_sel = 3;
-						u_sel_offset = filtered_size - 4;
-					}
-
-					uint16_t f_id = filtered_upgrades[u_id].id;
-
-					if (key_press(KEY_PRGM_ALPHA)
-						&& data.cookies >= filtered_upgrades[u_id].price
-						&& !data.upgrades[f_id]) {
-						data.cookies -= filtered_upgrades[u_id].price;
-						data.upgrades[f_id] = true;
-						enable_upgrade(&data, &gold, f_id);
-						unlock_upgrades(&data);
-					}
-				}
-
-				free(filtered_upgrades);
-
-			} else {
-				draw_background();
-
-				// buildings store
-
-				fill_area(180, 0, 204, 32, 0x0000);
-
-				disp_string(262, 10, "Store", 0xffff);
-				small_disp_string(182, 37, "BUILDINGS", 0xffff, true);
-
-				small_disp_string(339, 5, "[OPTN]", 0xffff, true);
-				copy_sprite_1bit(arrow[0], 374, 5, 6, 6, arrow_pal, 0xffff);
-
-				int store_size = (data.buildings_unlocked < 4) ? data.buildings_unlocked : 4;
-
-				for (int i = 0; i < store_size; i++) {
-					uint8_t b_id = i + b_sel_offset;
-
-					x = 180, y = 48 + i * 42;
-					draw_store_tile(x, y);
-					copy_sprite_scaled(icons[b_id], x, y, 21, 21, 42, 42,
-						data.buildings[b_id].hidden, 0x0000);
-
-					x = 223, y = 70 + i * 42;
-					copy_sprite_masked(money, x, y, 14, 14, COLOR_RED);
-
-					price_buf = get_display_val(data.buildings[b_id].price, false, false);
-
-					if ((text_width(price_buf) > 116 && data.buildings[b_id].owned >= 100)
-						|| (text_width(price_buf) > 121 && data.buildings[b_id].owned >= 10)
-						|| (text_width(price_buf) > 130)) {
+						x = 240;
+						color = (data.cookies >= p) ? 0x67ec : COLOR_RED;
+						disp_string(x, y, price_buf, color, 0);
 						free(price_buf);
-						price_buf = get_display_val(data.buildings[b_id].price, false, true);
+
+						if (data.buildings[b_id].owned > 0) {
+							char owned_buf[5];
+							itoa(data.buildings[b_id].owned, owned_buf, 10);
+							disp_string(380 - text_width(owned_buf), 62 + i * 42,
+								owned_buf, 0x2924, 0);
+						}
+
+						char type[18];
+						if (!data.buildings[b_id].hidden)
+							strcpy(type, building_types[b_id]);
+						else
+							strcpy(type, "???");
+						disp_string(223, 54 + i * 42, type, 0xffff, 0);
 					}
 
-					x = 240;
-					color = (data.cookies >= data.buildings[b_id].price) ? 0x67ec : COLOR_RED;
-					disp_string(x, y, price_buf, color);
-					free(price_buf);
+					draw_rect(181, 49 + b_sel * 42, 201, 39, 0xff80, 1);
 
-					if (data.buildings[b_id].owned > 0) {
-						char owned_buf[5];
-						itoa(data.buildings[b_id].owned, owned_buf, 10);
-						disp_string(380 - text_width(owned_buf), 62 + i * 42,
-							owned_buf, 0x2924);
+					if ((key_press(KEY_PRGM_DOWN) || (key == KEY_PRGM_DOWN && key_held)) && b_sel < store_size - 1)
+						b_sel++;
+					else if ((key_press(KEY_PRGM_DOWN) || (key == KEY_PRGM_DOWN && key_held)) && b_sel == 3 && data.buildings_unlocked > 4
+						&& b_sel_offset < data.buildings_unlocked - 4)
+						b_sel_offset++;
+
+					if ((key_press(KEY_PRGM_UP) || (key == KEY_PRGM_UP && key_held)) && b_sel > 0)
+						b_sel--;
+					else if ((key_press(KEY_PRGM_UP) || (key == KEY_PRGM_UP && key_held)) && b_sel == 0 && b_sel_offset > 0)
+						b_sel_offset--;
+
+					uint8_t b_id = b_sel + b_sel_offset;
+					double p = !(data.cheats.on && data.cheats.fb) * data.buildings[b_id].price;
+					if (key_press(KEY_PRGM_ALPHA)
+						&& data.cookies >= p) {
+						data.cookies -= p;
+						data.buildings[b_id].owned++;
+						data.buildings[b_id].price += (data.buildings[b_id].price * .15);
+						data.total_buildings++;
 					}
 
-					char type[18];
-					if (!data.buildings[b_id].hidden)
-						strcpy(type, building_types[b_id]);
-					else
-						strcpy(type, "???");
-					disp_string(223, 54 + i * 42, type, 0xffff);
-				}
+					// end store code
 
-				draw_rect(181, 49 + b_sel * 42, 201, 39, 0xff80, 1);
+					if (key_press(KEY_PRGM_SHIFT) || (key_hold(KEY_PRGM_SHIFT) && data.cheats.on && data.cheats.hc)) {
+						scale_w = 112;
+						scale_h = 114;
+						data.cookies += current_cpc;
+						data.cookies_all_time += current_cpc;
+						data.handmade_cookies += current_cpc;
+						data.click_count++;
+					}
 
-				if ((key_press(KEY_PRGM_DOWN) || (key == KEY_PRGM_DOWN && key_held)) && b_sel < store_size - 1)
-					b_sel++;
-				else if ((key_press(KEY_PRGM_DOWN) || (key == KEY_PRGM_DOWN && key_held)) && b_sel == 3 && data.buildings_unlocked > 4
-					&& b_sel_offset < data.buildings_unlocked - 4)
-					b_sel_offset++;
+					for (int i = 0; i < 20; i++) {
+						if (data.cookies_all_time >= base_prices[i] || (data.cheats.on && data.cheats.fb))
+							data.buildings[i].hidden = false;
 
-				if ((key_press(KEY_PRGM_UP) || (key == KEY_PRGM_UP && key_held)) && b_sel > 0)
-					b_sel--;
-				else if ((key_press(KEY_PRGM_UP) || (key == KEY_PRGM_UP && key_held)) && b_sel == 0 && b_sel_offset > 0)
-					b_sel_offset--;
-
-				uint8_t b_id = b_sel + b_sel_offset;
-				if (key_press(KEY_PRGM_ALPHA)
-					&& data.cookies >= data.buildings[b_id].price) {
-					data.cookies -= data.buildings[b_id].price;
-					data.buildings[b_id].owned++;
-					data.buildings[b_id].price += (data.buildings[b_id].price * .15);
-					data.total_buildings++;
-				}
-
-				// end store code
-
-				if (key_press(KEY_PRGM_SHIFT)) {
-					scale_w = 112;
-					scale_h = 114;
-					data.cookies += current_cpc;
-					data.cookies_all_time += current_cpc;
-					data.handmade_cookies += current_cpc;
-					data.click_count++;
-				}
-
-				for (int i = 0; i < 20; i++) {
-					if (data.cookies_all_time >= base_prices[i])
-						data.buildings[i].hidden = false;
-					if (i >= 2) {
-						if (data.buildings[i].locked && (data.cookies_all_time >= base_prices[i - 2])) {
-							data.buildings[i].locked = false;
-							data.buildings_unlocked++;
+						if (i >= 2) {
+							if (data.buildings[i].locked && ((data.cookies_all_time >= base_prices[i - 2]) || (data.cheats.on && data.cheats.fb))) {
+								data.buildings[i].locked = false;
+								data.buildings_unlocked++;
+							}
 						}
 					}
-				}
 
-				if (key == 0) {
-					scale_w = 124;
-					scale_h = 126;
-				}
-				
-				x = (scale_w < 124) ? 26 : 20, y = (scale_h < 126) ? 84 : 78;
-				copy_sprite_scaled(perfect_cookie, x, y, 62, 63, scale_w, scale_h, false, 0);
+					if (key == 0) {
+						scale_w = 124;
+						scale_h = 126;
+					}
+					
+					x = (scale_w < 124) ? 26 : 20, y = (scale_h < 126) ? 84 : 78;
+					copy_sprite_scaled(perfect_cookie, x, y, 62, 63, scale_w, scale_h, false, 0);
 
-				fill_area(0, 13, 164, 53, 0x0000);
+					fill_area(0, 13, 164, 53, 0x0000);
 
-				strcpy(cps_buf, "per sec: ");
+					strcpy(cps_buf, "per sec: ");
 
-				tmp = get_display_val(current_cps, (current_cps < 1E3), false);
-				if (text_width(tmp) > 126) {
+					tmp = get_display_val(current_cps, (current_cps < 1E3), false);
+					if (text_width(tmp) > 126) {
+						free(tmp);
+						tmp = get_display_val(current_cps, (current_cps < 1E3), true);
+					}
+					strcat(cps_buf, tmp);
 					free(tmp);
-					tmp = get_display_val(current_cps, (current_cps < 1E3), true);
-				}
-				strcat(cps_buf, tmp);
-				free(tmp);
 
-				cookie_buf = get_display_val(data.cookies, false, false);
-				if (text_width(cookie_buf) > 162) {
+					cookie_buf = get_display_val(data.cookies, false, false);
+					if (text_width(cookie_buf) > 162) {
+						free(cookie_buf);
+						cookie_buf = get_display_val(data.cookies, false, true);
+					}
+
+					x = ((164 - text_width(cookie_buf)) / 2) + 1;
+					disp_string(x, 19, cookie_buf, 0xffff, 0);
 					free(cookie_buf);
-					cookie_buf = get_display_val(data.cookies, false, true);
+
+					disp_string(53, 36, "cookies", 0xffff, 0);
+
+					x = ((164 - text_width_small(cps_buf, false)) / 2) + 1;
+					disp_string_small(x, 53, cps_buf, 0xffff, false, 0);
+
+					double f = (double) gold.frenzy_time / ticks(MAX_FRENZY * gold.effect_modifier);
+					double cf = (double) gold.click_frenzy_time / ticks(MAX_CLICK_FRENZY * gold.effect_modifier);
+					double b = (double) gold.boost_time / ticks(MAX_BOOST * gold.effect_modifier);
+
+					if (gold.frenzy_time > 0) {
+						y = (f < cf && f > b) || (f < b && f > cf) ? 3 : (f < cf && f < b) ? 6 : 0;
+						fill_area(0, y, round2(164. * f), 3, 0xddeb);
+					}
+
+					if (gold.click_frenzy_time > 0) {
+						y = (cf < f && cf > b) || (cf < b && cf > f) ? 3 : (cf < f && cf < b) ? 6 : 0;
+						fill_area(0, y, round2(164. * cf), 3, 0xddeb);
+					}
+
+					if (gold.boost_time > 0) {
+						y = (b < f && b > cf) || (b < cf && b > f) ? 3 : (b < f && b < cf) ? 6 : 0;
+						fill_area(0, y, round2(164. * b), 3, 0xddeb);
+					}
 				}
 
-				x = ((164 - text_width(cookie_buf)) / 2) + 1;
-				disp_string(x, 19, cookie_buf, 0xffff);
-				free(cookie_buf);
+				if (key_press(KEY_PRGM_X2)) {
+					if (!upgrades_toggle) {
+						unlock_upgrades(&data);
+						
+						filter_unlocked(filtered_upgrades, &data, upgrades, &filtered_size);
+						sort_upgrades(filtered_upgrades, 0, filtered_size - 1, data.upgrades);
+					}
+					
 
-				disp_string(53, 36, "cookies", 0xffff);
-
-				x = ((164 - small_text_width(cps_buf, false)) / 2) + 1;
-				small_disp_string(x, 53, cps_buf, 0xffff, false);
-
-				double f = (double) gold.frenzy_time / ticks(MAX_FRENZY * gold.effect_modifier);
-				double cf = (double) gold.click_frenzy_time / ticks(MAX_CLICK_FRENZY * gold.effect_modifier);
-				double b = (double) gold.boost_time / ticks(MAX_BOOST * gold.effect_modifier);
-
-				if (gold.frenzy_time > 0) {
-					y = (f < cf && f > b) || (f < b && f > cf) ? 3 : (f < cf && f < b) ? 6 : 0;
-					fill_area(0, y, round2(164. * f), 3, 0xddeb);
-				}
-
-				if (gold.click_frenzy_time > 0) {
-					y = (cf < f && cf > b) || (cf < b && cf > f) ? 3 : (cf < f && cf < b) ? 6 : 0;
-					fill_area(0, y, round2(164. * cf), 3, 0xddeb);
-				}
-
-				if (gold.boost_time > 0) {
-					y = (b < f && b > cf) || (b < cf && b > f) ? 3 : (b < f && b < cf) ? 6 : 0;
-					fill_area(0, y, round2(164. * b), 3, 0xddeb);
+					upgrades_toggle = !upgrades_toggle;
 				}
 			}
-	
-			if (key_press(KEY_PRGM_OPTN)) {
-				if (!upgrades_toggle)
-					unlock_upgrades(&data);
-				upgrades_toggle = !upgrades_toggle;
-			}
+			
+			if (key_press(KEY_PRGM_VARS))
+				stats_toggle = !stats_toggle;
 		}
 
 		// manual save
@@ -712,8 +995,12 @@ int main() {
 		if (gold.boost_time <= 0) 
 			gold.boost_multiplier = 0;
 		
-		if (key_press(KEY_PRGM_VARS))
-			stats_toggle = !stats_toggle;
+		if (key_press(KEY_PRGM_OPTN)) {
+			if (!options_toggle && stats_toggle)
+				stats_toggle = false;
+			options_toggle = !options_toggle;
+			s_sel = 0;
+		}
 
 		if (msg.time > 0) {
 			display_msg(msg);
@@ -721,7 +1008,7 @@ int main() {
 				msg.time = 0;
 		}
 		
-		if (key_press(f_buttons[gold.x]) && gold.time <= ticks(13 * gold.time_modifier)) {
+		if ((key_press(f_buttons[gold.x]) || (data.cheats.acg && data.cheats.on)) && gold.time <= ticks(13 * gold.time_modifier)) {
 			data.gold_click_count++;
 			if (gold.effect > 0 && gold.effect <= 425) {
 				// Lucky!
@@ -861,39 +1148,13 @@ int main() {
 			autosave_time = ticks(60);
 		}
 
-		// handle time-based events
-
-		int elapsed = elapsed_ticks(&old_ticks);
-		double seconds = secs(elapsed);
+		if (sleep)
+			fill_scr(0x0000);
 		
-		data.cookies += current_cps * seconds;
-		data.cookies_all_time += current_cps * seconds;
-
-		if (gold.frenzy_time > 0)
-			gold.frenzy_time -= elapsed;
-		if (gold.click_frenzy_time > 0)
-			gold.click_frenzy_time -= elapsed;
-		if (gold.boost_time > 0)
-			gold.boost_time -= elapsed;
-		if (msg.time > 0)
-			msg.time -= elapsed;
-		if (gold.time > 0)
-			gold.time -= elapsed;
-		if (autosave_time > 0)
-			autosave_time -= elapsed;
-
-		key_held = (key != 0 && RTC_GetTicks() >= hold_ticks);
-
-		if (key == 0)
-			hold_ticks = RTC_GetTicks() + ticks(0.5);
-
         if (key == KEY_PRGM_MENU) {
 			GetKey(&key);
 			DrawFrame(0x0000);
 		}
-
-		if (sleep)
-			fill_scr(0x0000);
 
 		Bdisp_PutDisp_DD();
 		Bdisp_AllClr_VRAM();

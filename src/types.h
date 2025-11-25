@@ -9,6 +9,14 @@ extern const char *building_types[20];
 extern const double base_prices[20];
 extern const double base_cps[20];
 
+struct Cheats {
+	bool on;	// cheats toggle
+	bool acg;	// auto-click golden cookies
+	bool hc;	// press and hold to click continuously
+	bool fb;	// all buildings are free
+	bool fu;	// all upgrades are free
+};
+
 struct Building {
 	double price;
 	double multiplier;
@@ -57,10 +65,11 @@ struct CookieData {
 	bool upgrades[478];
 	bool upgrades_unlocked[478];
 	double multiplier;
+	struct Cheats cheats;
 };
 
 struct Message {
-	char header[30];
+	char header[40];
 	char body[150];
 	int32_t time;
 };

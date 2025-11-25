@@ -12,6 +12,7 @@
 #include "save.h"
 
 const char path[20] = "\\\\fls0\\cookies.sav";
+const char bak_path[24] = "\\\\fls0\\cookies.sav.bak";
 
 char *get_save_val(double val) {
 	char *val_buf = malloc(20);
@@ -185,6 +186,26 @@ void save_game(const struct CookieData data, const struct GoldenData gold) {
 	strcat(save_buf, "\n");
 	free(tmp);
 
+	tmp = malloc(2);
+
+	itoa(data.cheats.on, tmp, 10);
+	strcat(save_buf, tmp);
+
+	itoa(data.cheats.acg, tmp, 10);
+	strcat(save_buf, tmp);
+
+	itoa(data.cheats.hc, tmp, 10);
+	strcat(save_buf, tmp);
+
+	itoa(data.cheats.fb, tmp, 10);
+	strcat(save_buf, tmp);
+
+	itoa(data.cheats.fu, tmp, 10);
+	strcat(save_buf, tmp);
+
+	strcat(save_buf, "\n");
+	free(tmp);
+
     Bfile_WriteFile_OS(h_file, save_buf, strlen(save_buf));
 
     Bfile_CloseFile_OS(h_file);
@@ -222,6 +243,12 @@ void load_game(struct CookieData *data, struct GoldenData *gold) {
 
 	data->multiplier = 1.0;
 
+	data->cheats.on = false;
+	data->cheats.acg = false;
+	data->cheats.hc = false;
+	data->cheats.fb = false;
+	data->cheats.fu = false;
+
 	char *buf = malloc(0x320);
 	
     unsigned short p_file[sizeof(path) * 2];
@@ -248,6 +275,7 @@ void load_game(struct CookieData *data, struct GoldenData *gold) {
 		gold->click_multiplier = 1.0;
 		gold->boost_time = 0;
 		gold->boost_multiplier = 0.0;
+
 		return;
 	}
 	
@@ -317,6 +345,7 @@ void load_game(struct CookieData *data, struct GoldenData *gold) {
 	char *boost_multiplier = strtok(NULL, "\n");
 	char *multiplier = strtok(NULL, "\n");
 	char *upgrades = strtok(NULL, "\n");
+	char *cheats = strtok(NULL, "\n");
 
 	dec = strtok(cps_multiplier, "E");
 	pow = strtok(NULL, "E");
@@ -347,7 +376,86 @@ void load_game(struct CookieData *data, struct GoldenData *gold) {
 		}
 	}
 
+	if (strlen(cheats) == 5) {
+		data->cheats.on = (cheats[0] == '1');
+		data->cheats.acg = (cheats[1] == '1');
+		data->cheats.hc = (cheats[2] == '1');
+		data->cheats.fb = (cheats[3] == '1');
+		data->cheats.fu = (cheats[4] == '1');
+	}
+
 	free(buf);
 
     Bfile_CloseFile_OS(h_file);
+}
+
+void backup_game() {
+	unsigned short save[sizeof(path) * 2];
+    unsigned short back[sizeof(bak_path) * 2];
+
+    Bfile_StrToName_ncpy(save, path, sizeof(path));
+    Bfile_StrToName_ncpy(back, bak_path, sizeof(bak_path));
+
+	if(Bfile_RenameEntry(save, back) < 0) {
+		Bfile_DeleteEntry(back);
+		Bfile_RenameEntry(save, back);
+	}
+}
+
+void restore_backup() {
+	unsigned short save[sizeof(path) * 2];
+    unsigned short back[sizeof(bak_path) * 2];
+
+    Bfile_StrToName_ncpy(save, path, sizeof(path));
+    Bfile_StrToName_ncpy(back, bak_path, sizeof(bak_path));
+
+	if(Bfile_RenameEntry(back, save) < 0) {
+		Bfile_DeleteEntry(save);
+		Bfile_RenameEntry(back, save);
+	}
+}
+
+void reset_game(struct CookieData *data, struct GoldenData *gold) {
+
+	reset_buildings(data);
+	gold->time_modifier = 1;
+	gold->effect_modifier = 1;
+	reset_gold(gold);
+
+    int i;
+
+	data->buildings_unlocked = 2;
+
+	for (i = 0; i < 478; i++) {
+		data->upgrades[i] = false;
+		data->upgrades_unlocked[i] = false;
+	}
+
+	data->multiplier = 1.0;
+	data->cookies_all_time = 0.0;
+	data->cookies = 0.0;
+	data->handmade_cookies = 0.0;
+	data->click_count = 0;
+	data->gold_click_count = 0;
+	for (i = 0; i < 20; i ++) {
+		data->buildings[i].multiplier = 1.0;
+		data->buildings[i].modifier = 0.0;
+		data->buildings[i].percent = 0.0;
+		data->buildings[i].gma = false;
+	}
+	data->total_buildings = 0;
+
+	data->cheats.on = false;
+	data->cheats.acg = false;
+	data->cheats.hc = false;
+	data->cheats.fb = false;
+	data->cheats.fu = false;
+
+	gold->frenzy_time = 0;
+	gold->cps_multiplier = 1.0;
+	gold->click_frenzy_time = 0;
+	gold->click_multiplier = 1.0;
+	gold->boost_time = 0;
+	gold->boost_multiplier = 0.0;
+
 }
