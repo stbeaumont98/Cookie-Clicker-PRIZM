@@ -239,7 +239,7 @@ void display_prompt(const struct Message msg, bool sel) {
 	int width = max(text_width(msg.header), text_width_small(msg.body, false));
 	int height = (text_height(msg.body) * 9) + 27;
 	int box_width = width + 50;
-	int box_height = height + (text_height(msg.header) * 15) + 25;
+	int box_height = height + (text_height(msg.header) * 14) + 25;
 	int box_x = (384 - box_width) / 2;
 	int box_y =  (213 - box_height) / 2;
 
@@ -255,7 +255,7 @@ void display_prompt(const struct Message msg, bool sel) {
 		//box_x + width + 13, box_y + (text_height(msg.header) * 14) + 35, 0x632c, 0);
 
 	disp_string_small(box_x + ((box_width - text_width_small(msg.body, false)) / 2),
-		box_y + (text_height(msg.header) * 15) + 17, msg.body, 0xad55, false, ALIGN_CENTER);
+		box_y + (text_height(msg.header) * 14) + 17, msg.body, 0xad55, false, ALIGN_CENTER);
 
 	draw_button(box_x + 15, box_y + box_height - 22, 0, "Yes!", 0xFFFF, sel);
 	draw_button(box_x + box_width - 39, box_y + box_height - 22, 0, "No", 0xFFFF, !sel);
@@ -332,6 +332,7 @@ int main() {
 	char *cookie_buf;
 	char *price_buf;
 	char cps_buf[30];
+	char u_count_buf[15];
 
 	bool upgrades_toggle = false;
 	bool stats_toggle = false;
@@ -532,6 +533,8 @@ int main() {
 				
 								filter_unlocked(filtered_upgrades, &data, upgrades, &filtered_size);
 								sort_upgrades(filtered_upgrades, 0, filtered_size - 1, data.upgrades);
+								u_sel = 0;
+								u_sel_offset = 0;
 
 								// Create another copy of the backup.
 								backup_game();
@@ -545,6 +548,8 @@ int main() {
 								
 								filter_unlocked(filtered_upgrades, &data, upgrades, &filtered_size);
 								sort_upgrades(filtered_upgrades, 0, filtered_size - 1, data.upgrades);
+								u_sel = 0;
+								u_sel_offset = 0;
 
 								// Reset the cookies.sav file.
 								save_game(data, gold);
@@ -681,6 +686,15 @@ int main() {
 					disp_string_small(28 + text_width_small("[x", false), 2, "2", 0xffff, false, 0);
 					copy_sprite_1bit(arrow[1], 20, 5, 6, 6, one_bit_pal, 0xffff);
 
+					char uc[4];
+					itoa(data.upgrades_count, uc, 10);
+					strcpy(u_count_buf, uc);
+					strcat(u_count_buf, "/478 (");
+					itoa((int) (((double) data.upgrades_count / 478.) * 100.), uc, 10);
+					strcat(u_count_buf, uc);
+					strcat(u_count_buf, "%)");
+					disp_string_small(20, 22, u_count_buf, 0xffff, false, 0);
+
 					cookie_buf = get_display_val(data.cookies, false, false);
 					if (text_width(cookie_buf) > 162) {
 						free(cookie_buf);
@@ -795,6 +809,7 @@ int main() {
 							data.cookies -= (!(data.cheats.on && data.cheats.fu) * filtered_upgrades[u_id].price);
 							data.upgrades[f_id] = true;
 							enable_upgrade(&data, &gold, f_id);
+							data.upgrades_count++;
 							unlock_upgrades(&data);
 							
 							filter_unlocked(filtered_upgrades, &data, upgrades, &filtered_size);

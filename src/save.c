@@ -240,6 +240,8 @@ void load_game(struct CookieData *data, struct GoldenData *gold) {
 		data->upgrades[i] = false;
 		data->upgrades_unlocked[i] = false;
 	}
+	
+	data->upgrades_count = 0;
 
 	data->multiplier = 1.0;
 
@@ -371,6 +373,7 @@ void load_game(struct CookieData *data, struct GoldenData *gold) {
 			bool isowned = (upgrades[i] == '1');
 			data->upgrades[i] = isowned;
 			data->upgrades_unlocked[i] = isowned;
+			data->upgrades_count += isowned;
 			if (isowned && i < 336)
 				enable_upgrade(data, gold, i);
 		}
@@ -444,6 +447,7 @@ void reset_game(struct CookieData *data, struct GoldenData *gold) {
 		data->buildings[i].gma = false;
 	}
 	data->total_buildings = 0;
+	data->upgrades_count = 0;
 
 	data->cheats.on = false;
 	data->cheats.acg = false;

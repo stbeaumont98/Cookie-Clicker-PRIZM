@@ -64,6 +64,7 @@ struct CookieData {
 	uint16_t total_buildings;
 	bool upgrades[478];
 	bool upgrades_unlocked[478];
+	uint16_t upgrades_count;
 	double multiplier;
 	struct Cheats cheats;
 };

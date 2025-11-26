@@ -716,12 +716,16 @@ const unsigned char small_r_bracket[] = {
     0x00, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x00
 };
 
+const unsigned char small_fslash[] = {
+	0xef, 0xcf, 0xdf, 0x9f, 0xbf, 0x3f, 0x7f
+};
+
 static const uint8_t small_char_width[] = {
     ['\n'] = 0,
     // symbols
     ['!'] = 2, ['%'] = 9, ['+'] = 3, ['-'] = 3, [','] = 2, ['.'] = 2,
     [':'] = 2, [';'] = 2, ['?'] = 4, ['('] = 3, [')'] = 3, ['['] = 3,
-    [']'] = 3,
+    [']'] = 3, ['/'] = 4,
     // numbers
     ['0'] = 5, ['1'] = 4, ['2'] = 5, ['3'] = 5, ['4'] = 5,
     ['5'] = 4, ['6'] = 5, ['7'] = 5, ['8'] = 5, ['9'] = 5,
@@ -744,7 +748,7 @@ static const uint8_t small_char_height[] = {
     // symbols
     ['!'] = 7, ['%'] = 8, ['+'] = 3, ['-'] = 1, [','] = 4, ['.'] = 2,
     [':'] = 5, [';'] = 7, ['?'] = 7, ['('] = 6, [')'] = 6, ['['] = 8,
-    [']'] = 8,
+    [']'] = 8, ['/'] = 7,
     // numbers
     ['0'] = 6, ['1'] = 6, ['2'] = 6, ['3'] = 6, ['4'] = 6,
     ['5'] = 6, ['6'] = 6, ['7'] = 6, ['8'] = 6, ['9'] = 6,
@@ -767,7 +771,7 @@ static const unsigned char *small_charmap[] = {
     ['!'] = small_exclamation, ['%'] = small_percent, ['+'] = small_plus, ['-'] = minus,
     [','] = small_comma, ['.'] = period, [':'] = small_colon, [';'] = small_semicolon,
     ['?'] = small_question, ['('] = small_l_parenthesis, [')'] = small_r_parenthesis,
-    ['['] = small_l_bracket, [']'] = small_r_bracket,
+    ['['] = small_l_bracket, [']'] = small_r_bracket, ['/'] = small_fslash,
     // numbers
     ['0'] = small_O, ['1'] = small_one, ['2'] = small_two, ['3'] = small_three, ['4'] = small_four,
     ['5'] = small_five, ['6'] = small_six, ['7'] = small_seven, ['8'] = small_eight, ['9'] = small_nine,
