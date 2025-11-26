@@ -265,18 +265,17 @@ void disp_string(unsigned x, unsigned y, const char *message, int color, int ali
     int width = text_width(message);
     int height = text_height(message);
     
-    char *msg = strdup(message);
+    char msg[1024];
+    strcpy(msg, message);
+
     char *token = strtok(msg, "\n");
 
     for (int line = 0; line < height && token != NULL; line++) {
         int w = text_width(token);
         int x_mod = (alignment == ALIGN_LEFT ? 0 : (alignment == ALIGN_CENTER ? ((width - w) / 2) : width - w));
-        disp_line(x + x_mod, y + (line * 15), token, color);
+        disp_line(x + x_mod, y + (line * 14), token, color);
         token = strtok(NULL, "\n");
     }
-
-    free(msg);
-    msg = NULL;
 }
 
 void disp_line(unsigned x, unsigned y, const char *message, int color) {
@@ -370,8 +369,10 @@ int text_width(const char *msg) {
 void disp_string_small(unsigned x, unsigned y, const char *message, int color, bool caps, int alignment) {
     int width = text_width_small(message, caps);
     int height = text_height(message);
+
+    char msg[1024];
+    strcpy(msg, message);
     
-    char *msg = strdup(message);
     char *token = strtok(msg, "\n");
 
     for (int line = 0; line < height && token != NULL; line++) {
@@ -380,9 +381,6 @@ void disp_string_small(unsigned x, unsigned y, const char *message, int color, b
         disp_line_small(x + x_mod, y + (line * 9), token, color, caps);
         token = strtok(NULL, "\n");
     }
-
-    free(msg);
-    msg = NULL;
 }
 
 void disp_line_small(unsigned x, unsigned y, const char* message, int color, bool caps) {
