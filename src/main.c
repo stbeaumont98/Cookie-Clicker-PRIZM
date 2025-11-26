@@ -337,6 +337,7 @@ int main() {
 	bool upgrades_toggle = false;
 	bool stats_toggle = false;
 	bool options_toggle = false;
+	bool x10_toggle = false;
 
 	int16_t autosave_time = (int16_t) ticks(60.);
 
@@ -834,11 +835,16 @@ int main() {
 					disp_string_small(353 + text_width_small("[x", false), 2, "2", 0xffff, true, 0);
 					copy_sprite_1bit(arrow[0], 374, 5, 6, 6, one_bit_pal, 0xffff);
 
+					if (x10_toggle) {
+						disp_string_small(182, 22, "x", 0xffff, false, 0);
+						disp_string(182 + text_width_small("x", false), 17, "10", 0xffff, 0);
+					}
+
 					int store_size = (data.buildings_unlocked < 4) ? data.buildings_unlocked : 4;
 
 					for (int i = 0; i < store_size; i++) {
 						uint8_t b_id = i + b_sel_offset;
-						double p = !(data.cheats.on && data.cheats.fb) * data.buildings[b_id].price;
+						double p = !(data.cheats.on && data.cheats.fb) * (data.buildings[b_id].price * (x10_toggle ? 20.303718238 : 1.));
 
 						x = 180, y = 48 + i * 42;
 						draw_store_tile(x, y);
@@ -891,13 +897,13 @@ int main() {
 						b_sel_offset--;
 
 					uint8_t b_id = b_sel + b_sel_offset;
-					double p = !(data.cheats.on && data.cheats.fb) * data.buildings[b_id].price;
+					double p = !(data.cheats.on && data.cheats.fb) * (data.buildings[b_id].price * (x10_toggle ? 20.303718238 : 1.));
 					if (key_press(KEY_PRGM_ALPHA)
 						&& data.cookies >= p) {
 						data.cookies -= p;
-						data.buildings[b_id].owned++;
-						data.buildings[b_id].price += (data.buildings[b_id].price * .15);
-						data.total_buildings++;
+						data.buildings[b_id].owned += x10_toggle ? 10 : 1;
+						data.buildings[b_id].price *= powInt(1.15, x10_toggle ? 10 : 1);
+						data.total_buildings += x10_toggle ? 10 : 1;
 					}
 
 					// end store code
@@ -910,6 +916,9 @@ int main() {
 						data.handmade_cookies += current_cpc;
 						data.click_count++;
 					}
+
+					if (key_press(KEY_PRGM_X10))
+						x10_toggle = !x10_toggle;
 
 					for (int i = 0; i < 20; i++) {
 						if (data.cookies_all_time >= base_prices[i] || (data.cheats.on && data.cheats.fb))
