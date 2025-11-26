@@ -267,12 +267,12 @@ void draw_prompt(int setting_selection, bool sel) {
 	switch (setting_selection) {
 		// Backup save
 		case 0:
-			strcpy(msg.header, "BACKUP SAVE");
+			strcpy(msg.header, "BACKUP");
 			strcpy(msg.body, "Are you sure?\nAny previous backups will be\noverwritten!");
 			break;
 		// Restore backup
 		case 1:
-			strcpy(msg.header, "RESTORE BACKUP");
+			strcpy(msg.header, "RESTORE");
 			strcpy(msg.body, "Are you sure?\nCurrent save file will be\noverwritten!");
 			break;
 		// Wipe save
@@ -281,8 +281,8 @@ void draw_prompt(int setting_selection, bool sel) {
 			strcpy(msg.body, "Do you REALLY want to\nwipe your save?\nYou will lose all your progress!");
 			break;
 		case 3:
-			strcpy(msg.header, "ENABLE CHEATS");
-			strcpy(msg.body, "Do you REALLY want to\nenable cheating?\nCheated cookies taste awful.");
+			strcpy(msg.header, "CHEATING");
+			strcpy(msg.body, "Do you REALLY want to\nenable cheats?\nCheated cookies taste awful.");
 			break;
 		default:
 			break;
