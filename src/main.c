@@ -10,7 +10,7 @@
 #include <math.h>
 #include "sprites.h"
 
-#include "types.h"
+#include "data.h"
 #include "draw.h"
 #include "math1.h"
 #include "keys.h"
@@ -18,278 +18,6 @@
 #include "convert.h"
 #include "upgrades.h"
 #include "time.h"
-
-static const double MAX_FRENZY = 77.;
-static const double MAX_CLICK_FRENZY = 13.;
-static const double MAX_BOOST = 30.;
-
-static const char *stats[9] = {
-	"Cookies in bank:",
-	"Cookies baked (all time):",
-	"Buildings owned:",
-	"Cookies per second:",
-	"Raw cookies per second:",
-	"Cookies per click:",
-	"Cookie clicks:",
-	"Hand-made cookies:",
-	"Golden cookie clicks:"
-};
-
-static const char *building_specials[20] = {
-	"High-five", "Congregation", "Luxuriant harvest", "Ore vein", "Oiled-up",
-	"Juicy profits", "Fervent adoration", "Manabloom", "Delicious lifeforms",
-	"Breakthrough", "Righteous cataclysm", "Golden ages", "Extra cycles",
-	"Solar flare", "Winning streak", "Macrocosm", "Refactoring",
-	"Cosmic nursery", "Brainstorm", "Deduplication"
-};
-
-static const char *buildings[20] = {
-	" cursors ", " grandmas ", " farms ", " mines ", " factories ", " banks ",
-	" temples ", " wizard towers ", " shipments ", " alchemy labs ",
-	" portals ", " time machines ", " antimatter condensers ", " prisms ",
-	" chancemakers ", " fractal engines ", " javascript consoles ",
-	" idleverses ", " cortex bakers ", " You "
-};
-
-static const char *blab[39] = {
-	"Cookie crumbliness x3 for 60 seconds!",
-	"Chocolatiness x7 for 77 seconds!",
-	"Dough elasticity halved for 66 seconds!",
-	"Golden cookie shininess doubled for 3 seconds!",
-	"World economy halved for 30 seconds!",
-	"Grandma kisses 23% stingier for 45 seconds!", "Thanks for clicking!",
-	"Fooled you! This one was just a test.", "Golden cookies clicked +1!",
-	"Your click has been registered.\nThank you for your cooperation.",
-	"Thanks! That hit the spot!", "Thank you. A team has been dispatched.",
-	"They know.",
-	"Oops. This was just a chocolate\ncookie with shiny aluminium foil.",
-	"Eschaton immanentized!", "Oh, that tickled!", "Again.",
-	"You've made a grave mistake.", "Chocolate chips reshuffled!",
-	"Randomized chance card outcome!", "Mouse acceleration +0.03%!",
-	"Gained 1 extra!", "Sorry, better luck next time!", "I felt that.",
-	"Nice try, but no.", "Wait, sorry, I wasn't ready yet.", "Yippee!",
-	"Bones removed.", "Organs added.", "Did you just click that?",
-	"Huh? Oh, there was nothing there.", "You saw nothing.",
-	"It seems you hallucinated that cookie.",
-	"This golden cookie was a complete fabrication.",
-	"In theory there is no wrong way of clicking\na golden cookie, but you did that, somehow.",
-	"All cookies multiplied by 999!\nAll cookies divided by 999!", "Why?",
-	"Why did you click that?", "Your cookies are never gonna give you up."
-};
-
-int *screen;
-
-int get_time() {
-	return (int)(RTC_GetTicks() / 128);
-}
-
-void set_message(struct Message *msg, const char *header,
-	const char *body, uint8_t time) {
-	strcpy(msg->header, header);
-	strcpy(msg->body, body);
-	msg->time = ticks(time);
-}
-
-void display_msg(const struct Message msg) {
-	bool has_header = strlen(msg.header) != 0;
-	int width = max(text_width(msg.header), text_width_small(msg.body, false));
-	int height = (text_height(msg.body) * 9) + 5;
-	int box_width = width + 10;
-	int box_height = height + (has_header ? 20 : 0);
-	int box_x = (384 - box_width) / 2;
-	int box_y =  213 - box_height;
-
-	fill_area(box_x, box_y, box_width, box_height, 0x0000);
-	draw_rect(box_x - 2, box_y - 2,
-		box_width + 3, box_height + 3, 0x82a4, 1);
-	
-	if (has_header) {
-		disp_string(box_x + 5, box_y + 4, msg.header, 0xad55, 0);
-		draw_line(box_x + 5, box_y + 19,
-			box_x + width + 3, box_y + 19, 0x632c, 0);
-		disp_string_small(box_x + 5, box_y + 24, msg.body, 0xad55, false, 0);
-	} else
-		disp_string_small(box_x + 5, box_y + 4, msg.body, 0xad55, false, 0);
-}
-
-void draw_background() {
-    fill_scr(0x22f0);
-	for (int i = 0; i < 12; i++) {
-		if (i % 2 != 0)
-			fill_area(i * 32, 0, 32, 216, 0x2b71);
-	}
-	copy_sprite_scaled(panel_v, 164, 0, 8, 108, 16, 216, false, 0);
-	copy_sprite_scaled(panel_h, 180, 32, 99, 8, 198, 16, false, 0);
-	copy_sprite_scaled(panel_h, 186, 32, 99, 8, 198, 16, false, 0);
-}
-
-void draw_store_tile(uint16_t x, uint8_t y) {
-	fill_area(x, y, 204, 42, 0xad73);
-	fill_area(x + 2, y, 202, 2, 0x7bac);
-	fill_area(x + 4, y + 2, 200, 2, 0x7bac);
-	fill_area(x, y, 2, 40, 0xbdd5);
-	fill_area(x + 2, y + 2, 2, 36, 0xbdd5);
-	fill_area(x + 2, y + 38, 202, 2, 0x39c5);
-	fill_area(x, y + 40, 204, 2, 0x39c5);
-}
-
-double get_cps(const struct CookieData data) {
-	uint16_t non_cursors = data.total_buildings - data.buildings[TYPE_CURSOR].owned;
-	double raw_cps = (base_cps[TYPE_CURSOR] * (double) data.buildings[TYPE_CURSOR].owned \
-		* data.buildings[TYPE_CURSOR].multiplier) + \
-		(data.buildings[TYPE_CURSOR].modifier * (double) data.buildings[TYPE_CURSOR].owned * (double) non_cursors);
-	raw_cps += base_cps[1] * (double) data.buildings[1].owned * data.buildings[1].multiplier;
-	for (int i = 2; i < 20; i++)
-		raw_cps += (base_cps[i] * (double) data.buildings[i].owned * data.buildings[i].multiplier) \
-			* (1.0 + ((data.buildings[i].gma ? 0.01 : 0.0) * ((double) data.buildings[1].owned / (double) (i - 1))));
-	return raw_cps * data.multiplier;
-}
-
-double get_cpc(const struct CookieData data, double cps) {
-	uint16_t non_cursors = data.total_buildings - data.buildings[TYPE_CURSOR].owned;
-	return data.buildings[TYPE_CURSOR].multiplier \
-		+ (data.buildings[TYPE_CURSOR].modifier * (double) non_cursors) \
-		+ (data.buildings[TYPE_CURSOR].percent * cps);
-}
-
-char *get_upgrade_type(const struct CookieData data, uint16_t id) {
-	if (id >= 336)
-		return data.upgrades_unlocked[336] ? upgrade_types[TYPE_FLAVORED_COOKIES] : "???";
-	else {
-		uint8_t type = (id - (45 * (id >= 45))) / (15 + (id >= 45)) + 3 * (id >= 45);
-		if ((type == TYPE_CURSOR && !data.buildings[type].hidden)
-			|| (type >= 2 && type < 21 && !data.buildings[type - 1].hidden)
-			|| (type == TYPE_MOUSE && data.upgrades_unlocked[type * 15])
-			|| (id >= 333 && id < 336 && data.upgrades_unlocked[333]))
-			return upgrade_types[type];
-		else
-			return "???";
-	}
-}
-
-char *get_upgrade_description(const struct CookieData data, uint16_t id) {
-	uint8_t type = (id - (45 * (id >= 45))) / (15 + (id >= 45)) + 3 * (id >= 45);
-	if (!data.upgrades_unlocked[id])
-		return "???";
-	else {
-		if (id == 333 || id == 334)
-			return "Golden cookies appear twice as often and last twice as long\non screen.";
-		else if (id == 335)
-			return "Golden cookie effects last twice as long.";
-		else if (id >= 336) {
-			if (id < 339 || id == 391)
-				return "Cookie production multiplier +1%.";
-			else if ((id >= 339 && id < 351) || (id >= 353 && id < 365))
-				return "Cookie production multiplier +2%.";
-			else if ((id >= 367 && id < 373))
-				return "Cookie production multiplier +3%.";
-			else if ((id >= 373 && id < 391) || (id >= 392 && id < 410))
-				return "Cookie production multiplier +4%.";
-			else
-				return "Cookie production multiplier +5%.";
-		} else {
-			switch (type) {
-				case TYPE_CURSOR:
-					switch (id) {
-						case 0:
-						case 1:
-						case 2:
-							return "The mouse and cursors are twice as efficient.";
-							break;
-						case 3:
-							return "The mouse and cursors gain +0.1 cookies for each non-cursor\nobject owned.";
-							break;
-						case 4:
-							return "Multiplies the gain from Thousand fingers by 5.";
-							break;
-						case 5:
-							return "Multiplies the gain from Thousand fingers by 10.";
-							break;
-						default:
-							return "Multiplies the gain from Thousand fingers by 20.";
-							break;
-					}
-					break;
-				case TYPE_MOUSE:
-					return "Clicking gains +1% of your CpS.";
-					break;
-				default:
-					return (id >= 45 && (id - 44) % 16 == 0) ? grandma_descriptions[type] : upgrade_descriptions[type];
-					break;
-			}
-		}
-	}
-}
-
-char *get_upgrade_name(const struct CookieData data, uint16_t id) {
-	if (data.upgrades_unlocked[id])
-		return upgrades[id].name;
-	else
-		return "???";
-}
-
-void draw_button(uint16_t x, uint8_t y, uint8_t w, char *message, color_t color, bool selected) {
-	int text_width = text_width_small(message, true);
-	int box_width = w != 0 ? w : text_width + 10;
-	draw_rect(x, y, box_width, 16, selected ? 0xff80 : dim_color(color, .5), 1);
-	disp_string_small(x + (box_width - 4 - text_width), y + 6, message, color, true, 0);
-}
-
-void display_prompt(const struct Message msg, bool sel) {
-	int width = max(text_width(msg.header), text_width_small(msg.body, false));
-	int height = (text_height(msg.body) * 9) + 27;
-	int box_width = width + 50;
-	int box_height = height + (text_height(msg.header) * 14) + 25;
-	int box_x = (384 - box_width) / 2;
-	int box_y =  (213 - box_height) / 2;
-
-	fill_area(box_x, box_y, box_width, box_height, 0x0000);
-	draw_rect(box_x - 2, box_y - 2,
-		box_width + 3, box_height + 3, 0x82a4, 1);
-	
-	disp_string(box_x + ((box_width - text_width(msg.header)) / 2), box_y + 6, msg.header, 0xad55, ALIGN_CENTER);
-
-	draw_rect(box_x + 14, box_y + 23, box_width - 29, (text_height(msg.body) * 9) + 14, 0x632c, 0);
-
-	//draw_line(box_x + ((box_width - width) / 2), box_y + (text_height(msg.header) * 14) + 35,
-		//box_x + width + 13, box_y + (text_height(msg.header) * 14) + 35, 0x632c, 0);
-
-	disp_string_small(box_x + ((box_width - text_width_small(msg.body, false)) / 2),
-		box_y + (text_height(msg.header) * 14) + 17, msg.body, 0xad55, false, ALIGN_CENTER);
-
-	draw_button(box_x + 15, box_y + box_height - 22, 0, "Yes!", 0xFFFF, sel);
-	draw_button(box_x + box_width - 39, box_y + box_height - 22, 0, "No", 0xFFFF, !sel);
-}
-
-void draw_prompt(int setting_selection, bool sel) {
-	struct Message msg;
-
-	switch (setting_selection) {
-		// Backup save
-		case 0:
-			strcpy(msg.header, "BACKUP");
-			strcpy(msg.body, "Are you sure?\nAny previous backups will be\noverwritten!");
-			break;
-		// Restore backup
-		case 1:
-			strcpy(msg.header, "RESTORE");
-			strcpy(msg.body, "Are you sure?\nCurrent save file will be\noverwritten!");
-			break;
-		// Wipe save
-		case 2:
-			strcpy(msg.header, "WIPE SAVE");
-			strcpy(msg.body, "Do you REALLY want to\nwipe your save?\nYou will lose all your progress!");
-			break;
-		case 3:
-			strcpy(msg.header, "CHEATING");
-			strcpy(msg.body, "Do you REALLY want to\nenable cheats?\nCheated cookies taste awful.");
-			break;
-		default:
-			break;
-	}
-
-	display_prompt(msg, sel);
-}
 
 int main() {
 	EnableStatusArea(3);
@@ -312,7 +40,7 @@ int main() {
 
 	struct Message msg;
 
-	set_message(&msg, "", "", 0);
+	set_msg(&msg, "", "", 0);
 	
 	int scale_w = 124, scale_h = 126;
 	
@@ -511,7 +239,33 @@ int main() {
 				}
 
 			} else {
-				draw_prompt(s_sel, p_sel);
+				struct Message s_msg;
+
+				switch (s_sel) {
+					// Backup save
+					case 0:
+						strcpy(s_msg.header, "BACKUP");
+						strcpy(s_msg.body, "Are you sure?\nAny previous backups will be\noverwritten!");
+						break;
+					// Restore backup
+					case 1:
+						strcpy(s_msg.header, "RESTORE");
+						strcpy(s_msg.body, "Are you sure?\nCurrent save file will be\noverwritten!");
+						break;
+					// Wipe save
+					case 2:
+						strcpy(s_msg.header, "WIPE SAVE");
+						strcpy(s_msg.body, "Do you REALLY want to\nwipe your save?\nYou will lose all your progress!");
+						break;
+					case 3:
+						strcpy(s_msg.header, "CHEATING");
+						strcpy(s_msg.body, "Do you REALLY want to\nenable cheats?\nCheated cookies taste awful.");
+						break;
+					default:
+						break;
+				}
+
+				disp_prompt(s_msg, p_sel);
 
 				if (key_press(KEY_PRGM_RIGHT) && p_sel)
 					p_sel = false;
@@ -525,7 +279,7 @@ int main() {
 							case 0:
 								backup_game();
 								save_game(data, gold);
-								set_message(&msg, "", "Backup created", 3);
+								set_msg(&msg, "", "Backup created", 3);
 								break;
 							// Restore backup
 							case 1:
@@ -540,7 +294,7 @@ int main() {
 								// Create another copy of the backup.
 								backup_game();
 								save_game(data, gold);
-								set_message(&msg, "", "Backup restored", 3);
+								set_msg(&msg, "", "Backup restored", 3);
 								break;
 							// Wipe save
 							case 2:
@@ -725,7 +479,7 @@ int main() {
 
 						uint16_t u_id = u_sel + u_sel_offset;
 						
-						char *b_type = get_upgrade_type(data, filtered_upgrades[u_id].id);
+						const char *b_type = get_upgrade_type(data, filtered_upgrades[u_id].id);
 						x = 366 - text_width_small(b_type, true);
 						disp_string_small(x, 37, b_type, 0xffff, true, 0);
 
@@ -746,7 +500,7 @@ int main() {
 							}
 
 							char *name =  filtered_upgrades[u_id].name;
-							char *desc = get_upgrade_description(data, f_id);
+							const char *desc = get_upgrade_description(data, f_id);
 
 							int n_h = text_height(name), d_h = text_height(desc);
 
@@ -1007,7 +761,7 @@ int main() {
 		// manual save
 		if (key_press(KEY_PRGM_EXP)) {
 			save_game(data, gold);
-			set_message(&msg, "", "Game saved", 2);
+			set_msg(&msg, "", "Game saved", 2);
 		}
 
 		if (gold.frenzy_time <= 0)
@@ -1027,7 +781,7 @@ int main() {
 		}
 
 		if (msg.time > 0) {
-			display_msg(msg);
+			disp_msg(msg);
 			if (key_press(KEY_PRGM_EXIT))
 				msg.time = 0;
 		}
@@ -1045,7 +799,7 @@ int main() {
 				strcat(msg_buf, tmp);
 				free(tmp);
 				strcat(msg_buf, " cookies!");
-				set_message(&msg, "Lucky!", msg_buf, 6);
+				set_msg(&msg, "Lucky!", msg_buf, 6);
 
 				data.cookies_all_time += earned;
 				data.cookies += earned;
@@ -1064,7 +818,7 @@ int main() {
 
 				strcat(msg_buf, " seconds!");
 
-				set_message(&msg, "Frenzy", msg_buf, 6);
+				set_msg(&msg, "Frenzy", msg_buf, 6);
 			} else if (gold.effect > 850 && gold.effect <= 893) {
 				// Click Frenzy
 				gold.click_frenzy_time = ticks(MAX_CLICK_FRENZY * gold.effect_modifier);
@@ -1080,7 +834,7 @@ int main() {
 
 				strcat(msg_buf, " seconds!");
 
-				set_message(&msg, "Click Frenzy", msg_buf, 6);
+				set_msg(&msg, "Click Frenzy", msg_buf, 6);
 			} else if (gold.effect > 893 && gold.effect <= 996) {
 				// Building special
 				int cnt = 0;
@@ -1124,7 +878,7 @@ int main() {
 
 					strcat(msg_buf, " seconds!");
 
-					set_message(&msg, building_specials[r_b], msg_buf, 6);
+					set_msg(&msg, building_specials[r_b], msg_buf, 6);
 				} else {
 					// Lucky!
 					double earned = (data.cookies >= current_cps * 6000) ? \
@@ -1136,7 +890,7 @@ int main() {
 					strcat(msg_buf, tmp);
 					free(tmp);
 					strcat(msg_buf, " cookies!");
-					set_message(&msg, "Lucky!", msg_buf, 6);
+					set_msg(&msg, "Lucky!", msg_buf, 6);
 
 					data.cookies_all_time += earned;
 					data.cookies += earned;
@@ -1144,7 +898,7 @@ int main() {
 
 			} else if (gold.effect > 996) {
 				int rblab = random() % 39;
-				set_message(&msg, "", blab[rblab], 6);
+				set_msg(&msg, "", blab[rblab], 6);
 			}
 			reset_gold(&gold);
 		}
@@ -1168,7 +922,7 @@ int main() {
 		// autosave when the time runs out
 		if (autosave_time <= 0) {
 			save_game(data, gold);
-			set_message(&msg, "", "Game saved", 2);
+			set_msg(&msg, "", "Game saved", 2);
 			autosave_time = ticks(60);
 		}
 

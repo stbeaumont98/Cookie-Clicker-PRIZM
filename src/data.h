@@ -1,13 +1,9 @@
-#ifndef TYPES_H_
-#define TYPES_H_
+#ifndef DATA_H_
+#define DATA_H_
 
 #include <stdint.h>
 #include <stdbool.h>
 #include <fxcg/display.h>
-
-extern const char *building_types[20];
-extern const double base_prices[20];
-extern const double base_cps[20];
 
 struct Cheats {
 	bool on;	// cheats toggle
@@ -75,7 +71,27 @@ struct Message {
 	int32_t time;
 };
 
+extern const double MAX_FRENZY;
+extern const double MAX_CLICK_FRENZY;
+extern const double MAX_BOOST;
+
+extern const char *building_types[20];
+extern const char *building_specials[20];
+extern const char *buildings[20];
+
+extern const double base_prices[20];
+extern const double base_cps[20];
+
+extern const char *stats[9];
+extern const char *blab[39];
+
+extern const char *suffixes[25];
+extern const char *suffixes_abrev[25];
+
+double get_cps(const struct CookieData data);
+double get_cpc(const struct CookieData data, double cps);
 void reset_buildings(struct CookieData *data);
 void reset_gold(struct GoldenData *data);
+void set_msg(struct Message *msg, const char *header, const char *body, uint8_t time);
 
 #endif

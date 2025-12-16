@@ -1,17 +1,17 @@
 #include <stddef.h>
 #include <stdlib.h>
-#include "types.h"
+#include "data.h"
 
 #include "upgrades.h"
 
-char *upgrade_types[23] = {
+const char *upgrade_types[23] = {
 	"Cursor", "Mouse", "Grandma", "Farm", "Mine", "Factory", "Bank", "Temple", 
 	"Wizard tower", "Shipment", "Alchemy lab", "Portal", "Time machine", 
     "Antimatter condenser", "Prism", "Chancemaker", "Fractal engine", "Javascript console", 
     "Idleverse", "Cortex baker", "You", "Golden cookie", "Flavored cookies"
 };
 
-char *upgrade_descriptions[21] = {
+const char *upgrade_descriptions[21] = {
 	"", "", "Grandmas are twice as efficient.", "Farms are twice as efficient.", 
     "Mines are twice as efficient.", "Factorys are twice as efficient.", 
     "Banks are twice as efficient.", "Temples are twice as efficient.", 
@@ -27,7 +27,7 @@ char *upgrade_descriptions[21] = {
     "Cortex bakers are twice as efficient.", "You are twice as efficient."
 };
 
-char *grandma_descriptions[21] = {
+const char *grandma_descriptions[21] = {
     "", "", "", "Grandmas are twice as efficient.\nFarms gain +1% CpS per grandma.", 
     "Grandmas are twice as efficient.\nMines gain +1% CpS per 2 grandmas.", 
     "Grandmas are twice as efficient.\nFactories gain +1% CpS per 3 grandmas.", 
@@ -757,4 +757,80 @@ void enable_upgrade(struct CookieData *data, struct GoldenData *gold, uint16_t i
     else if ((id >= 351 && id < 353) || (id >= 365 && id < 367) || (id >= 410 && id < 478))
         // Cookie production multiplier +5%.
         data->multiplier += (0.05 * data->multiplier);
+}
+
+const char *get_upgrade_type(const struct CookieData data, uint16_t id) {
+	if (id >= 336)
+		return data.upgrades_unlocked[336] ? upgrade_types[TYPE_FLAVORED_COOKIES] : "???";
+	else {
+		uint8_t type = (id - (45 * (id >= 45))) / (15 + (id >= 45)) + 3 * (id >= 45);
+		if ((type == TYPE_CURSOR && !data.buildings[type].hidden)
+			|| (type >= 2 && type < 21 && !data.buildings[type - 1].hidden)
+			|| (type == TYPE_MOUSE && data.upgrades_unlocked[type * 15])
+			|| (id >= 333 && id < 336 && data.upgrades_unlocked[333]))
+			return upgrade_types[type];
+		else
+			return "???";
+	}
+}
+
+const char *get_upgrade_description(const struct CookieData data, uint16_t id) {
+	uint8_t type = (id - (45 * (id >= 45))) / (15 + (id >= 45)) + 3 * (id >= 45);
+	if (!data.upgrades_unlocked[id])
+		return "???";
+	else {
+		if (id == 333 || id == 334)
+			return "Golden cookies appear twice as often and last twice as long\non screen.";
+		else if (id == 335)
+			return "Golden cookie effects last twice as long.";
+		else if (id >= 336) {
+			if (id < 339 || id == 391)
+				return "Cookie production multiplier +1%.";
+			else if ((id >= 339 && id < 351) || (id >= 353 && id < 365))
+				return "Cookie production multiplier +2%.";
+			else if ((id >= 367 && id < 373))
+				return "Cookie production multiplier +3%.";
+			else if ((id >= 373 && id < 391) || (id >= 392 && id < 410))
+				return "Cookie production multiplier +4%.";
+			else
+				return "Cookie production multiplier +5%.";
+		} else {
+			switch (type) {
+				case TYPE_CURSOR:
+					switch (id) {
+						case 0:
+						case 1:
+						case 2:
+							return "The mouse and cursors are twice as efficient.";
+							break;
+						case 3:
+							return "The mouse and cursors gain +0.1 cookies for each non-cursor\nobject owned.";
+							break;
+						case 4:
+							return "Multiplies the gain from Thousand fingers by 5.";
+							break;
+						case 5:
+							return "Multiplies the gain from Thousand fingers by 10.";
+							break;
+						default:
+							return "Multiplies the gain from Thousand fingers by 20.";
+							break;
+					}
+					break;
+				case TYPE_MOUSE:
+					return "Clicking gains +1% of your CpS.";
+					break;
+				default:
+					return (id >= 45 && (id - 44) % 16 == 0) ? grandma_descriptions[type] : upgrade_descriptions[type];
+					break;
+			}
+		}
+	}
+}
+
+char *get_upgrade_name(const struct CookieData data, uint16_t id) {
+	if (data.upgrades_unlocked[id])
+		return upgrades[id].name;
+	else
+		return "???";
 }

@@ -4,7 +4,7 @@
 #include <string.h>
 #include "fxcg\file.h"
 #include "fxcg\display.h"
-#include "types.h"
+#include "data.h"
 #include "convert.h"
 #include "math1.h"
 #include "upgrades.h"
@@ -13,46 +13,6 @@
 
 const char path[20] = "\\\\fls0\\cookies.sav";
 const char bak_path[24] = "\\\\fls0\\cookies.sav.bak";
-
-char *get_save_val(double val) {
-	char *val_buf = malloc(20);
-	char *suffix = malloc(5);
-
-	strcpy(suffix, "E");
-
-	if (val < 1) {
-		int cnt = 0;
-		if (val != 0) {
-			while (val < 1) {
-				val *= 10;
-				cnt++;
-			}
-			strcat(suffix, "-");
-		}
-		char tmp[3];
-		itoa(cnt, tmp, 10);
-		strcat(suffix, tmp);
-	} else {
-		int cnt = 0;
-		while (val >= 10) {
-			val *= 0.1;
-			cnt++;
-		}
-		char tmp[3];
-		itoa(cnt, tmp, 10);
-		strcat(suffix, tmp);
-	}
-
-	char *tmp = disp_decimal(val, 1000000);
-	strcpy(val_buf, tmp);
-	free(tmp);
-	strcat(val_buf, suffix);
-	strcat(val_buf, "\n");
-
-	free(suffix);
-
-	return val_buf;
-}
 
 void save_game(const struct CookieData data, const struct GoldenData gold) {
 	int i;

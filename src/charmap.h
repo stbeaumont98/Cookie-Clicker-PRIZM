@@ -1,11 +1,6 @@
 #ifndef CHARMAP_H_
 #define CHARMAP_H_
 
-
-// Alphabet
-
-const color_t charmap_palette[2] = {0xffff, 0xf800};
-
 // large
 
 // numbers
