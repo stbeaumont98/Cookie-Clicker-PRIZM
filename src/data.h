@@ -93,5 +93,6 @@ double get_cpc(const struct CookieData data, double cps);
 void reset_buildings(struct CookieData *data);
 void reset_gold(struct GoldenData *data);
 void set_msg(struct Message *msg, const char *header, const char *body, uint8_t time);
+void push_note(struct Message notes[3], const char *header, const char *body, uint8_t time, uint8_t *notes_cnt);
 
 #endif

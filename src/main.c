@@ -38,9 +38,11 @@ int main() {
 		KEY_PRGM_F5, KEY_PRGM_F6
 	};
 
-	struct Message msg;
+	struct Message notes[3];
+	uint8_t notes_cnt = 0;
 
-	set_msg(&msg, "", "", 0);
+	for (int i = 0; i < 3; i++)
+		set_msg(&notes[i], "", "", 0);
 	
 	int scale_w = 124, scale_h = 126;
 	
@@ -110,8 +112,10 @@ int main() {
 			gold.click_frenzy_time -= elapsed;
 		if (gold.boost_time > 0)
 			gold.boost_time -= elapsed;
-		if (msg.time > 0)
-			msg.time -= elapsed;
+		for (int i = notes_cnt; i >= 0; i--) {
+			if (notes[i].time > 0)
+				notes[i].time -= elapsed;
+		}
 		if (gold.time > 0)
 			gold.time -= elapsed;
 		if (autosave_time > 0)
@@ -279,7 +283,7 @@ int main() {
 							case 0:
 								backup_game();
 								save_game(data, gold);
-								set_msg(&msg, "", "Backup created", 3);
+								push_note(notes, "", "Backup created", 3, &notes_cnt);
 								break;
 							// Restore backup
 							case 1:
@@ -294,7 +298,7 @@ int main() {
 								// Create another copy of the backup.
 								backup_game();
 								save_game(data, gold);
-								set_msg(&msg, "", "Backup restored", 3);
+								push_note(notes, "", "Backup restored", 3, &notes_cnt);
 								break;
 							// Wipe save
 							case 2:
@@ -761,7 +765,7 @@ int main() {
 		// manual save
 		if (key_press(KEY_PRGM_EXP)) {
 			save_game(data, gold);
-			set_msg(&msg, "", "Game saved", 2);
+			push_note(notes, "", "Game saved", 2, &notes_cnt);
 		}
 
 		if (gold.frenzy_time <= 0)
@@ -780,10 +784,31 @@ int main() {
 			s_sel = 0;
 		}
 
-		if (msg.time > 0) {
-			disp_msg(msg);
-			if (key_press(KEY_PRGM_EXIT))
-				msg.time = 0;
+		uint8_t msg_offset = 0;
+		for (int i = notes_cnt; i >= 0; i--) {
+			if (notes[i].time > 0) {
+				uint8_t tmp = disp_msg(notes[i], msg_offset);
+				msg_offset += tmp;
+			} else {
+				if (i == 0) {
+					// copy values from index 1 to index 0
+					set_msg(&notes[0], notes[1].header, notes[1].body, secs(notes[1].time));
+				}
+				if (i == 0 || i == 1) {
+					// copy values from index 2 to index 1
+					set_msg(&notes[1], notes[2].header, notes[2].body, secs(notes[2].time));
+				}
+				// empty index 2
+				set_msg(&notes[2], "", "", 0);
+				if (notes_cnt > 0)
+					notes_cnt--;
+			}
+		}
+
+		if (notes[0].time > 0) {
+			if (key_press(KEY_PRGM_EXIT)) {
+				notes[0].time = 0;
+			}
 		}
 		
 		if ((key_press(f_buttons[gold.x]) || (data.cheats.acg && data.cheats.on)) && gold.time <= ticks(13 * gold.time_modifier)) {
@@ -799,7 +824,7 @@ int main() {
 				strcat(msg_buf, tmp);
 				free(tmp);
 				strcat(msg_buf, " cookies!");
-				set_msg(&msg, "Lucky!", msg_buf, 6);
+				push_note(notes, "Lucky!", msg_buf, 6, &notes_cnt);
 
 				data.cookies_all_time += earned;
 				data.cookies += earned;
@@ -818,7 +843,7 @@ int main() {
 
 				strcat(msg_buf, " seconds!");
 
-				set_msg(&msg, "Frenzy", msg_buf, 6);
+				push_note(notes, "Frenzy", msg_buf, 6, &notes_cnt);
 			} else if (gold.effect > 850 && gold.effect <= 893) {
 				// Click Frenzy
 				gold.click_frenzy_time = ticks(MAX_CLICK_FRENZY * gold.effect_modifier);
@@ -834,7 +859,7 @@ int main() {
 
 				strcat(msg_buf, " seconds!");
 
-				set_msg(&msg, "Click Frenzy", msg_buf, 6);
+				push_note(notes, "Click Frenzy", msg_buf, 6, &notes_cnt);
 			} else if (gold.effect > 893 && gold.effect <= 996) {
 				// Building special
 				int cnt = 0;
@@ -878,7 +903,7 @@ int main() {
 
 					strcat(msg_buf, " seconds!");
 
-					set_msg(&msg, building_specials[r_b], msg_buf, 6);
+					push_note(notes, building_specials[r_b], msg_buf, 6, &notes_cnt);
 				} else {
 					// Lucky!
 					double earned = (data.cookies >= current_cps * 6000) ? \
@@ -890,7 +915,7 @@ int main() {
 					strcat(msg_buf, tmp);
 					free(tmp);
 					strcat(msg_buf, " cookies!");
-					set_msg(&msg, "Lucky!", msg_buf, 6);
+					push_note(notes, "Lucky!", msg_buf, 6, &notes_cnt);
 
 					data.cookies_all_time += earned;
 					data.cookies += earned;
@@ -898,7 +923,7 @@ int main() {
 
 			} else if (gold.effect > 996) {
 				int rblab = random() % 39;
-				set_msg(&msg, "", blab[rblab], 6);
+				push_note(notes, "", blab[rblab], 6, &notes_cnt);
 			}
 			reset_gold(&gold);
 		}
@@ -922,7 +947,7 @@ int main() {
 		// autosave when the time runs out
 		if (autosave_time <= 0) {
 			save_game(data, gold);
-			set_msg(&msg, "", "Game saved", 2);
+			push_note(notes, "", "Game saved", 2, &notes_cnt);
 			autosave_time = ticks(60);
 		}
 

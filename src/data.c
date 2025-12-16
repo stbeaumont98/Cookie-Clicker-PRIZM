@@ -126,3 +126,21 @@ void set_msg(struct Message *msg, const char *header,
 	strcpy(msg->body, body);
 	msg->time = ticks(time);
 }
+
+void push_note(struct Message notes[3], const char *header,
+	const char *body, uint8_t time, uint8_t *notes_cnt) {
+
+	for (int i = 0; i < 3; i++) {
+		if (notes[i].time <= 0) {
+			set_msg(&notes[i], header, body, time);
+			(*notes_cnt)++;
+			return;
+		}
+	}
+	// copy values from index 1 to index 0
+	set_msg(&notes[0], notes[1].header, notes[1].body, secs(notes[1].time));
+	// copy values from index 2 to index 1
+	set_msg(&notes[1], notes[2].header, notes[2].body, secs(notes[2].time));
+	// copy new message into index 2
+	set_msg(&notes[2], header, body, time);
+}

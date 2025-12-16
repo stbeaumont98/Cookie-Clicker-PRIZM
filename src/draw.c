@@ -438,14 +438,14 @@ int text_width_small(const char *msg, bool caps) {
 	return max(total, max_total);
 }
 
-void disp_msg(const struct Message msg) {
+uint8_t disp_msg(const struct Message msg, uint8_t  y_offset) {
 	bool has_header = strlen(msg.header) != 0;
 	int width = max(text_width(msg.header), text_width_small(msg.body, false));
 	int height = (text_height(msg.body) * 9) + 5;
 	int box_width = width + 10;
-	int box_height = height + (has_header ? 20 : 0);
+	uint8_t box_height = height + (has_header ? 20 : 0);
 	int box_x = (384 - box_width) / 2;
-	int box_y =  213 - box_height;
+	int box_y =  213 - box_height - y_offset;
 
 	fill_area(box_x, box_y, box_width, box_height, 0x0000);
 	draw_rect(box_x - 2, box_y - 2,
@@ -458,6 +458,8 @@ void disp_msg(const struct Message msg) {
 		disp_string_small(box_x + 5, box_y + 24, msg.body, 0xad55, false, 0);
 	} else
 		disp_string_small(box_x + 5, box_y + 4, msg.body, 0xad55, false, 0);
+
+    return box_height + 8;
 }
 
 void draw_background() {
