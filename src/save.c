@@ -8,6 +8,7 @@
 #include "convert.h"
 #include "math1.h"
 #include "upgrades.h"
+#include "time.h"
 
 #include "save.h"
 
@@ -163,8 +164,15 @@ void save_game(const struct CookieData data, const struct GoldenData gold) {
 	itoa(data.cheats.fu, tmp, 10);
 	strcat(save_buf, tmp);
 
-	strcat(save_buf, "\n");
 	free(tmp);
+
+	strcat(save_buf, "\n");
+
+	tmp = get_save_val(get_timestamp());
+	strcat(save_buf, tmp);
+	free(tmp);
+
+	strcat(save_buf, "\n");
 
     Bfile_WriteFile_OS(h_file, save_buf, strlen(save_buf));
 
