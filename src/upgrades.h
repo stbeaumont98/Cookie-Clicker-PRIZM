@@ -1,7 +1,7 @@
 #ifndef UPGRADES_H_
 #define UPGRADES_H_
 
-#include "types.h"
+#include "data.h"
 #include "icons.h"
 
 #define MODE_MULTIPLY 0
@@ -33,9 +33,10 @@
 #define TYPE_GOLDEN 21
 #define TYPE_FLAVORED_COOKIES 22
 
-extern char *upgrade_types[23];
-extern char *upgrade_descriptions[21];
-extern char *grandma_descriptions[21];
+extern const char *upgrade_types[23];
+extern const char *upgrade_descriptions[21];
+extern const char *grandma_descriptions[21];
+
 extern const struct Upgrade upgrades[];
 
 void filter_unlocked(struct Upgrade filtered[], struct CookieData *data, const struct Upgrade *upgrades, int *filtered_size);
@@ -43,5 +44,9 @@ void sort_upgrades(struct Upgrade arr[], int low, int high, bool bought[]);
 
 void unlock_upgrades(struct CookieData *data);
 void enable_upgrade(struct CookieData *data, struct GoldenData *gold, uint16_t id);
+
+const char *get_upgrade_type(const struct CookieData data, uint16_t id);
+const char *get_upgrade_description(const struct CookieData data, uint16_t id);
+char *get_upgrade_name(const struct CookieData data, uint16_t id);
 
 #endif

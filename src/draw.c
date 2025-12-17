@@ -6,26 +6,9 @@
 #include "charmap.h"
 #include "math1.h"
 #include "sprites.h"
+#include "data.h"
 
 #include "draw.h"
-
-const color_t toggle_x_palette[2] = {0xffff, 0xf800};
-
-const unsigned char toggle_x[26] = {
-	0xff,0xff,
-	0x9f,0xcf,
-	0x8f,0x8f,
-	0xc7,0x1f,
-	0xe2,0x3f,
-	0xf0,0x7f,
-	0xf8,0xff,
-	0xf0,0x7f,
-	0xe2,0x3f,
-	0xc7,0x1f,
-	0x8f,0x8f,
-	0x9f,0xcf,
-	0xff,0xff
-};
 
 int rgb_color(int r, int g, int b) {
   	return ((r / 8) << 11) | ((g / 4) << 5) | (b / 8);
@@ -265,18 +248,17 @@ void disp_string(unsigned x, unsigned y, const char *message, int color, int ali
     int width = text_width(message);
     int height = text_height(message);
     
-    char *msg = strdup(message);
+    char msg[1024];
+    strcpy(msg, message);
+
     char *token = strtok(msg, "\n");
 
     for (int line = 0; line < height && token != NULL; line++) {
         int w = text_width(token);
         int x_mod = (alignment == ALIGN_LEFT ? 0 : (alignment == ALIGN_CENTER ? ((width - w) / 2) : width - w));
-        disp_line(x + x_mod, y + (line * 15), token, color);
+        disp_line(x + x_mod, y + (line * 14), token, color);
         token = strtok(NULL, "\n");
     }
-
-    free(msg);
-    msg = NULL;
 }
 
 void disp_line(unsigned x, unsigned y, const char *message, int color) {
@@ -334,7 +316,7 @@ void disp_line(unsigned x, unsigned y, const char *message, int color) {
                 break;
         }
         copy_sprite_1bit((c == '\"' && quote) ? r_quote : charmap[(int) c],
-            x + x_offset + ((c == '\"' && quote) ? 1 : 0), y + y_offset, w, h, charmap_palette, color);
+            x + x_offset + ((c == '\"' && quote) ? 1 : 0), y + y_offset, w, h, one_bit_pal, color);
         x_offset += (c == ' ') ? 5 : (w + (c == 'Q' ? -1 : 1) + (c == '(' || c == ')' ? 1 : 0));
         if (c == '\"')
             quote = !quote;
@@ -370,8 +352,10 @@ int text_width(const char *msg) {
 void disp_string_small(unsigned x, unsigned y, const char *message, int color, bool caps, int alignment) {
     int width = text_width_small(message, caps);
     int height = text_height(message);
+
+    char msg[1024];
+    strcpy(msg, message);
     
-    char *msg = strdup(message);
     char *token = strtok(msg, "\n");
 
     for (int line = 0; line < height && token != NULL; line++) {
@@ -380,9 +364,6 @@ void disp_string_small(unsigned x, unsigned y, const char *message, int color, b
         disp_line_small(x + x_mod, y + (line * 9), token, color, caps);
         token = strtok(NULL, "\n");
     }
-
-    free(msg);
-    msg = NULL;
 }
 
 void disp_line_small(unsigned x, unsigned y, const char* message, int color, bool caps) {
@@ -429,7 +410,7 @@ void disp_line_small(unsigned x, unsigned y, const char* message, int color, boo
                 break;
         } 
         copy_sprite_1bit(small_charmap[(int) c], x + x_offset, y + y_offset,\
-            w, h, charmap_palette, color);
+            w, h, one_bit_pal, color);
         x_offset += (c == ' ') ? 3 : (w + (c == '(' || c == ')' ? 2 : 1));
     }
 }
@@ -457,6 +438,84 @@ int text_width_small(const char *msg, bool caps) {
 	return max(total, max_total);
 }
 
+uint8_t disp_msg(const struct Message msg, uint8_t  y_offset) {
+	bool has_header = strlen(msg.header) != 0;
+	int width = max(text_width(msg.header), text_width_small(msg.body, false));
+	int height = (text_height(msg.body) * 9) + 5;
+	int box_width = width + 10;
+	uint8_t box_height = height + (has_header ? 20 : 0);
+	int box_x = (384 - box_width) / 2;
+	int box_y =  213 - box_height - y_offset;
+
+	fill_area(box_x, box_y, box_width, box_height, 0x0000);
+	draw_rect(box_x - 2, box_y - 2,
+		box_width + 3, box_height + 3, 0x82a4, 1);
+	
+	if (has_header) {
+		disp_string(box_x + 5, box_y + 4, msg.header, 0xad55, 0);
+		draw_line(box_x + 5, box_y + 19,
+			box_x + width + 3, box_y + 19, 0x632c, 0);
+		disp_string_small(box_x + 5, box_y + 24, msg.body, 0xad55, false, 0);
+	} else
+		disp_string_small(box_x + 5, box_y + 4, msg.body, 0xad55, false, 0);
+
+    return box_height + 8;
+}
+
+void draw_background() {
+    fill_scr(0x22f0);
+	for (int i = 0; i < 12; i++) {
+		if (i % 2 != 0)
+			fill_area(i * 32, 0, 32, 216, 0x2b71);
+	}
+	copy_sprite_scaled(panel_v, 164, 0, 8, 108, 16, 216, false, 0);
+	copy_sprite_scaled(panel_h, 180, 32, 99, 8, 198, 16, false, 0);
+	copy_sprite_scaled(panel_h, 186, 32, 99, 8, 198, 16, false, 0);
+}
+
+void draw_store_tile(uint16_t x, uint8_t y) {
+	fill_area(x, y, 204, 42, 0xad73);
+	fill_area(x + 2, y, 202, 2, 0x7bac);
+	fill_area(x + 4, y + 2, 200, 2, 0x7bac);
+	fill_area(x, y, 2, 40, 0xbdd5);
+	fill_area(x + 2, y + 2, 2, 36, 0xbdd5);
+	fill_area(x + 2, y + 38, 202, 2, 0x39c5);
+	fill_area(x, y + 40, 204, 2, 0x39c5);
+}
+
+void draw_button(uint16_t x, uint8_t y, uint8_t w, char *message, color_t color, bool selected) {
+	int text_width = text_width_small(message, true);
+	int box_width = w != 0 ? w : text_width + 10;
+	draw_rect(x, y, box_width, 16, selected ? 0xff80 : dim_color(color, .5), 1);
+	disp_string_small(x + (box_width - 4 - text_width), y + 6, message, color, true, 0);
+}
+
+void disp_prompt(const struct Message msg, bool sel) {
+	int width = max(text_width(msg.header), text_width_small(msg.body, false));
+	int height = (text_height(msg.body) * 9) + 27;
+	int box_width = width + 50;
+	int box_height = height + (text_height(msg.header) * 14) + 25;
+	int box_x = (384 - box_width) / 2;
+	int box_y =  (213 - box_height) / 2;
+
+	fill_area(box_x, box_y, box_width, box_height, 0x0000);
+	draw_rect(box_x - 2, box_y - 2,
+		box_width + 3, box_height + 3, 0x82a4, 1);
+	
+	disp_string(box_x + ((box_width - text_width(msg.header)) / 2), box_y + 6, msg.header, 0xad55, ALIGN_CENTER);
+
+	draw_rect(box_x + 14, box_y + 23, box_width - 29, (text_height(msg.body) * 9) + 14, 0x632c, 0);
+
+	//draw_line(box_x + ((box_width - width) / 2), box_y + (text_height(msg.header) * 14) + 35,
+		//box_x + width + 13, box_y + (text_height(msg.header) * 14) + 35, 0x632c, 0);
+
+	disp_string_small(box_x + ((box_width - text_width_small(msg.body, false)) / 2),
+		box_y + (text_height(msg.header) * 14) + 17, msg.body, 0xad55, false, ALIGN_CENTER);
+
+	draw_button(box_x + 15, box_y + box_height - 22, 0, "Yes!", 0xFFFF, sel);
+	draw_button(box_x + box_width - 39, box_y + box_height - 22, 0, "No", 0xFFFF, !sel);
+}
+
 void draw_toggle_box(uint16_t x, uint8_t y, char *message, color_t color, bool toggle) {
 	disp_string_small(x, y, message, color, true, 0);
     int msg_h = text_height(message);
@@ -464,7 +523,5 @@ void draw_toggle_box(uint16_t x, uint8_t y, char *message, color_t color, bool t
 	draw_rect(349, y + (((msg_h * 9) - 13) / 2), 10, 10, dim_color(0xFFFF, toggle ? 1. : 0.5), 1);
 
 	if (toggle)
-		//copy_sprite_1bit(toggle_x, 348, y + 1, 13, 13, toggle_x_palette, color);
-        //fill_area(350, y + (((msg_h * 9) - 13) / 2), 9, 9, color);
 		copy_sprite_1bit(check, 351, y + (((msg_h * 9) - 13) / 2) - 1, 11, 10, one_bit_pal, 0x67ec);
 }
