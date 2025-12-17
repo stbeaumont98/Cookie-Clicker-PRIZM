@@ -84,7 +84,7 @@ char *get_save_val(double val) {
 		strcat(suffix, tmp);
 	}
 
-	char *tmp = disp_decimal(val, 1000000);
+	char *tmp = disp_decimal(val, 1000000000);
 	strcpy(val_buf, tmp);
 	free(tmp);
 	strcat(val_buf, suffix);
@@ -96,7 +96,7 @@ char *get_save_val(double val) {
 }
 
 char *disp_decimal(double val, uint32_t dec_pnt) {
-	char *buffer = malloc(12);
+	char *buffer = malloc(16);
 
 	uint32_t integer = (uint32_t) (val + 1E-9);
 
@@ -113,7 +113,7 @@ char *disp_decimal(double val, uint32_t dec_pnt) {
 
 		if (decimal != 0) {
 
-			char tmp[9];
+			char tmp[12];
 			itoa(decimal, tmp, 10);
 			int dec_len = strlen(tmp);
 
