@@ -496,7 +496,7 @@ void disp_prompt(const struct Message msg, bool sel) {
 	int box_width = width + 50;
 	int box_height = height + (text_height(msg.header) * 14) + 25;
 	int box_x = (384 - box_width) / 2;
-	int box_y =  (213 - box_height) / 2;
+	int box_y = 79;
 
 	fill_area(box_x, box_y, box_width, box_height, 0x0000);
 	draw_rect(box_x - 2, box_y - 2,
@@ -505,9 +505,6 @@ void disp_prompt(const struct Message msg, bool sel) {
 	disp_string(box_x + ((box_width - text_width(msg.header)) / 2), box_y + 6, msg.header, 0xad55, ALIGN_CENTER);
 
 	draw_rect(box_x + 14, box_y + 23, box_width - 29, (text_height(msg.body) * 9) + 14, 0x632c, 0);
-
-	//draw_line(box_x + ((box_width - width) / 2), box_y + (text_height(msg.header) * 14) + 35,
-		//box_x + width + 13, box_y + (text_height(msg.header) * 14) + 35, 0x632c, 0);
 
 	disp_string_small(box_x + ((box_width - text_width_small(msg.body, false)) / 2),
 		box_y + (text_height(msg.header) * 14) + 17, msg.body, 0xad55, false, ALIGN_CENTER);
