@@ -6,9 +6,11 @@ In case it wasn't clear, the concept and sprites were created by [Ortiel](https:
 ![menu icon screenshot](/screenshots/menu_icon.png)
 
 ![beginning of the game](/screenshots/game_start.png) ![golden cookie](/screenshots/golden_cookie.png)
-![golden cookie effect](/screenshots/golden_effect.png) ![later game](/screenshots/game.png)
-![game statistics](/screenshots/stats.png) ![upgrades screen](/screenshots/upgrades.png)
-![game saved](/screenshots/game_saved.png)
+![x10 store](/screenshots/game_x10.png) ![golden cookie effect and game saved](/screenshots/notes.png)
+![later game](/screenshots/game.png) ![game statistics](/screenshots/stats.png)
+![upgrades screen](/screenshots/upgrades.png) ![sorted upgrades](/screenshots/upgrades_sorted.png)
+![options menu](/screenshots/options.png) ![backup prompt](/screenshots/backup_prompt.png)
+![cheating prompt](/screenshots/cheating_prompt.png) ![options menu with cheats enabled](/screenshots/cheats.png)
 
 Discussion thread: https://www.cemetech.net/forum/viewtopic.php?t=10476
 
