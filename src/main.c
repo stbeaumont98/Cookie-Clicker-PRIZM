@@ -601,8 +601,8 @@ int main() {
 					copy_sprite_1bit(arrow[0], 374, 5, 6, 6, one_bit_pal, 0xffff);
 
 					if (x10_toggle) {
-						disp_string_small(182, 22, "x", 0xffff, false, 0);
-						disp_string(182 + text_width_small("x", false), 17, "10", 0xffff, 0);
+						disp_string_small(363, 38, "x", 0xffff, false, 0);
+						disp_string(363 + text_width_small("x", false), 33, "10", 0xffff, 0);
 					}
 
 					int store_size = (data.buildings_unlocked < 4) ? data.buildings_unlocked : 4;
