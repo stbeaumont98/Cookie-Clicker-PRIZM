@@ -148,54 +148,56 @@ int main() {
 			draw_line(19, 73, 86, 73, 0x632c, 0);
 			disp_string(21, 80, "General", 0xFFFF, 0);
 			draw_line(19, 97, 86, 97, 0x632c, 0);
+			
+			if (data.cheats.on) {
+				draw_line(203, 73, 273, 73, 0x632c, 0);
+				disp_string(205, 80, "Cheating", 0xFFFF, 0);
+				draw_line(203, 97, 273, 97, 0x632c, 0);
+			}
 
 			draw_button(23, 104, 110, "BACKUP SAVE", 0xFFFF, s_sel == 0);
 			draw_button(23, 127, 110, "RESTORE BACKUP", 0xFFFF, s_sel == 1);
-			draw_button(66, 191, 110, "WIPE SAVE", COLOR_RED, s_sel == 2);
-
-			draw_line(203, 73, 273, 73, 0x632c, 0);
-			disp_string(205, 80, "Cheating", 0xFFFF, 0);
-			draw_line(203, 97, 273, 97, 0x632c, 0);
 
 			char cheats_str[12];
 			strcpy(cheats_str, "Cheats ");
 			strcat(cheats_str, data.cheats.on ? "ON" : "OFF");
-			draw_button(207, 104, 110, cheats_str, 0xFFFF, s_sel == 3);
+			draw_button(23, 150, 110, cheats_str, 0xFFFF, s_sel == 2);
+
+			draw_button(66, 191, 110, "WIPE SAVE", COLOR_RED, s_sel == 3);
 
 			if (data.cheats.on) {
-				draw_toggle_box(213, 133, "Auto-click\ngolden cookies", s_sel == 4 ? 0xFFFF : dim_color(0xFFFF, 0.5), data.cheats.acg);
-				draw_toggle_box(213, 156, "Press and hold\nto click", s_sel == 5 ? 0xFFFF : dim_color(0xFFFF, 0.5), data.cheats.hc);
-				draw_toggle_box(213, 179, "Free Buildings", s_sel == 6 ? 0xFFFF : dim_color(0xFFFF, 0.5), data.cheats.fb);
-				draw_toggle_box(213, 198, "Free Upgrades", s_sel == 7 ? 0xFFFF : dim_color(0xFFFF, 0.5), data.cheats.fu);
+				draw_toggle_box(210, 106, "Auto-click\ngolden cookies", s_sel == 4 ? 0xFFFF : dim_color(0xFFFF, 0.5), data.cheats.acg);
+				draw_toggle_box(210, 129, "Press and hold\nto click", s_sel == 5 ? 0xFFFF : dim_color(0xFFFF, 0.5), data.cheats.hc);
+				draw_toggle_box(210, 152, "Free Buildings", s_sel == 6 ? 0xFFFF : dim_color(0xFFFF, 0.5), data.cheats.fb);
+				draw_toggle_box(210, 171, "Free Upgrades", s_sel == 7 ? 0xFFFF : dim_color(0xFFFF, 0.5), data.cheats.fu);
+				draw_toggle_box(210, 190, "Idle CpS", s_sel == 8 ? 0xFFFF : dim_color(0xFFFF, 0.5), data.cheats.ic);
 			}
 
 			if (!prompt) {
 
-				if ((key_press(KEY_PRGM_DOWN) || (key == KEY_PRGM_DOWN && key_held)) && s_sel < (data.cheats.on ? 7 : 3))
+				if ((key_press(KEY_PRGM_DOWN) || (key == KEY_PRGM_DOWN && key_held)) && s_sel < (data.cheats.on ? 8 : 3))
 					s_sel++;
 				if ((key_press(KEY_PRGM_UP) || (key == KEY_PRGM_UP && key_held)) && s_sel > 0)
 					s_sel--;
 				if (key_press(KEY_PRGM_RIGHT) || (key == KEY_PRGM_RIGHT && key_held))
-					s_sel += (data.cheats.on && (s_sel >= 2)) || (!data.cheats.on && (s_sel >= 0)) ? (data.cheats.on ? 7 : 3) - s_sel : 3;
+					s_sel += (data.cheats.on && s_sel < 3) ? 4 : (data.cheats.on && s_sel == 3) ? 5 : 0;
 				if (key_press(KEY_PRGM_LEFT) || (key == KEY_PRGM_LEFT && key_held))
-					s_sel -= (s_sel > 5) ? s_sel - 2 : (s_sel < 3) ? s_sel : 3;
+					s_sel -= (s_sel > 3 && s_sel < 7) ? 4 : (s_sel > 3 && s_sel >= 7) ? 5 : 0;
 
 				if (key_press(KEY_PRGM_SHIFT)) {
 					switch (s_sel) {
 						case 0:
 						case 1:
-						case 2:
+						case 3:
 							prompt = true;
 							p_sel = true;
 							break;
-						case 3:
+						case 2:
 							if (!data.cheats.on) {
 								prompt = true;
 								p_sel = true;
 							} else {
 								data.cheats.on = false;
-								data.cheats.acg = false;
-								data.cheats.hc = false;
 							}
 							break;
 						case 4:
@@ -229,6 +231,9 @@ int main() {
 						case 7:
 							data.cheats.fu = !data.cheats.fu;
 							break;
+						case 8:
+							data.cheats.ic = !data.cheats.ic;
+							break;
 						default:
 							break;
 					}
@@ -256,14 +261,15 @@ int main() {
 						strcpy(s_msg.header, "RESTORE");
 						strcpy(s_msg.body, "Are you sure?\nCurrent save file will be\noverwritten!");
 						break;
-					// Wipe save
+					// Enable cheating
 					case 2:
-						strcpy(s_msg.header, "WIPE SAVE");
-						strcpy(s_msg.body, "Do you REALLY want to\nwipe your save?\nYou will lose all your progress!");
-						break;
-					case 3:
 						strcpy(s_msg.header, "CHEATING");
 						strcpy(s_msg.body, "Do you REALLY want to\nenable cheats?\nCheated cookies taste awful.");
+						break;
+					// Wipe save
+					case 3:
+						strcpy(s_msg.header, "WIPE SAVE");
+						strcpy(s_msg.body, "Do you REALLY want to\nwipe your save?\nYou will lose all your progress!");
 						break;
 					default:
 						break;
@@ -305,8 +311,12 @@ int main() {
 								save_game(data, gold);
 								push_note(notes, "", "Backup restored", 3, &notes_cnt);
 								break;
-							// Wipe save
+							// Enable cheating
 							case 2:
+								data.cheats.on = true;
+								break;
+							// Wipe save
+							case 3:
 								// Reset all variables.
 								reset_game(&data, &gold);
 								
@@ -319,9 +329,6 @@ int main() {
 
 								// Reset the cookies.sav file.
 								save_game(data, gold);
-								break;
-							case 3:
-								data.cheats.on = true;
 								break;
 							default:
 								break;
