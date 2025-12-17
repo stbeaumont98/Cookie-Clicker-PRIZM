@@ -287,13 +287,18 @@ int main() {
 								break;
 							// Restore backup
 							case 1:
-								restore_backup();
+								if (restore_backup() < 0) {
+									push_note(notes, "Restore Failed", "Unable to find backup file!", 3, &notes_cnt);
+									break;
+								}
 								load_game(&data, &gold);
 				
 								filter_unlocked(filtered_upgrades, &data, upgrades, &filtered_size);
 								sort_upgrades(filtered_upgrades, 0, filtered_size - 1, data.upgrades);
 								u_sel = 0;
 								u_sel_offset = 0;
+								b_sel = 0;
+								b_sel_offset = 0;
 
 								// Create another copy of the backup.
 								backup_game();
@@ -309,6 +314,8 @@ int main() {
 								sort_upgrades(filtered_upgrades, 0, filtered_size - 1, data.upgrades);
 								u_sel = 0;
 								u_sel_offset = 0;
+								b_sel = 0;
+								b_sel_offset = 0;
 
 								// Reset the cookies.sav file.
 								save_game(data, gold);
