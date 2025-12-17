@@ -365,17 +365,26 @@ void backup_game() {
 	}
 }
 
-void restore_backup() {
+int restore_backup() {
 	unsigned short save[sizeof(path) * 2];
     unsigned short back[sizeof(bak_path) * 2];
 
     Bfile_StrToName_ncpy(save, path, sizeof(path));
     Bfile_StrToName_ncpy(back, bak_path, sizeof(bak_path));
 
+	int h_back = Bfile_OpenFile_OS(back, 3, 0);
+
+	if (h_back < 0) {
+		Bfile_CloseFile_OS(h_back);
+		return -1;
+	}
+	Bfile_CloseFile_OS(h_back);
+
 	if(Bfile_RenameEntry(back, save) < 0) {
 		Bfile_DeleteEntry(save);
 		Bfile_RenameEntry(back, save);
 	}
+	return 0;
 }
 
 void reset_game(struct CookieData *data, struct GoldenData *gold) {
