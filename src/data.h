@@ -11,6 +11,7 @@ struct Cheats {
 	bool hc;	// press and hold to click continuously
 	bool fb;	// all buildings are free
 	bool fu;	// all upgrades are free
+	bool ic;	// idle cookies per second
 };
 
 struct Building {

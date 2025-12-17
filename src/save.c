@@ -164,6 +164,9 @@ void save_game(const struct CookieData data, const struct GoldenData gold) {
 	itoa(data.cheats.fu, tmp, 10);
 	strcat(save_buf, tmp);
 
+	itoa(data.cheats.ic, tmp, 10);
+	strcat(save_buf, tmp);
+
 	free(tmp);
 
 	strcat(save_buf, "\n");
@@ -218,6 +221,7 @@ void load_game(struct CookieData *data, struct GoldenData *gold) {
 	data->cheats.hc = false;
 	data->cheats.fb = false;
 	data->cheats.fu = false;
+	data->cheats.ic = false;
 
 	char *buf = malloc(0x320);
 	
@@ -347,12 +351,13 @@ void load_game(struct CookieData *data, struct GoldenData *gold) {
 		}
 	}
 
-	if (strlen(cheats) == 5) {
+	if (strlen(cheats) == 6) {
 		data->cheats.on = (cheats[0] == '1');
 		data->cheats.acg = (cheats[1] == '1');
 		data->cheats.hc = (cheats[2] == '1');
 		data->cheats.fb = (cheats[3] == '1');
 		data->cheats.fu = (cheats[4] == '1');
+		data->cheats.ic = (cheats[5] == '1');
 	}
 
 	free(buf);
@@ -431,6 +436,7 @@ void reset_game(struct CookieData *data, struct GoldenData *gold) {
 	data->cheats.hc = false;
 	data->cheats.fb = false;
 	data->cheats.fu = false;
+	data->cheats.ic = false;
 
 	gold->frenzy_time = 0;
 	gold->cps_multiplier = 1.0;
