@@ -2,7 +2,7 @@
 #define SAVE_H_
 
 void save_game(const struct CookieData data, const struct GoldenData gold);
-void load_game(struct CookieData *data, struct GoldenData *gold);
+double load_game(struct CookieData *data, struct GoldenData *gold);
 
 void backup_game();
 int restore_backup();

@@ -197,7 +197,7 @@ double ten_pow(int16_t n) {
 	return pow;
 }
 
-void load_game(struct CookieData *data, struct GoldenData *gold) {
+double load_game(struct CookieData *data, struct GoldenData *gold) {
 	reset_buildings(data);
 	gold->time_modifier = 1;
 	gold->effect_modifier = 1;
@@ -250,7 +250,7 @@ void load_game(struct CookieData *data, struct GoldenData *gold) {
 		gold->boost_time = 0;
 		gold->boost_multiplier = 0.0;
 
-		return;
+		return 0.;
 	}
 	
 	Bfile_ReadFile_OS(h_file, buf, 0x320, 0);
@@ -320,6 +320,7 @@ void load_game(struct CookieData *data, struct GoldenData *gold) {
 	char *multiplier = strtok(NULL, "\n");
 	char *upgrades = strtok(NULL, "\n");
 	char *cheats = strtok(NULL, "\n");
+	char *timestamp = strtok(NULL, "\n");
 
 	dec = strtok(cps_multiplier, "E");
 	pow = strtok(NULL, "E");
@@ -360,9 +361,16 @@ void load_game(struct CookieData *data, struct GoldenData *gold) {
 		data->cheats.ic = (cheats[5] == '1');
 	}
 
+	dec = strtok(timestamp, "E");
+	pow = strtok(NULL, "E");
+
+	double old_time = strtod(dec, NULL) * ten_pow(strtod(pow, NULL));
+
 	free(buf);
 
     Bfile_CloseFile_OS(h_file);
+
+	return old_time;
 }
 
 void backup_game() {
