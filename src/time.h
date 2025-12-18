@@ -14,7 +14,7 @@
 #define RMINCNT (unsigned char*) 0xA413FEC4
 #define RSECCNT (unsigned char*) 0xA413FEC2
 
-#define SECONDS_IN_DAY 86400
+#define SECONDS_IN_DAY 86400.
 
 extern const double days_in_month[12];
 

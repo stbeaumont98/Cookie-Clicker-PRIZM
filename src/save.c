@@ -183,9 +183,9 @@ void save_game(const struct CookieData data, const struct GoldenData gold) {
 }
 
 
-double ten_pow(int16_t n) {
-	double x = 10;
-    double pow = 1;
+double ten_pow(int32_t n) {
+	double x = 10.;
+    double pow = 1.;
 
     for (int i = 0; i < abs(n); i++) {
 		if (n < 0)
@@ -364,7 +364,7 @@ double load_game(struct CookieData *data, struct GoldenData *gold) {
 	dec = strtok(timestamp, "E");
 	pow = strtok(NULL, "E");
 
-	double old_time = strtod(dec, NULL) * ten_pow(strtod(pow, NULL));
+	double old_time = (strtod(dec, NULL) * ten_pow(strtod(pow, NULL))) - 100.;
 
 	free(buf);
 
