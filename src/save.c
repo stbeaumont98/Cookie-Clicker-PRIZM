@@ -182,21 +182,6 @@ void save_game(const struct CookieData data, const struct GoldenData gold) {
     Bfile_CloseFile_OS(h_file);
 }
 
-
-double ten_pow(int32_t n) {
-	double x = 10.;
-    double pow = 1.;
-
-    for (int i = 0; i < abs(n); i++) {
-		if (n < 0)
-			pow /= x;
-		else
-        	pow *= x;
-    }
-
-	return pow;
-}
-
 double load_game(struct CookieData *data, struct GoldenData *gold) {
 	reset_buildings(data);
 	gold->time_modifier = 1;
@@ -364,7 +349,7 @@ double load_game(struct CookieData *data, struct GoldenData *gold) {
 	dec = strtok(timestamp, "E");
 	pow = strtok(NULL, "E");
 
-	double old_time = (strtod(dec, NULL) * ten_pow(strtod(pow, NULL))) - 100.;
+	double old_time = (strtod(dec, NULL) * ten_pow(strtod(pow, NULL))) - 97.;
 
 	free(buf);
 

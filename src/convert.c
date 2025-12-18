@@ -37,12 +37,12 @@ char *get_display_val(double val, bool disp_dec, bool abrev) {
 	}
 
 	if (val < 1E6 && disp_dec)
-		dec = 10;
+		dec = 1;
 	else if (val < 1E6 && !disp_dec) {
 		dec = 0;
 		disp_val = round2(disp_val);
 	} else
-		dec = 1000;
+		dec = 3;
 	
 	char *tmp = disp_decimal(disp_val, dec);
 	strcpy(val_buf, tmp);
@@ -84,7 +84,7 @@ char *get_save_val(double val) {
 		strcat(suffix, tmp);
 	}
 
-	char *tmp = disp_decimal(val, 1000000000);
+	char *tmp = disp_decimal(val, 10);
 	strcpy(val_buf, tmp);
 	free(tmp);
 	strcat(val_buf, suffix);
@@ -95,7 +95,7 @@ char *get_save_val(double val) {
 	return val_buf;
 }
 
-char *disp_decimal(double val, uint32_t dec_pnt) {
+char *disp_decimal(double val, int dec_pow) {
 	char *buffer = malloc(16);
 
 	uint32_t integer = (uint32_t) (val + 1E-9);
@@ -107,34 +107,49 @@ char *disp_decimal(double val, uint32_t dec_pnt) {
 	} else
 		itoa(integer, buffer, 10);
 	
-	if (dec_pnt != 0) {
+	if (dec_pow != 0) {
 		double remaining = val - (double) integer;
-		uint32_t decimal = (uint32_t) round2(remaining * dec_pnt);
+		double powten = ten_pow(dec_pow);
+		uint64_t decimal = (uint64_t) round2(remaining * powten);
 
 		if (decimal != 0) {
 
-			char tmp[12];
-			itoa(decimal, tmp, 10);
-			int dec_len = strlen(tmp);
+			int offset = 0;
+			while (remaining < 0.1) {
+				remaining *= 10.;
+				offset++;
+			}
 
 			while (decimal % 10 == 0)
 				decimal /= 10;
-				
-			itoa(decimal, tmp, 10);
+
+			char r_tmp[12];
+
+			uint32_t first = (uint32_t) ((double) decimal / 100000.);
+			uint32_t second = (uint32_t) (decimal % 100000);
+
+			char tmp[12];
+
+			if (first == 0 && second != 0) {
+				itoa(second, tmp, 10);
+				strcpy(r_tmp, tmp);
+			} else if (first != 0 && second == 0) {
+				itoa(first, tmp, 10);
+				strcpy(r_tmp, tmp);
+			} else if (first != 0 && second != 0) {
+				itoa(first, tmp, 10);
+				strcpy(r_tmp, tmp);
+				itoa(second, tmp, 10);
+				strcat(r_tmp, tmp);
+			}
 			
 			strcat(buffer, ".");
 
-			int dec_pnt_cpy = dec_pnt, cnt = 0;
-			while (dec_pnt_cpy % 10 == 0) {
-				dec_pnt_cpy /= 10;
-				cnt++;
-			}
-
-			if (round2((val - integer) * dec_pnt) < (dec_pnt / 10)) {
-				for (int i = 0; i < cnt - dec_len; i++)
+			if (round2((val - (double) integer) * powten) < (powten / 10.)) {
+				for (int i = 0; i < offset; i++)
 					strcat(buffer, "0");
 			}
-			strcat(buffer, tmp);
+			strcat(buffer, r_tmp);
 		}
 	}
 	return buffer;

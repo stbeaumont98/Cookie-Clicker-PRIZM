@@ -3,7 +3,7 @@
 
 char *get_display_val(double val, bool disp_dec, bool abrev);
 char *get_save_val(double val);
-char *disp_decimal(double val, uint32_t dec_pnt);
+char *disp_decimal(double val, int dec_pnt);
 char *disp_comma(uint32_t val);
 
 #endif

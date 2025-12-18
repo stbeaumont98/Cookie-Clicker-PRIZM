@@ -100,7 +100,27 @@ int main() {
 		tmp = get_display_val(idle_earned, false, false);
 		strcat(idle_msg, tmp);
 		free(tmp);
-		strcat(idle_msg, " cookies while\nyou were away.");
+		strcat(idle_msg, " cookie");
+		if (round2(idle_earned) != 1)
+			strcat(idle_msg, "s");
+		strcat(idle_msg, " while\nyou were away.");
+
+		// tmp = get_save_val(get_timestamp());
+		// strcpy(idle_msg, tmp);
+		// free(tmp);
+
+		// strcat(idle_msg, " - ");
+
+		// tmp = get_save_val(old_ts);
+		// strcat(idle_msg, tmp);
+		// free(tmp);
+
+		// strcat(idle_msg, " is ");
+
+		// tmp = get_save_val(elapsed_sec);
+		// strcat(idle_msg, tmp);
+		// free(tmp);
+
 		push_note(notes, "Welcome back!", idle_msg, 5, &notes_cnt);
 	}
 
