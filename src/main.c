@@ -30,7 +30,7 @@ int main() {
 
 	struct CookieData data;
 
-	load_game(&data, &gold);
+	double old_time = load_game(&data, &gold);
 
 	int f_buttons[6] = {
 		KEY_PRGM_F1, KEY_PRGM_F2,
@@ -86,6 +86,23 @@ int main() {
 
 	filter_unlocked(filtered_upgrades, &data, upgrades, &filtered_size);
 	sort_upgrades(filtered_upgrades, 0, filtered_size - 1, data.upgrades);
+
+	// Handle idle cookies cheat
+	double elapsed_secs = get_timestamp() - old_time;
+	if (data.cheats.on && data.cheats.ic && old_time != 0 && elapsed_secs > 0)  {
+		double idle_earned = elapsed_secs * raw_cps;
+		data.cookies_all_time += idle_earned;
+		data.cookies += idle_earned;
+
+		// Tell the player how much they earned since they last played.
+		char idle_msg[69];
+		strcpy(idle_msg, "You earned ");
+		tmp = get_display_val(idle_earned, false, false);
+		strcat(idle_msg, tmp);
+		free(tmp);
+		strcat(idle_msg, " cookies while\nyou were away.");
+		push_note(notes, "Welcome back!", idle_msg, 5, &notes_cnt);
+	}
 
 	while (1) {
         int key = PRGM_GetKey();
