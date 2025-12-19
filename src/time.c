@@ -1,5 +1,6 @@
+#include <stdint.h>
 #include "fxcg\rtc.h"
-#include "stdint.h"
+#include "math1.h"
 
 #include "time.h"
 
@@ -58,7 +59,12 @@ int get_current_second() {
 }
 
 double date_to_seconds(int year, int month, int day, int hour, int min, int sec) {
-    double total = (double) year * 31536000.;
+    double total = 0.;
+    int leap_cnt = (int) floor2(((double) year - 1.) / 4.)
+                    - (int) floor2(((double) year - 1.) / 100.)
+                    + (int) floor2(((double) year - 1.) / 400.);
+    total += (double) leap_cnt * 31622400.;
+    total += (double) (year - leap_cnt - 1) * 31536000.;
     for (int i = 0; i < month - 1; i++) {
         if (i == 1 && (year & 3) == 0 && ((year % 25) != 0 || (year & 15) == 0)) {
             total += (29. * SECONDS_IN_DAY);
