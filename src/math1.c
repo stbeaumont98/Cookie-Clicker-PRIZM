@@ -1,4 +1,5 @@
 #include <stdint.h>
+#include <stdlib.h>
 #include "math1.h"
 
 static unsigned int lastrandom=0x12345678;
@@ -65,8 +66,8 @@ long factorial(int n)
 	return result;
 }
 
-int32_t round2(double num) {
-   return num < 0 ? num - 0.5 : num + 0.5; 
+int64_t round2(double num) {
+   return num < 0 ? (int64_t) (num - 0.5) : (int64_t) (num + 0.5); 
 } 
 
 float floor2(double x) { 
@@ -75,4 +76,18 @@ float floor2(double x) {
 
 float ceil2(double x) { 
    return ((int) x) + (x < 0); 
+}
+
+double ten_pow(int32_t n) {
+	double x = 10.;
+    double pow = 1.;
+
+    for (int i = 0; i < abs(n); i++) {
+		if (n < 0)
+			pow /= x;
+		else
+        	pow *= x;
+    }
+
+	return pow;
 }

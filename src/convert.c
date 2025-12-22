@@ -37,12 +37,12 @@ char *get_display_val(double val, bool disp_dec, bool abrev) {
 	}
 
 	if (val < 1E6 && disp_dec)
-		dec = 10;
+		dec = 1;
 	else if (val < 1E6 && !disp_dec) {
 		dec = 0;
 		disp_val = round2(disp_val);
 	} else
-		dec = 1000;
+		dec = 3;
 	
 	char *tmp = disp_decimal(disp_val, dec);
 	strcpy(val_buf, tmp);
@@ -61,30 +61,26 @@ char *get_save_val(double val) {
 
 	strcpy(suffix, "E");
 
+	int cnt = 0;
 	if (val < 1) {
-		int cnt = 0;
 		if (val != 0) {
 			while (val < 1) {
 				val *= 10;
-				cnt++;
+				cnt--;
 			}
-			strcat(suffix, "-");
 		}
-		char tmp[3];
-		itoa(cnt, tmp, 10);
-		strcat(suffix, tmp);
 	} else {
-		int cnt = 0;
 		while (val >= 10) {
 			val *= 0.1;
 			cnt++;
 		}
-		char tmp[3];
-		itoa(cnt, tmp, 10);
-		strcat(suffix, tmp);
 	}
 
-	char *tmp = disp_decimal(val, 1000000);
+	char s_tmp[3];
+	itoa(cnt, s_tmp, 10);
+	strcat(suffix, s_tmp);
+
+	char *tmp = disp_decimal(val, 7);
 	strcpy(val_buf, tmp);
 	free(tmp);
 	strcat(val_buf, suffix);
@@ -95,8 +91,19 @@ char *get_save_val(double val) {
 	return val_buf;
 }
 
-char *disp_decimal(double val, uint32_t dec_pnt) {
-	char *buffer = malloc(12);
+void pad_zeros(char *buffer, uint32_t val, uint8_t pow) {
+	char tmp[0xF];
+
+	itoa(val, tmp, 10);
+
+	if (val < (ten_pow(pow) / 10.)) {
+		for (int i = 0; i < pow - strlen(tmp); i++)
+			strcat(buffer, "0");
+	}
+}
+
+char *disp_decimal(double val, uint8_t dec_pow) {
+	char *buffer = malloc(16);
 
 	uint32_t integer = (uint32_t) (val + 1E-9);
 
@@ -107,34 +114,38 @@ char *disp_decimal(double val, uint32_t dec_pnt) {
 	} else
 		itoa(integer, buffer, 10);
 	
-	if (dec_pnt != 0) {
+	if (dec_pow != 0) {
 		double remaining = val - (double) integer;
-		uint32_t decimal = (uint32_t) round2(remaining * dec_pnt);
+		uint64_t decimal = (uint64_t) round2(remaining * ten_pow(dec_pow));
 
 		if (decimal != 0) {
-
-			char tmp[9];
-			itoa(decimal, tmp, 10);
-			int dec_len = strlen(tmp);
-
-			while (decimal % 10 == 0)
-				decimal /= 10;
-				
-			itoa(decimal, tmp, 10);
 			
 			strcat(buffer, ".");
 
-			int dec_pnt_cpy = dec_pnt, cnt = 0;
-			while (dec_pnt_cpy % 10 == 0) {
-				dec_pnt_cpy /= 10;
-				cnt++;
+			while (decimal % 10 == 0) {
+				decimal /= 10;
+				dec_pow--;
 			}
 
-			if (round2((val - integer) * dec_pnt) < (dec_pnt / 10)) {
-				for (int i = 0; i < cnt - dec_len; i++)
-					strcat(buffer, "0");
+			uint8_t half_pow = dec_pow / 2;
+			
+			uint32_t first = (uint32_t) ((double) decimal / ten_pow(half_pow));
+			uint32_t second = (uint32_t) (decimal % (uint32_t) ten_pow(half_pow));
+
+			char r_tmp[20];
+			char tmp[10];
+
+			pad_zeros(r_tmp, first, dec_pow - half_pow);
+			itoa(first, tmp, 10);
+			strcat(r_tmp, tmp);
+
+			if (second != 0) {
+				pad_zeros(r_tmp, second, half_pow);
+				itoa(second, tmp, 10);
+				strcat(r_tmp, tmp);
 			}
-			strcat(buffer, tmp);
+
+			strcat(buffer, r_tmp);
 		}
 	}
 	return buffer;
@@ -167,4 +178,22 @@ char *disp_comma(uint32_t val) {
 	free(back_buf);
 
 	return buffer;
+}
+
+char *time_to_str(double timestamp) {
+    char *buffer = malloc(16);
+	char tmp[10];
+
+	uint32_t integer = (uint32_t) (timestamp / ten_pow(6));
+	uint32_t remaining = (uint32_t) (timestamp - ((double) integer * ten_pow(6)));
+
+	itoa(integer, tmp, 10);
+	strcpy(buffer, tmp);
+
+	pad_zeros(buffer, remaining, 6);
+
+    itoa(remaining, tmp, 10);
+	strcat(buffer, tmp);
+    
+    return buffer;
 }

@@ -111,7 +111,7 @@ void reset_buildings(struct CookieData *data) {
 	}
 }
 
-void reset_gold(struct GoldenData *data) {
+void rand_gold(struct GoldenData *data) {
 	data->x = random() % 6;
 	data->y = random() % 171;
 	data->scale = 2;
