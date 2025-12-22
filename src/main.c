@@ -187,11 +187,11 @@ int main() {
 			draw_button(66, 191, 110, "WIPE SAVE", COLOR_RED, s_sel == 3);
 
 			if (data.cheats.on) {
-				draw_toggle_box(210, 106, "Auto-click\ngolden cookies", s_sel == 4 ? 0xFFFF : dim_color(0xFFFF, 0.5), data.cheats.acg);
-				draw_toggle_box(210, 129, "Press and hold\nto click", s_sel == 5 ? 0xFFFF : dim_color(0xFFFF, 0.5), data.cheats.hc);
-				draw_toggle_box(210, 152, "Free Buildings", s_sel == 6 ? 0xFFFF : dim_color(0xFFFF, 0.5), data.cheats.fb);
-				draw_toggle_box(210, 171, "Free Upgrades", s_sel == 7 ? 0xFFFF : dim_color(0xFFFF, 0.5), data.cheats.fu);
-				draw_toggle_box(210, 190, "Idle CpS", s_sel == 8 ? 0xFFFF : dim_color(0xFFFF, 0.5), data.cheats.ic);
+				draw_toggle_box(210, 106, "Idle CpS", s_sel == 4 ? 0xFFFF : dim_color(0xFFFF, 0.5), data.cheats.ic);
+				draw_toggle_box(210, 125, "Press and hold\nto click", s_sel == 5 ? 0xFFFF : dim_color(0xFFFF, 0.5), data.cheats.hc);
+				draw_toggle_box(210, 148, "Auto-click\ngolden cookies", s_sel == 6 ? 0xFFFF : dim_color(0xFFFF, 0.5), data.cheats.acg);
+				draw_toggle_box(210, 171, "Free Buildings", s_sel == 7 ? 0xFFFF : dim_color(0xFFFF, 0.5), data.cheats.fb);
+				draw_toggle_box(210, 190, "Free Upgrades", s_sel == 8 ? 0xFFFF : dim_color(0xFFFF, 0.5), data.cheats.fu);
 			}
 
 			if (!prompt) {
@@ -222,12 +222,15 @@ int main() {
 							}
 							break;
 						case 4:
-							data.cheats.acg = !data.cheats.acg;
+							data.cheats.ic = !data.cheats.ic;
 							break;
 						case 5:
 							data.cheats.hc = !data.cheats.hc;
 							break;
 						case 6:
+							data.cheats.acg = !data.cheats.acg;
+							break;
+						case 7:
 							data.cheats.fb = !data.cheats.fb;
 							if (!data.cheats.fb) {
 								bool last_hide = true;
@@ -249,11 +252,8 @@ int main() {
 								}
 							}
 							break;
-						case 7:
-							data.cheats.fu = !data.cheats.fu;
-							break;
 						case 8:
-							data.cheats.ic = !data.cheats.ic;
+							data.cheats.fu = !data.cheats.fu;
 							break;
 						default:
 							break;
