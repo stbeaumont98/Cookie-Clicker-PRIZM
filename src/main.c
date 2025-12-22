@@ -105,22 +105,6 @@ int main() {
 			strcat(idle_msg, "s");
 		strcat(idle_msg, " while\nyou were away.");
 
-		// tmp = get_save_val(get_timestamp());
-		// strcpy(idle_msg, tmp);
-		// free(tmp);
-
-		// strcat(idle_msg, " - ");
-
-		// tmp = get_save_val(old_ts);
-		// strcat(idle_msg, tmp);
-		// free(tmp);
-
-		// strcat(idle_msg, " is ");
-
-		// tmp = get_save_val(elapsed_sec);
-		// strcat(idle_msg, tmp);
-		// free(tmp);
-
 		push_note(notes, "Welcome back!", idle_msg, 5, &notes_cnt);
 	}
 
@@ -976,7 +960,7 @@ int main() {
 				int rblab = random() % 39;
 				push_note(notes, "", blab[rblab], 6, &notes_cnt);
 			}
-			reset_gold(&gold);
+			rand_gold(&gold);
 		}
 		
 		if (gold.time <= ticks(13 * gold.time_modifier)) {
@@ -992,7 +976,7 @@ int main() {
 				gold.scale -= 2;
 			
 			if (gold.time <= 0 && gold.scale <= 2)
-				reset_gold(&gold);
+				rand_gold(&gold);
 		}
 
 		// autosave when the time runs out
