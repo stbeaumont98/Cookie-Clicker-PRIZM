@@ -60,9 +60,9 @@ int get_current_second() {
 
 double date_to_seconds(int year, int month, int day, int hour, int min, int sec) {
     double total = 0.;
-    int leap_cnt = (int) floor2(((double) year - 1.) / 4.)
-                    - (int) floor2(((double) year - 1.) / 100.)
-                    + (int) floor2(((double) year - 1.) / 400.);
+    int leap_cnt = (int) floor2(((double) (year - 1)) / 4.)
+                    - (int) floor2(((double) (year - 1)) / 100.)
+                    + (int) floor2(((double) (year - 1)) / 400.);
     total += (double) leap_cnt * 31622400.;
     total += (double) (year - leap_cnt - 1) * 31536000.;
     for (int i = 0; i < month - 1; i++) {
