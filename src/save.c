@@ -171,7 +171,7 @@ void save_game(const struct CookieData data, const struct GoldenData gold) {
 
 	strcat(save_buf, "\n");
 
-	tmp = get_save_val(get_timestamp());
+	tmp = time_to_str(get_timestamp());
 	strcat(save_buf, tmp);
 	free(tmp);
 
@@ -183,31 +183,9 @@ void save_game(const struct CookieData data, const struct GoldenData gold) {
 }
 
 double load_game(struct CookieData *data, struct GoldenData *gold) {
-	reset_buildings(data);
-	gold->time_modifier = 1;
-	gold->effect_modifier = 1;
-	reset_gold(gold);
+	reset_game(data, gold);
 
     int i, j;
-
-	data->buildings_unlocked = 2;
-
-	for (i = 0; i < 478; i++) {
-		data->upgrades[i] = false;
-		data->upgrades_unlocked[i] = false;
-	}
-	
-	data->upgrades_count = 0;
-
-	data->multiplier = 1.0;
-
-	data->cheats.on = false;
-	data->cheats.acg = false;
-	data->cheats.hc = false;
-	data->cheats.fb = false;
-	data->cheats.fu = false;
-	data->cheats.ic = false;
-
 	char *buf = malloc(0x320);
 	
     unsigned short p_file[sizeof(path) * 2];
@@ -215,28 +193,8 @@ double load_game(struct CookieData *data, struct GoldenData *gold) {
 
     int h_file = Bfile_OpenFile_OS(p_file, 3, 0);
 
-    if (h_file < 0) {
-		data->cookies_all_time = 0.0;
-		data->cookies = 0.0;
-		data->handmade_cookies = 0.0;
-		data->click_count = 0;
-		data->gold_click_count = 0;
-		for (i = 0; i < 20; i ++) {
-			data->buildings[i].multiplier = 1.0;
-			data->buildings[i].modifier = 0.0;
-			data->buildings[i].percent = 0.0;
-			data->buildings[i].gma = false;
-		}
-		data->total_buildings = 0;
-		gold->frenzy_time = 0;
-		gold->cps_multiplier = 1.0;
-		gold->click_frenzy_time = 0;
-		gold->click_multiplier = 1.0;
-		gold->boost_time = 0;
-		gold->boost_multiplier = 0.0;
-
+    if (h_file < 0)
 		return 0.;
-	}
 	
 	Bfile_ReadFile_OS(h_file, buf, 0x320, 0);
 
@@ -346,10 +304,7 @@ double load_game(struct CookieData *data, struct GoldenData *gold) {
 		data->cheats.ic = (cheats[5] == '1');
 	}
 
-	dec = strtok(timestamp, "E");
-	pow = strtok(NULL, "E");
-
-	double old_time = (strtod(dec, NULL) * ten_pow(strtod(pow, NULL))) - 97.;
+	double old_time = strtod(timestamp, NULL);
 
 	free(buf);
 
@@ -394,11 +349,7 @@ int restore_backup() {
 }
 
 void reset_game(struct CookieData *data, struct GoldenData *gold) {
-
 	reset_buildings(data);
-	gold->time_modifier = 1;
-	gold->effect_modifier = 1;
-	reset_gold(gold);
 
     int i;
 
@@ -431,11 +382,15 @@ void reset_game(struct CookieData *data, struct GoldenData *gold) {
 	data->cheats.fu = false;
 	data->cheats.ic = false;
 
+	gold->time_modifier = 1;
+	gold->effect_modifier = 1;
 	gold->frenzy_time = 0;
 	gold->cps_multiplier = 1.0;
 	gold->click_frenzy_time = 0;
 	gold->click_multiplier = 1.0;
 	gold->boost_time = 0;
 	gold->boost_multiplier = 0.0;
+
+	rand_gold(gold);
 
 }
