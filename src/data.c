@@ -81,6 +81,8 @@ const char *blab[39] = {
 	"Why did you click that?", "Your cookies are never gonna give you up."
 };
 
+const double price_mult[3] = {1., 20.303718238, 7828749.671335256};
+
 double get_cps(const struct CookieData data) {
 	uint16_t non_cursors = data.total_buildings - data.buildings[TYPE_CURSOR].owned;
 	double raw_cps = (base_cps[TYPE_CURSOR] * (double) data.buildings[TYPE_CURSOR].owned \

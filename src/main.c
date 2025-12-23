@@ -67,7 +67,7 @@ int main() {
 	bool upgrades_toggle = false;
 	bool stats_toggle = false;
 	bool options_toggle = false;
-	bool x10_toggle = false;
+	int x10_toggle = 0;
 
 	int16_t autosave_time = (int16_t) ticks(60.);
 
@@ -628,16 +628,19 @@ int main() {
 					disp_string_small(353 + text_width_small("[x", false), 2, "2", 0xffff, true, 0);
 					copy_sprite_1bit(arrow[0], 374, 5, 6, 6, one_bit_pal, 0xffff);
 
-					if (x10_toggle) {
+					if (x10_toggle == 1) {
 						disp_string_small(363, 38, "x", 0xffff, false, 0);
 						disp_string(363 + text_width_small("x", false), 33, "10", 0xffff, 0);
+					} else if (x10_toggle == 2) {
+						disp_string_small(354, 38, "x", 0xffff, false, 0);
+						disp_string(354 + text_width_small("x", false), 33, "100", 0xffff, 0);
 					}
 
 					int store_size = (data.buildings_unlocked < 4) ? data.buildings_unlocked : 4;
 
 					for (int i = 0; i < store_size; i++) {
 						uint8_t b_id = i + b_sel_offset;
-						double p = !(data.cheats.on && data.cheats.fb) * (data.buildings[b_id].price * (x10_toggle ? 20.303718238 : 1.));
+						double p = !(data.cheats.on && data.cheats.fb) * (data.buildings[b_id].price * price_mult[x10_toggle]);
 
 						x = 180, y = 48 + i * 42;
 						draw_store_tile(x, y);
@@ -690,13 +693,13 @@ int main() {
 						b_sel_offset--;
 
 					uint8_t b_id = b_sel + b_sel_offset;
-					double p = !(data.cheats.on && data.cheats.fb) * (data.buildings[b_id].price * (x10_toggle ? 20.303718238 : 1.));
+					double p = !(data.cheats.on && data.cheats.fb) * (data.buildings[b_id].price * price_mult[x10_toggle]);
 					if (key_press(KEY_PRGM_ALPHA)
 						&& data.cookies >= p) {
 						data.cookies -= p;
-						data.buildings[b_id].owned += x10_toggle ? 10 : 1;
-						data.buildings[b_id].price *= powInt(1.15, x10_toggle ? 10 : 1);
-						data.total_buildings += x10_toggle ? 10 : 1;
+						data.buildings[b_id].owned += ten_pow(x10_toggle);
+						data.buildings[b_id].price *= powInt(1.15, ten_pow(x10_toggle));
+						data.total_buildings += ten_pow(x10_toggle);
 					}
 
 					// end store code
@@ -711,7 +714,7 @@ int main() {
 					}
 
 					if (key_press(KEY_PRGM_X10))
-						x10_toggle = !x10_toggle;
+						x10_toggle = (x10_toggle + 1) % 3;
 
 					for (int i = 0; i < 20; i++) {
 						if (data.cookies_all_time >= base_prices[i] || (data.cheats.on && data.cheats.fb))
