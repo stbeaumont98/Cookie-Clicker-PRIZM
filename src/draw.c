@@ -95,7 +95,7 @@ void copy_sprite_scaled(const color_t *in, unsigned x, unsigned y, unsigned w1, 
 			y2 = ((i * y_ratio) >> 16);
 			color_t p = in[(y2 * w1) + x2];
 			if(i >= 0 && i <= 216 && j >= 0 && j <= 384 && p != COLOR_RED)
-				*(VRAM)++ = overlay ? 0x0000 : p;
+				*(VRAM)++ = overlay ? overlay_color : p;
 			else
 				VRAM++;
 		} 
@@ -473,14 +473,14 @@ void draw_background() {
 	copy_sprite_scaled(panel_h, 186, 32, 99, 8, 198, 16, false, 0);
 }
 
-void draw_store_tile(uint16_t x, uint8_t y) {
-	fill_area(x, y, 204, 42, 0xad73);
-	fill_area(x + 2, y, 202, 2, 0x7bac);
-	fill_area(x + 4, y + 2, 200, 2, 0x7bac);
-	fill_area(x, y, 2, 40, 0xbdd5);
-	fill_area(x + 2, y + 2, 2, 36, 0xbdd5);
-	fill_area(x + 2, y + 38, 202, 2, 0x39c5);
-	fill_area(x, y + 40, 204, 2, 0x39c5);
+void draw_store_tile(uint16_t x, uint8_t y, bool enabled) {
+	fill_area(x, y, 204, 42, dim_color(0xad73, enabled ? 1. : .75));
+	fill_area(x + 2, y, 202, 2, dim_color(0x7bac, enabled ? 1. : .75));
+	fill_area(x + 4, y + 2, 200, 2, dim_color(0x7bac, enabled ? 1. : .75));
+	fill_area(x, y, 2, 40, dim_color(0xbdd5, enabled ? 1. : .75));
+	fill_area(x + 2, y + 2, 2, 36, dim_color(0xbdd5, enabled ? 1. : .75));
+	fill_area(x + 2, y + 38, 202, 2, dim_color(0x39c5, enabled ? 1. : .75));
+	fill_area(x, y + 40, 204, 2, dim_color(0x39c5, enabled ? 1. : .75));
 }
 
 void draw_button(uint16_t x, uint8_t y, uint8_t w, char *message, color_t color, bool selected) {

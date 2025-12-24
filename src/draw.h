@@ -29,7 +29,7 @@ void disp_line_small(unsigned x, unsigned y, const char* message, int color, boo
 int text_width_small(const char *msg, bool caps);
 uint8_t disp_msg(const struct Message msg, uint8_t  y_offset);
 void draw_background();
-void draw_store_tile(uint16_t x, uint8_t y);
+void draw_store_tile(uint16_t x, uint8_t y, bool enabled);
 void draw_button(uint16_t x, uint8_t y, uint8_t w, char *message, color_t color, bool selected);
 void disp_prompt(const struct Message msg, bool sel);
 void draw_toggle_box(uint16_t x, uint8_t y, char *message, color_t color, bool toggle);
