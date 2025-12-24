@@ -40,7 +40,7 @@ char *get_display_val(double val, bool disp_dec, bool abrev) {
 		dec = 1;
 	else if (val < 1E6 && !disp_dec) {
 		dec = 0;
-		disp_val = round2(disp_val);
+		disp_val = (double) round2(disp_val);
 	} else
 		dec = 3;
 	
