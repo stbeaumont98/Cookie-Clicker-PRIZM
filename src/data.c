@@ -89,7 +89,7 @@ const char *blab[39] = {
 double get_buy_price(uint8_t b_id, uint16_t owned, uint16_t amount) {
 	double price = 0.;
 	for (int i = max(0, owned); i < max(0, owned + amount); i++)
-		price += base_prices[b_id] * powInt(1.15, max(0, i));
+		price += base_prices[b_id] * pow_int(1.15, max(0, i));
 
 	return ceil2(price);
 }
@@ -97,7 +97,7 @@ double get_buy_price(uint8_t b_id, uint16_t owned, uint16_t amount) {
 double get_sell_price(uint8_t b_id, uint16_t owned, uint16_t amount) {
 	double price = 0.;
 	for (int i = max(0, owned - amount); i < max(0, owned); i++)
-		price += base_prices[b_id] * powInt(1.15, max(0, i));
+		price += base_prices[b_id] * pow_int(1.15, max(0, i));
 
 	price *= .25;
 	return ceil2(price);
@@ -106,8 +106,9 @@ double get_sell_price(uint8_t b_id, uint16_t owned, uint16_t amount) {
 void set_prices(struct CookieData *data, int x10_toggle, bool sell_toggle) {
 	for (int i = 0; i < 20; i++) {
 		uint16_t owned = data->buildings[i].owned;
-		data->buildings[i].price = (data->cheats.on && data->cheats.fb) ? 0. :
-			(sell_toggle ? get_sell_price(i, owned, min(owned, ten_pow(x10_toggle))) : get_buy_price(i, owned, ten_pow(x10_toggle)));
+		data->buildings[i].price = (data->cheats.on && data->cheats.fb) ? 0. : (sell_toggle ?
+			get_sell_price(i, owned, min(owned, ten_pow(x10_toggle))) :
+			get_buy_price(i, owned, ten_pow(x10_toggle)));
 	}
 }
 
