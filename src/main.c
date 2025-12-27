@@ -705,7 +705,9 @@ int main() {
 							ten_pow(x10_toggle) : -min(data.buildings[b_id].owned, ten_pow(x10_toggle)));
 						data.total_buildings += (!sell_toggle ?
 							ten_pow(x10_toggle) : -min(data.buildings[b_id].owned, ten_pow(x10_toggle)));
-						set_prices(&data, x10_toggle, sell_toggle);
+						data.buildings[b_id].price = (data.cheats.on && data.cheats.fb) ? 0. : (sell_toggle ?
+							get_sell_price(b_id, data.buildings[b_id].owned, min(data.buildings[b_id].owned, ten_pow(x10_toggle))) :
+							get_buy_price(b_id, data.buildings[b_id].owned, ten_pow(x10_toggle)));
 					}
 
 					// end store code
