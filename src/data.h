@@ -86,8 +86,7 @@ extern const double base_cps[20];
 extern const char *stats[9];
 extern const char *blab[39];
 
-extern const double price_mult[3];
-
+void set_prices(struct CookieData *data, int x10_toggle, bool sell_toggle);
 double get_cps(const struct CookieData data);
 double get_cpc(const struct CookieData data, double cps);
 void reset_buildings(struct CookieData *data);

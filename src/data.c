@@ -81,7 +81,35 @@ const char *blab[39] = {
 	"Why did you click that?", "Your cookies are never gonna give you up."
 };
 
-const double price_mult[3] = {1., 20.303718238, 7828749.671335256};
+// get_buy_price() and get_sell_price() were pulled and ported from the
+// original game's JavaScript code. These are more accurate than the method
+// for price calculation that I was using before.
+// https://orteil.dashnet.org/cookieclicker/
+
+double get_buy_price(uint8_t b_id, uint16_t owned, uint16_t amount) {
+	double price = 0.;
+	for (int i = max(0, owned); i < max(0, owned + amount); i++)
+		price += base_prices[b_id] * powInt(1.15, max(0, i));
+
+	return ceil2(price);
+}
+
+double get_sell_price(uint8_t b_id, uint16_t owned, uint16_t amount) {
+	double price = 0.;
+	for (int i = max(0, owned - amount); i < max(0, owned); i++)
+		price += base_prices[b_id] * powInt(1.15, max(0, i));
+
+	price *= .25;
+	return ceil2(price);
+}
+
+void set_prices(struct CookieData *data, int x10_toggle, bool sell_toggle) {
+	for (int i = 0; i < 20; i++) {
+		uint16_t owned = data->buildings[i].owned;
+		data->buildings[i].price = (data->cheats.on && data->cheats.fb) ? 0. :
+			(sell_toggle ? get_sell_price(i, owned, min(owned, ten_pow(x10_toggle))) : get_buy_price(i, owned, ten_pow(x10_toggle)));
+	}
+}
 
 double get_cps(const struct CookieData data) {
 	uint16_t non_cursors = data.total_buildings - data.buildings[TYPE_CURSOR].owned;
@@ -105,7 +133,6 @@ double get_cpc(const struct CookieData data, double cps) {
 
 void reset_buildings(struct CookieData *data) {
 	for(int i = 0; i < 20; i++) {
-		data->buildings[i].price = base_prices[i];
 		data->buildings[i].owned = 0;
 		data->buildings[i].locked = !(strcmp(building_types[i], "Cursor") == 0 \
 			|| strcmp(building_types[i], "Grandma") == 0);
