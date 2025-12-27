@@ -7,12 +7,7 @@
 unsigned int random(void);
 unsigned int srandom(int seed);
 
-double exp(double x);
-double powInt(double x, int n);
-double lnFor0To2(double x);
-double ln(double x);
-double pow1(double x, double y);
-long factorial(int n);
+double pow_int(double x, int n);
 int64_t round2(double num);
 double floor2(double x);
 double ceil2(double x);
