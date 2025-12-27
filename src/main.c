@@ -252,6 +252,7 @@ int main() {
 									b_sel_offset = data.buildings_unlocked - 4;
 								}
 							}
+							set_prices(&data, x10_toggle, sell_toggle);
 							break;
 						case 8:
 							data.cheats.fu = !data.cheats.fu;
@@ -327,6 +328,8 @@ int main() {
 								u_sel_offset = 0;
 								b_sel = 0;
 								b_sel_offset = 0;
+								x10_toggle = 0;
+								sell_toggle = false;
 
 								// Create another copy of the backup.
 								backup_game();
@@ -348,6 +351,8 @@ int main() {
 								u_sel_offset = 0;
 								b_sel = 0;
 								b_sel_offset = 0;
+								x10_toggle = 0;
+								sell_toggle = false;
 
 								// Reset the cookies.sav file.
 								save_game(data, gold);
@@ -641,30 +646,26 @@ int main() {
 
 					for (int i = 0; i < store_size; i++) {
 						uint8_t b_id = i + b_sel_offset;
-						double p = !(data.cheats.on && data.cheats.fb) * (data.buildings[b_id].price * price_mult[x10_toggle]);
-						
-						if (sell_toggle)
-							p *= (0.25 / powInt(1.15, ten_pow(x10_toggle)));
 
 						x = 180, y = 48 + i * 42;
-						draw_store_tile(x, y, (!sell_toggle && data.cookies >= p) || (sell_toggle && data.buildings[b_id].owned > 0));
+						draw_store_tile(x, y, (!sell_toggle && data.cookies >= data.buildings[b_id].price) || (sell_toggle && data.buildings[b_id].owned > 0));
 						copy_sprite_scaled(icons[b_id], x, y, 21, 21, 42, 42,
 							data.buildings[b_id].hidden, 0x0000);
 
 						x = 223, y = 70 + i * 42;
 						copy_sprite_masked(money, x, y, 14, 14, COLOR_RED);
 
-						price_buf = get_display_val((!sell_toggle || (sell_toggle && data.buildings[b_id].owned > 0)) ? p : 0., false, false);
+						price_buf = get_display_val(data.buildings[b_id].price, false, false);
 
 						if ((text_width(price_buf) > 116 && data.buildings[b_id].owned >= 100)
 							|| (text_width(price_buf) > 121 && data.buildings[b_id].owned >= 10)
 							|| (text_width(price_buf) > 130)) {
 							free(price_buf);
-							price_buf = get_display_val(p, false, true);
+							price_buf = get_display_val(data.buildings[b_id].price, false, true);
 						}
 
 						x = 240;
-						color = ((!sell_toggle && data.cookies >= p) || (sell_toggle && data.buildings[b_id].owned > 0)) ? 0x67ec : dim_color(COLOR_RED, .75);
+						color = ((!sell_toggle && data.cookies >= data.buildings[b_id].price) || (sell_toggle && data.buildings[b_id].owned > 0)) ? 0x67ec : dim_color(COLOR_RED, .75);
 						disp_string(x, y, price_buf, color, 0);
 						free(price_buf);
 
@@ -672,7 +673,7 @@ int main() {
 							char owned_buf[5];
 							itoa(data.buildings[b_id].owned, owned_buf, 10);
 							disp_string(380 - text_width(owned_buf), 62 + i * 42,
-								owned_buf, dim_color(0x2924, (!sell_toggle && data.cookies >= p) || (sell_toggle && data.buildings[b_id].owned > 0) ? 1. : .75), 0);
+								owned_buf, dim_color(0x2924, (!sell_toggle && data.cookies >= data.buildings[b_id].price) || (sell_toggle && data.buildings[b_id].owned > 0) ? 1. : .75), 0);
 						}
 
 						char type[18];
@@ -680,7 +681,7 @@ int main() {
 							strcpy(type, building_types[b_id]);
 						else
 							strcpy(type, "???");
-						disp_string(223, 54 + i * 42, type, dim_color(0xffff, (!sell_toggle && data.cookies >= p) || (sell_toggle && data.buildings[b_id].owned > 0) ? 1. : .75), 0);
+						disp_string(223, 54 + i * 42, type, dim_color(0xffff, (!sell_toggle && data.cookies >= data.buildings[b_id].price) || (sell_toggle && data.buildings[b_id].owned > 0) ? 1. : .75), 0);
 					}
 
 					draw_rect(181, 49 + b_sel * 42, 201, 39, 0xff80, 1);
@@ -696,29 +697,15 @@ int main() {
 					else if ((key_press(KEY_PRGM_UP) || (key == KEY_PRGM_UP && key_held)) && b_sel == 0 && b_sel_offset > 0)
 						b_sel_offset--;
 
-					if (key_press(KEY_PRGM_DEL))
-						sell_toggle = !sell_toggle;
-
 					uint8_t b_id = b_sel + b_sel_offset;
-					double p = !(data.cheats.on && data.cheats.fb) * (data.buildings[b_id].price * price_mult[x10_toggle]);
 
-					if (sell_toggle) {
-						p *= (0.25 / powInt(1.15, ten_pow(x10_toggle)));
-						if (key_press(KEY_PRGM_ALPHA)
-							&& data.buildings[b_id].owned > 0) {
-							data.cookies += p;
-							data.buildings[b_id].owned = max(0, data.buildings[b_id].owned - ten_pow(x10_toggle));
-							data.buildings[b_id].price = max(base_prices[b_id], data.buildings[b_id].price / powInt(1.15, ten_pow(x10_toggle)));
-							data.total_buildings -= max(0, data.total_buildings - ten_pow(x10_toggle));
-						}
-					} else {
-						if (key_press(KEY_PRGM_ALPHA)
-							&& data.cookies >= p) {
-							data.cookies -= p;
-							data.buildings[b_id].owned += ten_pow(x10_toggle);
-							data.buildings[b_id].price *= powInt(1.15, ten_pow(x10_toggle));
-							data.total_buildings += ten_pow(x10_toggle);
-						}
+					if (key_press(KEY_PRGM_ALPHA) && ((sell_toggle && data.buildings[b_id].owned > 0) || (!sell_toggle && data.cookies >= data.buildings[b_id].price))) {
+						data.cookies += (!sell_toggle ? -data.buildings[b_id].price : data.buildings[b_id].price);
+						data.buildings[b_id].owned += (!sell_toggle ?
+							ten_pow(x10_toggle) : -min(data.buildings[b_id].owned, ten_pow(x10_toggle)));
+						data.total_buildings += (!sell_toggle ?
+							ten_pow(x10_toggle) : -min(data.buildings[b_id].owned, ten_pow(x10_toggle)));
+						set_prices(&data, x10_toggle, sell_toggle);
 					}
 
 					// end store code
@@ -732,8 +719,15 @@ int main() {
 						data.click_count++;
 					}
 
-					if (key_press(KEY_PRGM_X10))
+					if (key_press(KEY_PRGM_DEL)) {
+						sell_toggle = !sell_toggle;
+						set_prices(&data, x10_toggle, sell_toggle);
+					}
+
+					if (key_press(KEY_PRGM_X10)) {
 						x10_toggle = (x10_toggle + 1) % 3;
+						set_prices(&data, x10_toggle, sell_toggle);
+					}
 
 					for (int i = 0; i < 20; i++) {
 						if (data.cookies_all_time >= base_prices[i] || (data.cheats.on && data.cheats.fb))
