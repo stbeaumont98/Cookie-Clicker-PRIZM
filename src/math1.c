@@ -13,6 +13,23 @@ unsigned int srandom(int seed){
     return ( lastrandom >> 16 );
 }
 
+double trunc(double x) {
+	union {double f; uint64_t i;} u = {x};
+	int e = (int)(u.i >> 52 & 0x7ff) - 0x3ff + 12;
+	uint64_t m;
+
+	if (e >= 52 + 12)
+		return x;
+	if (e < 12)
+		e = 1;
+	m = -1ULL >> e;
+	if ((u.i & m) == 0)
+		return x;
+   
+	u.i &= ~m;
+	return u.f;
+}
+
 double exp(double x) { 
    int i=2; 
    long long fact=2; 
@@ -70,12 +87,14 @@ int64_t round2(double num) {
    return num < 0 ? (int64_t) (num - 0.5) : (int64_t) (num + 0.5); 
 } 
 
-float floor2(double x) { 
-   return ((int) x) - (x < 0); 
+double floor2(double x) {
+   double r = trunc(x);
+   return r - (r != x && x < 0); 
 }
 
-float ceil2(double x) { 
-   return ((int) x) + (x < 0); 
+double ceil2(double x) {
+   double r = trunc(x);
+   return r + (r != x && x > 0); 
 }
 
 double ten_pow(int32_t n) {

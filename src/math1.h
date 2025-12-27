@@ -14,8 +14,8 @@ double ln(double x);
 double pow1(double x, double y);
 long factorial(int n);
 int64_t round2(double num);
-float floor2(double x);
-float ceil2(double x);
+double floor2(double x);
+double ceil2(double x);
 double ten_pow(int32_t n);
 
 #endif
