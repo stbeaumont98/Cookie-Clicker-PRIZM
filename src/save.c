@@ -185,7 +185,7 @@ void save_game(const struct CookieData data, const struct GoldenData gold) {
 double load_game(struct CookieData *data, struct GoldenData *gold) {
 	reset_game(data, gold);
 
-    int i, j;
+    int i;
 	char *buf = malloc(0x320);
 	
     unsigned short p_file[sizeof(path) * 2];
@@ -222,10 +222,6 @@ double load_game(struct CookieData *data, struct GoldenData *gold) {
 
 		data->buildings[i].owned = count;
 		data->total_buildings += count;
-
-		for (j = 0; j < data->buildings[i].owned; j++)
-			data->buildings[i].price += (data->buildings[i].price * .15);
-
 		
 		if (data->cookies_all_time >= base_prices[i])
 			data->buildings[i].hidden = false;
@@ -304,6 +300,8 @@ double load_game(struct CookieData *data, struct GoldenData *gold) {
 		data->cheats.ic = (cheats[5] == '1');
 	}
 
+	set_prices(data, 0, false);
+
 	double old_time = strtod(timestamp, NULL);
 
 	free(buf);
@@ -381,6 +379,8 @@ void reset_game(struct CookieData *data, struct GoldenData *gold) {
 	data->cheats.fb = false;
 	data->cheats.fu = false;
 	data->cheats.ic = false;
+
+	set_prices(data, 0, false);
 
 	gold->time_modifier = 1;
 	gold->effect_modifier = 1;
