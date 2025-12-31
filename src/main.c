@@ -95,6 +95,8 @@ int main() {
 		data.cookies_all_time += idle_earned;
 		data.cookies += idle_earned;
 
+		save_game(data, gold);
+
 		// Tell the player how much they earned since they last played.
 		char idle_msg[75];
 		strcpy(idle_msg, "You earned ");
@@ -271,34 +273,8 @@ int main() {
 				}
 
 			} else {
-				struct Message s_msg;
 
-				switch (s_sel) {
-					// Backup save
-					case 0:
-						strcpy(s_msg.header, "BACKUP");
-						strcpy(s_msg.body, "Are you sure?\nAny previous backups will be\noverwritten!");
-						break;
-					// Restore backup
-					case 1:
-						strcpy(s_msg.header, "RESTORE");
-						strcpy(s_msg.body, "Are you sure?\nCurrent save file will be\noverwritten!");
-						break;
-					// Enable cheating
-					case 2:
-						strcpy(s_msg.header, "CHEATING");
-						strcpy(s_msg.body, "Do you REALLY want to\nenable cheats?\nCheated cookies taste awful.");
-						break;
-					// Wipe save
-					case 3:
-						strcpy(s_msg.header, "WIPE SAVE");
-						strcpy(s_msg.body, "Do you REALLY want to\nwipe your save?\nYou will lose all your progress!");
-						break;
-					default:
-						break;
-				}
-
-				disp_prompt(s_msg, p_sel);
+				disp_prompt(prompts[s_sel], p_sel);
 
 				if (key_press(KEY_PRGM_RIGHT) && p_sel)
 					p_sel = false;

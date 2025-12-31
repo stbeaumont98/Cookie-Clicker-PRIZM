@@ -81,6 +81,13 @@ const char *blab[39] = {
 	"Why did you click that?", "Your cookies are never gonna give you up."
 };
 
+const struct Message prompts[4] = {
+	{"BACKUP", "Are you sure?\nAny previous backups will be\noverwritten!"},
+	{"RESTORE", "Are you sure?\nCurrent save file will be\noverwritten!"},
+	{"CHEATING", "Do you REALLY want to\nenable cheats?\nCheated cookies taste awful."},
+	{"WIPE SAVE", "Do you REALLY want to\nwipe your save?\nYou will lose all your progress!"}
+};
+
 // get_buy_price() and get_sell_price() were pulled and ported from the
 // original game's JavaScript code. These are more accurate than the method
 // for price calculation that I was using before.
