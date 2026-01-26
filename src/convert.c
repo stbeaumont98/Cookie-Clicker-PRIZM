@@ -6,28 +6,34 @@
 
 #include "convert.h"
 
-const char *suffixes[25] = { " million", " billion", " trillion",
+const char *suffixes[40] = { " million", " billion", " trillion",
     " quadrillion", " quintillion", " sextillion", " septillion", " octillion",
     " nonillion", " decillion", " undecillion", " duodecillion", " tredecillion",
     " quattuordecillion", " quindecillion", " sexdecillion", " septendecillion",
     " octodecillion", " novemdecillion", " vigintillion", " unvigintillion",
 	" duovigintillion", " trevigintillion", " quattuorvigintillion",
-	" quinvigintillion"};
+	" quinvigintillion", " sesvigintillion", " septemvigintillion", " octovigintillion",
+	" novemvigintillion", " trigintillion", " untrigintillion", " duotrigintillion",
+	" trestrigintillion", " quattuor­trigint­illion", " quintrigintillion",
+	" sestrigintillion", " septentrigintillion", " octotrigintillion",
+	" noventrigintillion", " quadragintillion" };
 
-const char *suffixes_abrev[25] = { " mil.", " bil.", " tril.", " quad.",
+const char *suffixes_abrev[40] = { " mil.", " bil.", " tril.", " quad.",
     " quin.", " sext.", " sept.", " oct.", " non.", " dec.", " udc.", " ddc.",
     " tdc.", " qadc.", " qidc.", " sxdc.", " spdc.", " ocdc.", " nodc.", " vg.",
-	" uvg.", " dvg.", " tvg.", " qavg.", " qivg." };
+	" uvg.", " dvg.", " tvg.", " qavg.", " qivg.", " ssvg.", " spvg.", " ocvg.",
+	" novg.", " trg.", " utrg.", " dtrg.", " ttrg.", " qatrg.", " qitrg.", " sstrg.",
+	" sptrg.", " octrg.", " notrg.", " qdg." };
 
 char *get_display_val(double val, bool disp_dec, bool abrev) {
 	double disp_val = val;
 	char *val_buf = malloc(0x20);
-	char *suffix = malloc(0x18);
+	char *suffix = malloc(0x20);
 	int dec = 0;
 
 	if (val >= 1E6) {
 		disp_val *= 1E-6;
-		for (int i = 0; i < 25; i++) {
+		for (int i = 0; i < 40; i++) {
 			if (disp_val < 1000) {
 				strcpy(suffix, abrev ? suffixes_abrev[i] : suffixes[i]);
 				break;
