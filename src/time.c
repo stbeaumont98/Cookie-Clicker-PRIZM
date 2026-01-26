@@ -1,5 +1,5 @@
 #include <stdint.h>
-#include "fxcg\rtc.h"
+#include "fxcg/rtc.h"
 #include "math1.h"
 
 #include "time.h"

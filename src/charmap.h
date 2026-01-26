@@ -190,7 +190,7 @@ const unsigned char e[] = {
     0xc7, 0x93, 0x39, 0x01, 0x3f, 0x3f, 0x9d, 0xc3
 };
 
-const unsigned char é[12] = {
+const unsigned char e_acute[] = {
     0xf3, 0xe7, 0xef, 0xff, 0xc7, 0x93, 0x39, 0x01, 0x3f, 0x3f, 0x9d, 0xc3
 };
 
@@ -409,7 +409,7 @@ static const unsigned char *charmap[] = {
     ['g'] = g, ['h'] = h, ['i'] = li, ['j'] = lj, ['k'] = lk, ['l'] = l,
     ['m'] = m, ['n'] = n, ['o'] = o, ['p'] = p, ['q'] = q, ['r'] = r,
     ['s'] = s, ['t'] = t, ['u'] = u, ['v'] = v, ['w'] = w, ['x'] = x,
-    ['y'] = y, ['z'] = z, ['`'] = é
+    ['y'] = y, ['z'] = z, ['`'] = e_acute
 };
 
 // small

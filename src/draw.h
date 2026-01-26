@@ -1,7 +1,7 @@
 #ifndef DRAW_H_
 #define DRAW_H_
 
-#include "fxcg\display.h"
+#include "fxcg/display.h"
 
 #define ALIGN_LEFT 0
 #define ALIGN_CENTER 1

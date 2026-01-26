@@ -1,7 +1,7 @@
 #ifndef ICONS_H_
 #define ICONS_H_
 
-#include "fxcg\display.h"
+#include "fxcg/display.h"
 
 extern const color_t cursor_pal[4];
 extern const color_t grandma_pal[7];

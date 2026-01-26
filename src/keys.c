@@ -1,5 +1,5 @@
 
-#include "fxcg\keyboard.h"
+#include "fxcg/keyboard.h"
 #include "keyboard_syscalls.h"
 #include <string.h>
 

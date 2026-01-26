@@ -1,4 +1,4 @@
-#include "fxcg\display.h"
+#include "fxcg/display.h"
 
 #include "sprites.h"
 

@@ -2,7 +2,7 @@
 #include <stdbool.h>
 #include <string.h>
 #include <stdlib.h>
-#include "fxcg\display.h"
+#include "fxcg/display.h"
 #include "charmap.h"
 #include "math1.h"
 #include "sprites.h"

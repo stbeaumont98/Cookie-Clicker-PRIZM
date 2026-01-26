@@ -1,6 +1,6 @@
-#include "fxcg\display.h"
-#include "fxcg\keyboard.h"
-#include "fxcg\rtc.h"
+#include "fxcg/display.h"
+#include "fxcg/keyboard.h"
+#include "fxcg/rtc.h"
 #include "keyboard_syscalls.h"
 #include <string.h>
 #include <stdint.h>

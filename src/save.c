@@ -2,8 +2,8 @@
 #include <stdio.h>
 #include <stdbool.h>
 #include <string.h>
-#include "fxcg\file.h"
-#include "fxcg\display.h"
+#include "fxcg/file.h"
+#include "fxcg/display.h"
 #include "data.h"
 #include "convert.h"
 #include "math1.h"
