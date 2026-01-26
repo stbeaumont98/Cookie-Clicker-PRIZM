@@ -87,11 +87,14 @@ const struct Message prompts[4] = {
 	{"CHEATING", "Do you REALLY want to\nenable cheats?\nCheated cookies taste awful."},
 	{"WIPE SAVE", "Do you REALLY want to\nwipe your save?\nYou will lose all your progress!"}
 };
-
-// get_buy_price() and get_sell_price() were pulled and ported from the
-// original game's JavaScript code. These are more accurate than the method
-// for price calculation that I was using before.
-// https://orteil.dashnet.org/cookieclicker/
+ 
+/*
+ * get_buy_price() and get_sell_price() were pulled and ported from the
+ * original game's JavaScript code. These are more accurate than the method
+ * for price calculation that I was using before, even if they're slower on
+ * a calculator. Credit goes to Ortiel himself for the algorithm.
+ * https://orteil.dashnet.org/cookieclicker/
+ */
 
 double get_buy_price(uint8_t b_id, uint16_t owned, uint16_t amount) {
 	double price = 0.;
