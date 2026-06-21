@@ -660,7 +660,7 @@ int main() {
 						disp_string(223, 54 + i * 42, type, dim_color(0xffff, (!sell_toggle && data.cookies >= data.buildings[b_id].price) || (sell_toggle && data.buildings[b_id].owned > 0) ? 1. : .75), 0);
 					}
 
-					draw_rect(181, 49 + b_sel * 42, 201, 39, 0xff80, 1);
+					draw_rect(181, 49 + b_sel * 42, 201, 39, sell_toggle ? COLOR_RED : 0xff80, 1);
 
 					if ((key_press(KEY_PRGM_DOWN) || (key == KEY_PRGM_DOWN && key_held)) && b_sel < store_size - 1)
 						b_sel++;
@@ -749,7 +749,7 @@ int main() {
 					disp_string(x, 19, cookie_buf, 0xffff, 0);
 					free(cookie_buf);
 
-					disp_string(53, 36, "cookies", 0xffff, 0);
+					disp_string((round2(data.cookies) != 1) ? 53 : 57, 36, (round2(data.cookies) != 1) ? "cookies" : "cookie", 0xffff, 0);
 
 					x = ((164 - text_width_small(cps_buf, false)) / 2) + 1;
 					disp_string_small(x, 53, cps_buf, 0xffff, false, 0);
