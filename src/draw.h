@@ -32,6 +32,6 @@ void draw_background();
 void draw_store_tile(uint16_t x, uint8_t y, bool enabled);
 void draw_button(uint16_t x, uint8_t y, uint8_t w, char *message, color_t color, bool selected);
 void disp_prompt(const struct Message msg, bool sel);
-void draw_toggle_box(uint16_t x, uint8_t y, char *message, color_t color, bool toggle);
+void draw_toggle_box(uint16_t x, uint8_t y, uint8_t w, char *message, color_t color, bool selected, bool toggle, bool spaced);
 
 #endif

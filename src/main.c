@@ -90,7 +90,7 @@ int main() {
 
 	// Handle idle cookies cheat
 	double elapsed_sec = get_timestamp() - old_ts;
-	if (data.cheats.on && data.cheats.ic && old_ts != 0.)  {
+	if (data.cheats.ic && old_ts != 0.)  {
 		double idle_earned = ((elapsed_sec < 0.) ? 0. : elapsed_sec) * raw_cps;
 		data.cookies_all_time += idle_earned;
 		data.cookies += idle_earned;
@@ -182,41 +182,39 @@ int main() {
 			draw_button(23, 104, 110, "BACKUP SAVE", 0xFFFF, s_sel == 0);
 			draw_button(23, 127, 110, "RESTORE BACKUP", 0xFFFF, s_sel == 1);
 
-			char cheats_str[12];
-			strcpy(cheats_str, "Cheats ");
-			strcat(cheats_str, data.cheats.on ? "ON" : "OFF");
-			draw_button(23, 150, 110, cheats_str, 0xFFFF, s_sel == 2);
+			draw_toggle_box(23, 150, 110, "Idle CpS", 0xFFFF, s_sel == 2, data.cheats.ic, false);
 
-			draw_button(66, 191, 110, "WIPE SAVE", COLOR_RED, s_sel == 3);
+			draw_toggle_box(23, 173, 110, "Cheats", 0xFFFF, s_sel == 3, data.cheats.on, false);
+
+			draw_button(66, 196, 110, "WIPE SAVE", COLOR_RED, s_sel == 4);
 
 			if (data.cheats.on) {
-				draw_toggle_box(210, 106, "Idle CpS", s_sel == 4 ? 0xFFFF : dim_color(0xFFFF, 0.5), data.cheats.ic);
-				draw_toggle_box(210, 125, "Press and hold\nto click", s_sel == 5 ? 0xFFFF : dim_color(0xFFFF, 0.5), data.cheats.hc);
-				draw_toggle_box(210, 148, "Auto-click\ngolden cookies", s_sel == 6 ? 0xFFFF : dim_color(0xFFFF, 0.5), data.cheats.acg);
-				draw_toggle_box(210, 171, "Free Buildings", s_sel == 7 ? 0xFFFF : dim_color(0xFFFF, 0.5), data.cheats.fb);
-				draw_toggle_box(210, 190, "Free Upgrades", s_sel == 8 ? 0xFFFF : dim_color(0xFFFF, 0.5), data.cheats.fu);
+				draw_toggle_box(210, 104, 146, "Press and hold\nto click", 0xFFFF, s_sel == 5, data.cheats.hc, true);
+				draw_toggle_box(210, 136, 146, "Auto-click\ngolden cookies", 0xFFFF, s_sel == 6, data.cheats.acg, true);
+				draw_toggle_box(210, 168, 146, "Free Buildings", 0xFFFF, s_sel == 7, data.cheats.fb, true);
+				draw_toggle_box(210, 191, 146, "Free Upgrades", 0xFFFF, s_sel == 8, data.cheats.fu, true);
 			}
 
 			if (!prompt) {
 
-				if ((key_press(KEY_PRGM_DOWN) || (key == KEY_PRGM_DOWN && key_held)) && s_sel < (data.cheats.on ? 8 : 3))
+				if ((key_press(KEY_PRGM_DOWN) || (key == KEY_PRGM_DOWN && key_held)) && s_sel < (data.cheats.on ? 8 : 4))
 					s_sel++;
 				if ((key_press(KEY_PRGM_UP) || (key == KEY_PRGM_UP && key_held)) && s_sel > 0)
 					s_sel--;
 				if (key_press(KEY_PRGM_RIGHT) || (key == KEY_PRGM_RIGHT && key_held))
-					s_sel += (data.cheats.on && s_sel < 3) ? 4 : (data.cheats.on && s_sel == 3) ? 5 : 0;
+					s_sel += (data.cheats.on && s_sel <= 1) ? 5 : (data.cheats.on && s_sel < 5) ? 4 : 0;
 				if (key_press(KEY_PRGM_LEFT) || (key == KEY_PRGM_LEFT && key_held))
-					s_sel -= (s_sel > 3 && s_sel < 7) ? 4 : (s_sel > 3 && s_sel >= 7) ? 5 : 0;
+					s_sel -= (s_sel == 5 || s_sel == 6) ? 5 : (s_sel > 6) ? 4 : 0;
 
 				if (key_press(KEY_PRGM_SHIFT)) {
 					switch (s_sel) {
 						case 0:
 						case 1:
-						case 3:
+						case 4:
 							prompt = true;
 							p_sel = true;
 							break;
-						case 2:
+						case 3:
 							if (!data.cheats.on) {
 								prompt = true;
 								p_sel = true;
@@ -224,7 +222,7 @@ int main() {
 								data.cheats.on = false;
 							}
 							break;
-						case 4:
+						case 2:
 							data.cheats.ic = !data.cheats.ic;
 							break;
 						case 5:
@@ -235,26 +233,24 @@ int main() {
 							break;
 						case 7:
 							data.cheats.fb = !data.cheats.fb;
+							set_prices(&data, x10_toggle, sell_toggle);
 							if (!data.cheats.fb) {
-								bool last_hide = true;
 								for (int i = 19; i >= 0 && data.buildings[i].owned == 0; i--) {
-									if (i >= 2) {
-										if (data.cookies_all_time < base_prices[i - 2]) {
-											data.buildings[i].locked = true;
-											data.buildings_unlocked--;
+									if (!data.buildings[i].hidden && data.cookies_all_time < base_prices[i]) {
+										data.buildings[i].hidden = true;
+										if (i >= 2) {
+											if (!data.buildings[i].locked && data.cookies_all_time < base_prices[i - 2]) {
+												data.buildings[i].locked = true;
+												data.buildings_unlocked--;
+											}
 										}
 									}
-									if (data.cookies_all_time >= base_prices[i])
-										last_hide = false;
-									if (data.cookies_all_time < base_prices[i] && last_hide)
-										data.buildings[i].hidden = true;
 								}
 								if (b_sel + b_sel_offset > data.buildings_unlocked) {
-									b_sel = 3;
-									b_sel_offset = data.buildings_unlocked - 4;
+									b_sel = 0;
+									b_sel_offset = 0;
 								}
 							}
-							set_prices(&data, x10_toggle, sell_toggle);
 							break;
 						case 8:
 							data.cheats.fu = !data.cheats.fu;
@@ -313,11 +309,11 @@ int main() {
 								push_note(notes, "", "Backup restored", 3, &notes_cnt);
 								break;
 							// Enable cheating
-							case 2:
+							case 3:
 								data.cheats.on = true;
 								break;
 							// Wipe save
-							case 3:
+							case 4:
 								// Reset all variables.
 								reset_game(&data, &gold);
 								

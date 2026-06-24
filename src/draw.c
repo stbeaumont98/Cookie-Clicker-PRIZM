@@ -486,8 +486,8 @@ void draw_store_tile(uint16_t x, uint8_t y, bool enabled) {
 void draw_button(uint16_t x, uint8_t y, uint8_t w, char *message, color_t color, bool selected) {
 	int text_width = text_width_small(message, true);
 	int box_width = w != 0 ? w : text_width + 10;
-	draw_rect(x, y, box_width, 16, selected ? 0xff80 : dim_color(color, .5), 1);
-	disp_string_small(x + (box_width - 4 - text_width), y + 6, message, color, true, 0);
+	draw_rect(x, y, box_width, 16, selected ? 0xff80 : dim_color(color, .3), 1);
+	disp_string_small(x + (box_width - 4 - text_width), y + 6, message, color, true, ALIGN_RIGHT);
 }
 
 void disp_prompt(const struct Message msg, bool sel) {
@@ -502,7 +502,7 @@ void disp_prompt(const struct Message msg, bool sel) {
 	draw_rect(box_x - 2, box_y - 2,
 		box_width + 3, box_height + 3, 0x82a4, 1);
 	
-	disp_string(box_x + ((box_width - text_width(msg.header)) / 2), box_y + 6, msg.header, 0xad55, ALIGN_CENTER);
+	disp_string(box_x + ((box_width - text_width(msg.header)) / 2), box_y + 6, msg.header, 0xef16, ALIGN_CENTER);
 
 	draw_rect(box_x + 14, box_y + 23, box_width - 29, (text_height(msg.body) * 9) + 14, 0x632c, 0);
 
@@ -513,12 +513,12 @@ void disp_prompt(const struct Message msg, bool sel) {
 	draw_button(box_x + box_width - 39, box_y + box_height - 22, 0, "No", 0xFFFF, !sel);
 }
 
-void draw_toggle_box(uint16_t x, uint8_t y, char *message, color_t color, bool toggle) {
-	disp_string_small(x, y, message, color, true, 0);
+void draw_toggle_box(uint16_t x, uint8_t y, uint8_t w, char *message, color_t color, bool selected, bool toggle, bool spaced) {
     int msg_h = text_height(message);
+    int msg_w = text_width_small(message, true);
 
-	draw_rect(349, y + (((msg_h * 9) - 13) / 2), 10, 10, dim_color(0xFFFF, toggle ? 1. : 0.5), 1);
+	draw_rect(x, y, w, msg_h * 9 + 7, selected ? 0xff80 : dim_color(color, .3), 1);
+	disp_string_small(x + (spaced ? 6 : (w - (toggle ? 20 : 25) - msg_w)), y + 6, message, color, true, ALIGN_RIGHT);
 
-	if (toggle)
-		copy_sprite_1bit(check, 351, y + (((msg_h * 9) - 13) / 2) - 1, 11, 10, one_bit_pal, 0x67ec);
+    disp_string_small(x + w - (toggle ? 17 : 22), y + (((msg_h * 9) - 9) / 2) + 6, toggle ? "ON" : "OFF", color, true, ALIGN_RIGHT);
 }

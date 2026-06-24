@@ -86,7 +86,7 @@ extern const double base_cps[20];
 extern const char *stats[9];
 extern const char *blab[39];
 
-extern const struct Message prompts[4];
+extern const struct Message prompts[5];
 
 double get_buy_price(uint8_t b_id, uint16_t owned, uint16_t amount);
 double get_sell_price(uint8_t b_id, uint16_t owned, uint16_t amount);

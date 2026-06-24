@@ -81,9 +81,10 @@ const char *blab[39] = {
 	"Why did you click that?", "Your cookies are never gonna give you up."
 };
 
-const struct Message prompts[4] = {
+const struct Message prompts[5] = {
 	{"BACKUP", "Are you sure?\nAny previous backups will be\noverwritten!"},
 	{"RESTORE", "Are you sure?\nCurrent save file will be\noverwritten!"},
+	{"", ""},
 	{"CHEATING", "Do you REALLY want to\nenable cheats?\nCheated cookies taste awful."},
 	{"WIPE SAVE", "Do you REALLY want to\nwipe your save?\nYou will lose all your progress!"}
 };
